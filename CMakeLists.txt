@@ -10,6 +10,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COMPILE_FLAGS}")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LINK_FLAGS}")
 
 set(SRCS	"src/main.c"
+					"src/virus.c"
 					"src/ass.s")
 
 add_executable(rel_code ${SRCS})
