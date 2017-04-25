@@ -1,15 +1,10 @@
 .file	"ass.s"
 .text
 
-StrLoc:
-	.ascii "LELELELE\0"
-  .ascii "HEHEHE\0"
-
-.globl	_get_string
-.def	_get_string;	.scl	2;	.type	32;	.endef
-_get_string:
-  movl $StrLoc, %eax
-  ret
+.globl	_strKernel32
+.def	_strKernel32;	.scl	2;	.type	32;	.endef
+_strKernel32:
+	.ascii "KERNEL32.dll\0"
 
 .globl	_get_image_base
 .def	_get_image_base;	.scl	2;	.type	32;	.endef
@@ -45,5 +40,6 @@ _get_kernel32_base:
 .def	_end_code;	.scl	2;	.type	32;	.endef
 _end_code:
   ret
+
 
 .ident	"GCC: (GNU) 6.3.1 20170109"

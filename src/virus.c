@@ -5,13 +5,15 @@ void start_code(void) {}
 
 void memdump(uint8_t *start, uint8_t *end) {
   printf("memdump:");
+  uint32_t i = 0;
   while (start <= end) {
-    if ((uint32_t)start % 16 == 0)
+    if ((uint32_t)i % 16 == 0)
       printf("\n0x%X | ", start);
-    else if ((uint32_t)start % 8 == 0)
+    else if ((uint32_t)i % 8 == 0)
       printf(" ");
     printf("%02X ", *start);
     start++;
+    i++;
   }
   printf("\n");
 }
@@ -20,29 +22,9 @@ uint8_t* get_nt_header(uint8_t *base) {
   return base + *(base + 0x3C);
 }
 
-uint8_t* get_optional_header(uint8_t *base) {
-  return get_nt_header(base) + 0x18;
-}
-
-int check_pe_constants(uint8_t *base) {
-  if (*(uint16_t*)base != 0x5A4D)  //"MZ"
-    return 1;
-
-  base += *(base + 0x3C);
-
-  if (*(uint16_t*)base != 0x4550)  //"PE"
-    return 2;
-
-  base += 0x18;
-
-  if (*(uint16_t*)base != 0x10B)   //Magic
-    return 3;
-
-  return 0;
-}
-
 int run(void) {
   Data data;
+  IMAGE_NT_HEADERS *ntHdr = NULL;
   uint8_t *ptr = NULL;
 
   printf("current code size: %d bytes\n", end_code - start_code);
@@ -50,20 +32,30 @@ int run(void) {
   data.imageBase = get_image_base();
   data.kernel32Base = get_kernel32_base();
 
+  if (*(uint16_t*)data.imageBase != 0x5A4D)  //"MZ"
+    return 1;
+
+  if (*(uint16_t*)data.kernel32Base != 0x5A4D)  //"MZ"
+    return 2;
+
   printf("image base: 0x%X\nkernel32 base: 0x%X\n", data.imageBase, data.kernel32Base);
 
-  memdump(data.kernel32Base, data.kernel32Base + 0x100);
+  ntHdr = get_nt_header(data.kernel32Base);
 
-  int err = check_pe_constants(data.kernel32Base);
-  if (err != 0) {
-    printf("Not all PE constants found, ret val = %d\n", err);
+
+  IMAGE_EXPORT_DIRECTORY *exportDir = data.kernel32Base + ntHdr->OptionalHeader.DataDirectory[0].VirtualAddress;
+
+  memdump(exportDir, exportDir + sizeof(IMAGE_EXPORT_DIRECTORY));
+
+  printf("%s\n", data.kernel32Base + exportDir->Name);
+
+  uint32_t* namePtr = data.kernel32Base + exportDir->AddressOfNames;
+  uint32_t* addrPtr = data.kernel32Base + exportDir->AddressOfFunctions;
+  for(uint32_t i = 0; i < exportDir->NumberOfNames; i++) {
+    printf("%s\n", data.kernel32Base + *namePtr);
+
+    namePtr++;
   }
-
-  uint8_t *ntHeader = get_nt_header(data.kernel32Base);
-
-  ptr = ntHeader + 0x78;    //
-
-  printf("ptr @ 0x%X = 0x%X\n", ntHeader, *(uint16_t*)ntHeader);
 
   return 0;
 }
