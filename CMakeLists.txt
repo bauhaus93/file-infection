@@ -11,11 +11,17 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LINK_FLAGS}")
 
 set(SRCS	"src/main.c"
 					"src/virus.c"
+					"src/checksum.c"
 					"src/ass.s")
 
+set(SRCS_GENERATOR	"src/checksum_generator.c"
+										"src/checksum.c")
+
 add_executable(rel_code ${SRCS})
+add_executable(cs_generator ${SRCS_GENERATOR})
 
 set_target_properties(rel_code PROPERTIES OUTPUT_NAME "rel_code.exe")
+set_target_properties(cs_generator PROPERTIES OUTPUT_NAME "create_checksums.exe")
 
 include_directories(/usr/include)
 include_directories(src)

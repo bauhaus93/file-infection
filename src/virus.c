@@ -22,6 +22,8 @@ uint8_t* get_nt_header(uint8_t *base) {
   return base + *(base + 0x3C);
 }
 
+
+
 int run(void) {
   Data data;
   IMAGE_NT_HEADERS *ntHdr = NULL;
@@ -49,13 +51,25 @@ int run(void) {
 
   printf("%s\n", data.kernel32Base + exportDir->Name);
 
-  uint32_t* namePtr = data.kernel32Base + exportDir->AddressOfNames;
-  uint32_t* addrPtr = data.kernel32Base + exportDir->AddressOfFunctions;
-  for(uint32_t i = 0; i < exportDir->NumberOfNames; i++) {
-    printf("%s\n", data.kernel32Base + *namePtr);
+
+  fpExitProcess* tick = GetAddressByChecksum(exportDir, data.kernel32Base, CS_EXITPROCESS);
+
+  return 0;
+}
+
+uint32_t GetAddressByChecksum(IMAGE_EXPORT_DIRECTORY* ed, uint8_t* base, uint32_t cs) {
+  uint32_t* namePtr = base + ed->AddressOfNames;
+  uint32_t* addrPtr = base + ed->AddressOfFunctions;
+  uint16_t* nameOrdinalsPtr = base + ed->AddressOfNameOrdinals;
+
+  for(uint32_t i = 0; i < ed->NumberOfNames; i++) {
+
+    if (checksum(base + *namePtr) == cs) {
+      return base + *(addrPtr + *nameOrdinalsPtr);
+    }
 
     namePtr++;
+    nameOrdinalsPtr++;
   }
-
   return 0;
 }
