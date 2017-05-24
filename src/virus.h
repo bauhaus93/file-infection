@@ -6,28 +6,27 @@
 #include "checksum.h"
 #include "checksum_list.h"
 
-//BEWARE: Maybe define calling convenctions? Would be WINAPI
-typedef void(*fpExitProcess (UINT));
-typedef DWORD(*fpGetTickCount(void));
-typedef HANDLE(*fpGetProcessHeap(void));
-typedef LPVOID(*fpHeapAlloc(HANDLE, DWORD, SIZE_T));
-typedef BOOL(*fpHeapFree(HANDLE, DWORD, LPVOID));
-typedef HANDLE(*fpFindFirstFileA(LPCTSTR, LPWIN32_FIND_DATA));
-typedef BOOL(*fpFindNextFileA(HANDLE, LPWIN32_FIND_DATA));
-typedef BOOL(*fpFindClose(HANDLE));
-typedef HANDLE(*fpCreateFileA(LPCTSTR, DWORD, DWORD, LPSECURITY_ATTRIBUTES, DWORD, DWORD, HANDLE));
-typedef DWORD(*fpGetFileSize(HANDLE, LPDWORD));
-typedef HANDLE(*fpCreateFileMappingA(HANDLE, LPSECURITY_ATTRIBUTES, DWORD, DWORD, DWORD, LPCTSTR));
-typedef LPVOID(*fpMapViewOfFile(HANDLE, DWORD, DWORD, DWORD, SIZE_T));
-typedef BOOL(*fpFlushViewOfFile(LPCVOID, SIZE_T));
-typedef BOOL(*fpUnmapViewOfFile(LPCVOID));
-typedef DWORD(*fpSetFilePointer(HANDLE, LONG, PLONG, DWORD));
-typedef BOOL(*fpSetEndOfFile(HANDLE));
-typedef BOOL(*fpCloseHandle(HANDLE));
-typedef void(*fpCopyMemory(PVOID, const VOID*, SIZE_T));
-typedef HANDLE(*fpCreateThread(LPSECURITY_ATTRIBUTES, SIZE_T, LPTHREAD_START_ROUTINE, LPVOID, DWORD, LPDWORD));
-typedef DWORD(*fpGetLogicalDrives(void));
-typedef VOID(*fpSleep(DWORD));
+typedef void(WINAPI *fpExitProcess)(UINT);
+typedef DWORD(WINAPI *fpGetTickCount)(void);
+typedef HANDLE(WINAPI *fpGetProcessHeap)(void);
+typedef LPVOID(WINAPI *fpHeapAlloc)(HANDLE, DWORD, SIZE_T);
+typedef BOOL(WINAPI *fpHeapFree)(HANDLE, DWORD, LPVOID);
+typedef HANDLE(WINAPI *fpFindFirstFileA)(LPCTSTR, LPWIN32_FIND_DATA);
+typedef BOOL(WINAPI *fpFindNextFileA)(HANDLE, LPWIN32_FIND_DATA);
+typedef BOOL(WINAPI *fpFindClose)(HANDLE);
+typedef HANDLE(WINAPI *fpCreateFileA)(LPCTSTR, DWORD, DWORD, LPSECURITY_ATTRIBUTES, DWORD, DWORD, HANDLE);
+typedef DWORD(WINAPI *fpGetFileSize)(HANDLE, LPDWORD);
+typedef HANDLE(WINAPI *fpCreateFileMappingA)(HANDLE, LPSECURITY_ATTRIBUTES, DWORD, DWORD, DWORD, LPCTSTR);
+typedef LPVOID(WINAPI *fpMapViewOfFile)(HANDLE, DWORD, DWORD, DWORD, SIZE_T);
+typedef BOOL(WINAPI *fpFlushViewOfFile)(LPCVOID, SIZE_T);
+typedef BOOL(WINAPI *fpUnmapViewOfFile)(LPCVOID);
+typedef DWORD(WINAPI *fpSetFilePointer)(HANDLE, LONG, PLONG, DWORD);
+typedef BOOL(WINAPI *fpSetEndOfFile)(HANDLE);
+typedef BOOL(WINAPI *fpCloseHandle)(HANDLE);
+typedef void(WINAPI *fpCopyMemory)(PVOID, const VOID*, SIZE_T);
+typedef HANDLE(WINAPI *fpCreateThread)(LPSECURITY_ATTRIBUTES, SIZE_T, LPTHREAD_START_ROUTINE, LPVOID, DWORD, LPDWORD);
+typedef DWORD(WINAPI *fpGetLogicalDrives)(void);
+typedef VOID(WINAPI *fpSleep)(DWORD);
 
 typedef struct {
     fpExitProcess* exitProcess;
