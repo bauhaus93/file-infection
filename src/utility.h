@@ -3,6 +3,7 @@
 
 #include <windows.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "functions.h"
 #include "checksum.h"

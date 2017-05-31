@@ -5,10 +5,10 @@ void memdump(uint8_t *start, uint8_t *end) {
   uint32_t i = 0;
   while (start <= end) {
     if ((uint32_t)i % 16 == 0)
-      printf("\n0x%X | ", start);
+      printf("\n0x%X | ", (unsigned int)start);
     else if ((uint32_t)i % 8 == 0)
       printf(" ");
-    printf("%02X ", *start);
+    printf("%02X ", (unsigned int)*start);
     start++;
     i++;
   }
