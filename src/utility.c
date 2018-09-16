@@ -1,18 +1,18 @@
 #include "utility.h"
 
 void memdump(uint8_t *start, uint8_t *end) {
-  printf("memdump:");
+  PRINT_DEBUG("memdump:");
   uint32_t i = 0;
   while (start <= end) {
     if ((uint32_t)i % 16 == 0)
-      printf("\n0x%X | ", (unsigned int)start);
+      PRINT_DEBUG("\n0x%X | ", (unsigned int)start);
     else if ((uint32_t)i % 8 == 0)
-      printf(" ");
-    printf("%02X ", (unsigned int)*start);
+      PRINT_DEBUG(" ");
+    PRINT_DEBUG("%02X ", (unsigned int)*start);
     start++;
     i++;
   }
-  printf("\n");
+  PRINT_DEBUG("\n");
 }
 
 IMAGE_NT_HEADERS* get_nt_header(void* base) {
@@ -29,7 +29,7 @@ void* get_address_by_checksum(IMAGE_EXPORT_DIRECTORY* ed, void* base, uint32_t c
   uint16_t* nameOrdinalsPtr = (uint16_t*) ((uint8_t*)base + ed->AddressOfNameOrdinals);
 
   for(uint32_t i = 0; i < ed->NumberOfNames; i++) {
-    printf(">>%s\n", (uint8_t*)base + *namePtr);
+    PRINT_DEBUG(">>%s\n", (uint8_t*)base + *namePtr);
 
     if (checksum((const char*) base + *namePtr) == cs) {
       return (void*) ((uint8_t*)base + *(addrPtr + *nameOrdinalsPtr));
@@ -115,4 +115,10 @@ int is_section_header_empty(IMAGE_SECTION_HEADER* sectionHeader) {
 void memzero(void* start, uint32_t size) {
   for(uint8_t* ptr = start; ptr < (uint8_t*)start + size; ptr++)
     *ptr = 0;
+}
+
+void memcp(void* src, void* dest, uint32_t size) {
+  for(uint32_t i = 0; i < size; i++) {
+    ((uint8_t*)dest)[i] = ((uint8_t*)src)[i];
+  }
 }

@@ -9,5 +9,5 @@
 #include "infect.h"
 #include "data.h"
 
-void start_code(void);
 int run(void);
+int init_data(data_t* data);

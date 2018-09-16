@@ -9,8 +9,15 @@
 #include "checksum.h"
 #include "checksum_list.h"
 
-#define VERIFY_MZ(addr) (*((uint16_t*)addr) == 0x5A4D)
-#define VERIFY_MAGIC(addr) (*((uint16_t*)addr) ==  IMAGE_NT_OPTIONAL_HDR_MAGIC)
+#define DEBUGLEL
+
+#ifdef DEBUGLEL
+  #define PRINT_DEBUG(...) fprintf(stderr, __VA_ARGS__)
+#else
+  #define PRINT_DEBUG(...)
+#endif
+
+#define IS_PE(baseAddr) (*(WORD*)baseAddr == 0x5A4D && get_nt_header(baseAddr)->OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR_MAGIC)
 #define ALIGN_VALUE(value, alignment) (value + alignment - (value % alignment))
 
 IMAGE_NT_HEADERS* get_nt_header(void* base);
@@ -22,5 +29,6 @@ int fill_addresses(IMAGE_EXPORT_DIRECTORY* ed, void* base, functions_t* function
 int is_section_header_empty(IMAGE_SECTION_HEADER* sectionHeader);
 
 void memzero(void* start, uint32_t size);
+void memcp(void* src, void* dest, uint32_t size);
 
 #endif
