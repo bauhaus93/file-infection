@@ -1,48 +1,25 @@
 #include "ass.h"
 
-void* get_tib(void) {
-    assert(sizeof(void*) == 8);
-    void* tib = NULL;
-    asm("movl %%fs:0x18, %0" : "=r" (tib));
-    assert(tib != NULL);
-    return tib;
+TEB* get_teb(void) {
+    assert(sizeof(void*) == 4);
+    TEB* teb = NULL;
+    asm("movl %%fs:0x18, %0" : "=r" (teb));
+    assert(teb != NULL);
+    return teb;
 }
 
-void* get_peb(void) {
-    return (void*)*(uint8_t*)get_tib() + 0x30;
+PEB* get_peb(void) {
+    return get_teb()->peb;
 }
 
 void* get_image_base(void) {
-    uint8_t* base = get_peb();
-    base = base + 0xC;  base = *base;
-    base = *(base + 0x14);
-    base = *(base + 0x10);
-        
-    /*
-    movl %fs:0x30, %eax
-    movl 0xC(%eax), %eax
-    movl 0x14(%eax), %eax
-    movl 0x10(%eax), %eax
-    ret
-    ;*/
-    return (void*)base;
+    return get_peb()->imageBase;
 }
+
 void* get_kernel32_base(void) {
-    uint8_t* base = get_peb();
-    base = (uint8_t*)*(base + 0xC);
-    base = (uint8_t*)*(base + 0x14);
-    base = (uint8_t*)**base;
-    base = (uint8_t*)*(base + 0x10);
-    /*__asm {
-        movl %fs:0x30, %eax
-        movl 0xC(%eax), %eax
-        movl 0x14(%eax), %eax
-        movl (%eax), %eax
-        movl (%eax), %eax
-        movl 0x10(%eax), %eax
-        ret
-    }*/
-    return (void*)base;
+    PEBLdrData* ldr = get_peb()->ldr;
+    LdrEntry* entry = (LdrEntry*)ldr->moduleList.flink->flink->flink; //assumes kernel32.dll is third in list
+    return entry->dllBase;
 }
 
 void end_code(void) {}

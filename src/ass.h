@@ -1,23 +1,45 @@
+#ifndef ASS_H
+#define ASS_H
+
 #include <stdlib.h>
 #include <stdint.h>
 #include <assert.h>
 
-typedef struct {
+#include "utility.h"
 
+typedef struct {
+    uint16_t    len;
+    uint16_t    maxLen;
+    uint16_t*   buffer;
+} UnicodeStr;
+
+typedef struct _ListEntry {
+    struct _ListEntry* flink;
+    struct _ListEntry* blink;
 } ListEntry;
+
+typedef struct {
+    ListEntry   moduleList;
+    void*       res1[2];
+    void*       dllBase;
+    void*       entryPoint;
+    void*       res3;
+    UnicodeStr  dllName;
+} LdrEntry;
 
 typedef struct {
     uint8_t     res1[8];
     void*       res2[3];
     ListEntry   moduleList;
-} PEBLoaderData;
+} PEBLdrData;
 
 typedef struct {
     uint8_t         res1[2];
     uint8_t         isDebugged;
     uint8_t         res2[1];
-    void*           res3[2];
-    PEBLoaderData*  loader;
+    void*           res3;
+    void*           imageBase;
+    PEBLdrData*     ldr;
     //excluding: some bytes of unneeded stuff
 } PEB;
 
@@ -27,6 +49,9 @@ typedef struct {
     //excluding: some bytes of unneeded stuff
 } TEB;
 
-extern void* get_image_base(void);
-extern void* get_kernel32_base(void);
-extern void  end_code(void);
+void* get_image_base(void);
+void* get_kernel32_base(void);
+void  end_code(void);
+
+
+#endif
