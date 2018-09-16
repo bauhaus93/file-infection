@@ -13,7 +13,7 @@ typedef struct {
   HANDLE  hMap;
   void*   startAddress;
   DWORD   size;
-}file_view_t;
+} file_view_t;
 
 int infect(const char* filename, data_t* data);
 

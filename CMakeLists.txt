@@ -1,29 +1,43 @@
 cmake_minimum_required(VERSION 3.4.3)
-project(Infect C)
+project(infect C)
 
-enable_language(ASM)
+#enable_language(ASM)
 
+macro(add_sources)
+	file (RELATIVE_PATH _relPath "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
+	foreach(_src ${ARGN})
+		if(_relPath)
+			file(TO_NATIVE_PATH "${_relPath}/${_src}" _nativePath)
+		else()
+			file(TO_NATIVE_PATH ${_src} _nativePath)
+		endif()
+		set_property(TARGET infect APPEND PROPERTY SRC_LIST ${_nativePath})
+	endforeach()
+endmacro()
+
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose build type" FORCE)
+endif()
+
+set(EXEC_NAME "infect")
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+add_executable(${EXEC_NAME} "")
+
+set_property(TARGET ${EXEC_NAME} PROPERTY C_STANDARD 99)
 if ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
-	set(COMPILE_FLAGS "-std=c99 -Wall -fmax-errors=1")
-	set(LINK_FLAGS "${COMPILE_FLAGS}")
-	set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+	target_compile_options(${EXEC_NAME} PRIVATE -Wall -fmax-errors=1 -Werror)
+elseif ("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
+	target_compile_options(${EXEC_NAME} PRIVATE -Wall -ferror-limit=1 -Werror)
+elseif ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
+	target_compile_options(${EXEC_NAME} PRIVATE /W4 /MP)
 else()
 	message(SEND_ERROR "Unknown compiler: ${CMAKE_C_COMPILER_ID}")
 endif()
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COMPILE_FLAGS}")
-set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LINK_FLAGS}")
+add_subdirectory(src)
+get_property(SRCS TARGET ${EXEC_NAME} PROPERTY SRC_LIST)
+target_sources(${EXEC_NAME} PRIVATE ${SRCS})
 
-set(SRCS	"src/main.c"
-					"src/virus.c"
-					"src/utility.c"
-					"src/checksum.c"
-					"src/infect.c"
-					"src/ass.s")
-
-add_executable(infect ${SRCS})
-
-set_target_properties(infect PROPERTIES OUTPUT_NAME "infect.exe")
-
-include_directories(/usr/include)
-include_directories(src)
+target_include_directories(${EXEC_NAME} PRIVATE src)
+target_include_directories(${EXEC_NAME} PRIVATE D:/Programme/MinGW/include)

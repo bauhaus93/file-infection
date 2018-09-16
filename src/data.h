@@ -9,6 +9,6 @@ typedef struct {
    void* codeAddress;
    uint32_t codeSize;
    functions_t functions;
-}data_t;
+} data_t;
 
 #endif

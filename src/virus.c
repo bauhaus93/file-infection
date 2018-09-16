@@ -30,8 +30,8 @@ int run(void) {
 int init_data(data_t* data) {
   memzero(data, sizeof(data_t));
 
-  data->codeAddress = run;
-  data->codeSize = end_code - (void(*)(void))run;
+  data->codeAddress = (void*)run;
+  data->codeSize = (uint32_t)((uint8_t*)end_code - (uint8_t*)run);
 
   data->imageBase = get_image_base();
   data->kernel32Base = get_kernel32_base();
