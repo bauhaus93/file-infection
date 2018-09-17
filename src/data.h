@@ -14,9 +14,10 @@ typedef struct {
    void*        codeEnd;
    uint32_t     codeSize;
    int32_t      deltaOffset;
+   uint32_t     entryOffset;
    functions_t  functions;
 } data_t;
 
-int init_data(data_t* data, void* codeBegin, void* codeEnd);
+int init_data(data_t* data, void* codeBegin, void* codeEnd, uint32_t entryOffset);
 
 #endif

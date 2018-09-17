@@ -9,7 +9,8 @@
 #include "checksum.h"
 #include "checksum_list.h"
 
-#ifndef NDEBUG
+
+#ifdef NDEBUG
 #define PRINT_DEBUG(...) fprintf(stderr, __VA_ARGS__)
 #else
 #define PRINT_DEBUG(...)
