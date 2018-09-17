@@ -1,11 +1,13 @@
 add_sources(
     main.c
-	data.h
 	functions.h
 	checksum_list.h
-    virus.h     virus.c
-	utility.h   utility.c
-	checksum.h  checksum.c
-	infect.h    infect.c
-	ass.h       ass.c
+	code_begin.h 	code_begin.c
+    virus.h     	virus.c
+	utility.h   	utility.c
+	data.h			data.c
+	checksum.h  	checksum.c
+	infect.h    	infect.c
+	process_info.h	process_info.c
+	code_end.h 		code_end.c
 )

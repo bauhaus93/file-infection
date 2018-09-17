@@ -1,6 +1,8 @@
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
 
+#include <windows.h>
+
 typedef void (WINAPI *fpExitProcess)(UINT);
 typedef DWORD (WINAPI *fpGetTickCount)(void);
 typedef HANDLE (WINAPI *fpGetProcessHeap)(void);

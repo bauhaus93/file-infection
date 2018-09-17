@@ -1,18 +1,23 @@
 #include "utility.h"
 
-void memdump(uint8_t *start, uint8_t *end) {
-  PRINT_DEBUG("memdump:");
-  uint32_t i = 0;
-  while (start <= end) {
-    if ((uint32_t)i % 16 == 0)
-      PRINT_DEBUG("\n0x%X | ", (unsigned int)start);
-    else if ((uint32_t)i % 8 == 0)
-      PRINT_DEBUG(" ");
-    PRINT_DEBUG("%02X ", (unsigned int)*start);
-    start++;
-    i++;
-  }
-  PRINT_DEBUG("\n");
+int32_t get_delta_offset(void) {
+  int32_t offset;
+  asm("call .base\n"
+      ".base:\n"
+      "pop %%edx\n"
+      "sub $.base, %%edx\n"
+      "mov %%edx, %0"
+      : "=r" (offset)
+  );
+  return offset;
+}
+
+uint8_t is_pe(void* baseAddr) {
+  return *(uint16_t*)baseAddr == 0x5A4D && get_nt_header(baseAddr)->OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR_MAGIC;
+}
+
+uint32_t align_value(uint32_t value, uint32_t alignment) {
+  return value + alignment - (value % alignment);
 }
 
 IMAGE_NT_HEADERS* get_nt_header(void* base) {
@@ -121,4 +126,19 @@ void memcp(void* src, void* dest, uint32_t size) {
   for(uint32_t i = 0; i < size; i++) {
     ((uint8_t*)dest)[i] = ((uint8_t*)src)[i];
   }
+}
+
+void memdump(uint8_t *start, uint8_t *end) {
+  PRINT_DEBUG("memdump:");
+  uint32_t i = 0;
+  while (start <= end) {
+    if ((uint32_t)i % 16 == 0)
+      PRINT_DEBUG("\n0x%X | ", (unsigned int)start);
+    else if ((uint32_t)i % 8 == 0)
+      PRINT_DEBUG(" ");
+    PRINT_DEBUG("%02X ", (unsigned int)*start);
+    start++;
+    i++;
+  }
+  PRINT_DEBUG("\n");
 }

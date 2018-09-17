@@ -1,11 +1,9 @@
-#ifndef ASS_H
-#define ASS_H
+#ifndef PROCESS_INFO_H
+#define PROCESS_INFO_H
 
 #include <stdlib.h>
 #include <stdint.h>
 #include <assert.h>
-
-#include "utility.h"
 
 typedef struct {
     uint16_t    len;
@@ -49,9 +47,10 @@ typedef struct {
     //excluding: some bytes of unneeded stuff
 } TEB;
 
+TEB* get_teb(void);
+PEB* get_peb(void);
 void* get_image_base(void);
 void* get_kernel32_base(void);
-void  end_code(void);
 
 
 #endif

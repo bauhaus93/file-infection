@@ -9,7 +9,7 @@ def create_checksum(string):
         a = (a + ord(c)) % 65521
         b = (b + a) % 65521#
 
-    return ((b << 16) + a) & 0xFFFFFFFF;
+    return ((b << 16) + a) & 0xFFFFFFFF
 
 argc = len(sys.argv)
 if argc == 1:

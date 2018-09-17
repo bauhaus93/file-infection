@@ -1,4 +1,4 @@
-#include "ass.h"
+#include "process_info.h"
 
 TEB* get_teb(void) {
     assert(sizeof(void*) == 4);
@@ -21,5 +21,3 @@ void* get_kernel32_base(void) {
     LdrEntry* entry = (LdrEntry*)ldr->moduleList.flink->flink->flink; //assumes kernel32.dll is third in list
     return entry->dllBase;
 }
-
-void end_code(void) {}
