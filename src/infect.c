@@ -75,13 +75,15 @@ void create_section_header(IMAGE_SECTION_HEADER* sectionHeader, IMAGE_NT_HEADERS
 }
 
 int open_file_view(const char* filename, file_view_t* fileView, data_t* data) {
-  fileView->hFile = data->functions.createFileA(filename,
-                            GENERIC_READ | GENERIC_WRITE,
-                            FILE_SHARE_READ | FILE_SHARE_WRITE,
-                            NULL,
-                            OPEN_EXISTING,
-                            FILE_ATTRIBUTE_NORMAL,
-                            NULL);
+  fileView->hFile = data->functions.createFileA(
+    filename,
+    GENERIC_READ | GENERIC_WRITE,
+    FILE_SHARE_READ | FILE_SHARE_WRITE,
+    NULL,
+    OPEN_EXISTING,
+    FILE_ATTRIBUTE_NORMAL,
+    NULL
+  );
 
   if (fileView->hFile == INVALID_HANDLE_VALUE) {
     return 1;
@@ -94,23 +96,28 @@ int open_file_view(const char* filename, file_view_t* fileView, data_t* data) {
     }
   }
 
-  fileView->hMap = data->functions.createFileMappingA(fileView->hFile,
-                                            NULL,
-                                            PAGE_READWRITE,
-                                            0,
-                                            fileView->size,
-                                            NULL);
+  fileView->hMap = data->functions.createFileMappingA(
+    fileView->hFile,
+    NULL,
+    PAGE_READWRITE,
+    0,
+    fileView->size,
+    NULL
+  );
 
   if (fileView->hMap == NULL) {
     data->functions.closeHandle(fileView->hFile);
     return 3;
   }
 
-  fileView->startAddress = (void*)data->functions.mapViewOfFile(fileView->hMap,
-                                                                FILE_MAP_ALL_ACCESS,
-                                                                0,
-                                                                0,
-                                                                fileView->size);
+  fileView->startAddress = (void*)data->functions.mapViewOfFile(
+    fileView->hMap,
+    FILE_MAP_ALL_ACCESS,
+    0,
+    0,
+    fileView->size
+  );
+
   if (fileView->startAddress == NULL) {
     data->functions.closeHandle(fileView->hMap);
     data->functions.closeHandle(fileView->hFile);

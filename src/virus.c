@@ -12,8 +12,6 @@ int run(void) {
 
   PRINT_DEBUG("current code size: %.2fkB\n", ((float)data.codeSize) / 1000.0f);
 
-  return 0;
-
   char lel[20];
   lel[0] = 'P';
   lel[1] = 'E';
