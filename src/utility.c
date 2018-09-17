@@ -52,7 +52,8 @@ int fill_addresses(IMAGE_EXPORT_DIRECTORY* ed, void* base, functions_t* function
   uint16_t* nameOrdinalsPtr = (uint16_t*) ((uint8_t*)base + ed->AddressOfNameOrdinals);
   int functionCounter = 0;
 
-  memset(functions, 0, sizeof(functions_t));
+
+  memzero((void*)functions, sizeof(functions_t));
 
   for(uint32_t i = 0; i < ed->NumberOfNames; i++) {
 

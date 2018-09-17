@@ -1,9 +1,10 @@
 #include "data.h"
 
 int init_data(data_t* data, void* codeBegin, void* codeEnd, uint32_t entryOffset) {
+  
   memzero(data, sizeof(data_t));
 
-  PRINT_DEBUG("entry offset = 0x%X\n", entryOffset);
+  //PRINT_DEBUG("entry offset = 0x%X\n", entryOffset);
 
   data->deltaOffset = get_delta_offset();
   data->codeBegin = (void*)((uint8_t*)codeBegin + data->deltaOffset);
@@ -20,7 +21,6 @@ int init_data(data_t* data, void* codeBegin, void* codeEnd, uint32_t entryOffset
 
   IMAGE_NT_HEADERS* ntHdr = get_nt_header(data->kernel32Base);
   IMAGE_EXPORT_DIRECTORY* exportDir = get_export_directory(data->kernel32Base, ntHdr);
-
   if(fill_addresses(exportDir, data->kernel32Base, &data->functions) != sizeof(functions_t) / sizeof(fpExitProcess*)) {
     return 3;
   }

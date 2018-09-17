@@ -24,6 +24,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 add_executable(${EXEC_NAME} "")
 
+
 set_property(TARGET ${EXEC_NAME} PROPERTY C_STANDARD 99)
 if ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
 	target_compile_options(${EXEC_NAME} PRIVATE -Wall -fmax-errors=1 -Werror)

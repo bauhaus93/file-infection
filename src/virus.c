@@ -6,12 +6,10 @@ int run(void) {
   assert(code_begin < code_end);
   assert((void*)run >= (void*)code_begin &&
          (void*)run < (void*)code_end);
-
+  
   if (init_data(&data, (void*)code_begin, (void*)code_end, (uint8_t*)run - (uint8_t*)code_begin) != 0) {
     return -1;
   }
-
-  PRINT_DEBUG("current code size: %.2fkB\n", ((float)data.codeSize) / 1000.0f);
 
   char lel[20];
   lel[0] = 'P';
