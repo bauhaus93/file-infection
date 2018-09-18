@@ -7,10 +7,22 @@
 #include "virus.h"
 
 int main(int argc, char **argv) {
-  printf("code_begin = 0x%08X\n", (unsigned int)code_begin);
-  printf("code_end = 0x%08X\n", (unsigned int)code_end);
-  printf("code_size = 0x%X\n", (uint8_t*)code_end - (uint8_t*)code_begin);
-  int retVal = run();
-  printf("return value: %d\n", retVal);
-  return retVal;
+  //assert(IS_32_BIT);    // currently only 32 bit working, yet need to check for 64 bit compatibility/differences
+  assert(IS_32_BIT || IS_64_BIT);
+  assert(!(IS_32_BIT && IS_64_BIT));
+  assert(code_begin < code_end);
+  assert((void*)run >= (void*)code_begin &&
+         (void*)run < (void*)code_end);
+  if (IS_32_BIT) {
+    printf("running 32 bit\n");
+  }
+  if (IS_64_BIT) {
+    printf("running 64 bit\n");
+  }
+  printf("code_begin = 0x%p\n", code_begin);
+  printf("code_end = 0x%p\n", code_end);
+  printf("code_size = 0x%X\n", (uint32_t)((uint8_t*)code_end - (uint8_t*)code_begin));
+  run();
+  system("pause");
+  return 0;
 }

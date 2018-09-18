@@ -16,6 +16,9 @@
 #define PRINT_DEBUG(...)
 #endif
 
+#define IS_32_BIT (sizeof(void*) == 4)
+#define IS_64_BIT (sizeof(void*) == 8)
+
 int32_t get_delta_offset(void);
 uint8_t is_pe(void* baseAddr);
 uint32_t align_value(uint32_t value, uint32_t alignment);

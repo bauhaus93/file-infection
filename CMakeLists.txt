@@ -24,14 +24,9 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 add_executable(${EXEC_NAME} "")
 
-
 set_property(TARGET ${EXEC_NAME} PROPERTY C_STANDARD 99)
 if ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
 	target_compile_options(${EXEC_NAME} PRIVATE -Wall -fmax-errors=1 -Werror)
-elseif ("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
-	target_compile_options(${EXEC_NAME} PRIVATE -Wall -ferror-limit=1 -Werror)
-elseif ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
-	target_compile_options(${EXEC_NAME} PRIVATE /W4 /MP)
 else()
 	message(SEND_ERROR "Unknown compiler: ${CMAKE_C_COMPILER_ID}")
 endif()
@@ -41,4 +36,4 @@ get_property(SRCS TARGET ${EXEC_NAME} PROPERTY SRC_LIST)
 target_sources(${EXEC_NAME} PRIVATE ${SRCS})
 
 target_include_directories(${EXEC_NAME} PRIVATE src)
-target_include_directories(${EXEC_NAME} PRIVATE D:/Programme/MinGW/include)
+#target_include_directories(${EXEC_NAME} PRIVATE D:/Programme/MinGW/include)

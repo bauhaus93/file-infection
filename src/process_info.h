@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <assert.h>
 
+#include "utility.h"
+
 typedef struct {
     uint16_t    len;
     uint16_t    maxLen;

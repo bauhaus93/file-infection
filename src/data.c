@@ -15,9 +15,12 @@ int init_data(data_t* data, void* codeBegin, void* codeEnd, uint32_t entryOffset
   data->imageBase = get_image_base();
   data->kernel32Base = get_kernel32_base();
 
-  assert(is_pe(data->imageBase));
-  assert(is_pe(data->kernel32Base));
-  assert(data->entryOffset < data->codeSize);
+  if (!is_pe(data->imageBase)) {
+    return 1;
+  }
+  if (!is_pe(data->kernel32Base)) {
+    return 2;
+  }
 
   IMAGE_NT_HEADERS* ntHdr = get_nt_header(data->kernel32Base);
   IMAGE_EXPORT_DIRECTORY* exportDir = get_export_directory(data->kernel32Base, ntHdr);

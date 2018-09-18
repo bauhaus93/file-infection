@@ -13,6 +13,6 @@
 #include "code_begin.h"
 #include "code_end.h"
 
-int run(void);
+void run(void);
 
 #endif

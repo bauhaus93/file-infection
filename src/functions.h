@@ -20,7 +20,6 @@ typedef BOOL (WINAPI *fpUnmapViewOfFile)(LPCVOID);
 typedef DWORD (WINAPI *fpSetFilePointer)(HANDLE, LONG, PLONG, DWORD);
 typedef BOOL (WINAPI *fpSetEndOfFile)(HANDLE);
 typedef BOOL (WINAPI *fpCloseHandle)(HANDLE);
-typedef void (WINAPI *fpCopyMemory)(PVOID, const VOID*, SIZE_T);
 typedef HANDLE (WINAPI *fpCreateThread)(LPSECURITY_ATTRIBUTES, SIZE_T, LPTHREAD_START_ROUTINE, LPVOID, DWORD, LPDWORD);
 typedef DWORD (WINAPI *fpGetLogicalDrives)(void);
 typedef VOID (WINAPI *fpSleep)(DWORD);
@@ -43,7 +42,6 @@ typedef struct {
 	fpSetFilePointer		setFilePointer;
 	fpSetEndOfFile			setEndOfFile;
 	fpCloseHandle			closeHandle;
-	//fpCopyMemory			copyMemory;
 	fpCreateThread			createThread;
 	fpGetLogicalDrives		getLogicalDrives;
 	fpSleep					sleep;
