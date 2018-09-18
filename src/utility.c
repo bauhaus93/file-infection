@@ -24,7 +24,6 @@ int32_t get_delta_offset(void) {
 }
 
 uint8_t is_pe(void* baseAddr) {
-  PRINT_DEBUG("MAGIC is = %X\n", get_nt_header(baseAddr)->OptionalHeader.Magic);
   return  *(uint16_t*)baseAddr == 0x5A4D &&
           get_nt_header(baseAddr)->OptionalHeader.Magic == (IS_32_BIT ? IMAGE_NT_OPTIONAL_HDR32_MAGIC : IMAGE_NT_OPTIONAL_HDR64_MAGIC);
 }
