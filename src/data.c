@@ -1,16 +1,15 @@
 #include "data.h"
 
-int init_data(data_t* data, void* codeBegin, void* codeEnd, uint32_t entryOffset) {
-  
+int init_data(data_t* data, void* codeBegin, void* codeEnd, void* entryPoint) {
+  asm("nop\nnop\nnop\nnop\nnop");
   memzero(data, sizeof(data_t));
-
-  //PRINT_DEBUG("entry offset = 0x%X\n", entryOffset);
+  asm("nop\nnop\nnop\nnop\nnop");
 
   data->deltaOffset = get_delta_offset();
   data->codeBegin = (void*)((uint8_t*)codeBegin + data->deltaOffset);
   data->codeEnd = (void*)((uint8_t*)codeEnd + data->deltaOffset);
   data->codeSize = (uint8_t*)data->codeEnd - (uint8_t*)data->codeBegin;
-  data->entryOffset = entryOffset;
+  data->entryOffset = (uint8_t*)entryPoint - (uint8_t*)codeBegin;
 
   data->imageBase = get_image_base();
   data->kernel32Base = get_kernel32_base();

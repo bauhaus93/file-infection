@@ -18,6 +18,6 @@ typedef struct {
    functions_t  functions;
 } data_t;
 
-int init_data(data_t* data, void* codeBegin, void* codeEnd, uint32_t entryOffset);
+int init_data(data_t* data, void* codeBegin, void* codeEnd, void* entryPoint);
 
 #endif

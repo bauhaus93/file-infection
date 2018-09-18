@@ -13,6 +13,6 @@
 #include "code_begin.h"
 #include "code_end.h"
 
-void run(void);
+void spawn_infection_thread(void);
 
 #endif

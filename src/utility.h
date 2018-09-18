@@ -9,11 +9,12 @@
 #include "checksum.h"
 #include "checksum_list.h"
 
+#define DISABLE_PRINT
 
-#ifndef NDEBUG
+#ifndef DISABLE_PRINT
 #define PRINT_DEBUG(...) fprintf(stderr, __VA_ARGS__)
 #else
-#define PRINT_DEBUG(...)
+#define PRINT_DEBUG(...) ((void)0)
 #endif
 
 #define IS_32_BIT (sizeof(void*) == 4)

