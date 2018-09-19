@@ -26,7 +26,7 @@ add_executable(${EXEC_NAME} "")
 
 set_property(TARGET ${EXEC_NAME} PROPERTY C_STANDARD 99)
 if ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
-	target_compile_options(${EXEC_NAME} PRIVATE -Wall -fmax-errors=1 -Werror -nodefaultlibs -nostdlib  -fno-builtin)
+	target_compile_options(${EXEC_NAME} PRIVATE -Wall -fmax-errors=1 -Werror -fno-builtin)
 else()
 	message(SEND_ERROR "Unknown compiler: ${CMAKE_C_COMPILER_ID}")
 endif()
