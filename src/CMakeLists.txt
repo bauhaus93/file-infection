@@ -6,6 +6,7 @@ add_sources(
 	utility.h   	utility.c
 	data.h			data.c
 	pe.h			pe.c
+	oep.h			oep.c
 	functions.h		functions.c
 	checksum.h  	checksum.c
 	infect.h    	infect.c
