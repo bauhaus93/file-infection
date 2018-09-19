@@ -7,6 +7,7 @@
 #include "data.h"
 #include "pe.h"
 #include "utility.h"
+#include "oep.h"
 
 int infect(const char* filename, data_t* data);
 

