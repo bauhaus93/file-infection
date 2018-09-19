@@ -26,7 +26,7 @@ uint8_t is_section_header_empty(IMAGE_SECTION_HEADER* sectionHeader) {
   return 1;
 }
 
-static void create_section_header(IMAGE_SECTION_HEADER* sectionHeader, IMAGE_NT_HEADERS* ntHeaders, uint32_t codeSize) {
+void create_section_header(IMAGE_SECTION_HEADER* sectionHeader, IMAGE_NT_HEADERS* ntHeaders, uint32_t codeSize) {
   ntHeaders->FileHeader.NumberOfSections++;
 
   sectionHeader->Name[0] = '.';

