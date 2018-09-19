@@ -3,9 +3,9 @@
 
 #include <windows.h>
 #include <stdint.h>
-#include <stdio.h>
 
 #include "data.h"
+#include "pe.h"
 #include "utility.h"
 
 int infect(const char* filename, data_t* data);

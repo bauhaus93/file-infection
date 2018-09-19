@@ -6,6 +6,7 @@
 #include "functions.h"
 #include "utility.h"
 #include "process_info.h"
+#include "pe.h"
 
 typedef struct {
    void*        imageBase;

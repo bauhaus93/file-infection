@@ -3,6 +3,10 @@
 
 #include <windows.h>
 
+#include "utility.h"
+#include "checksum.h"
+#include "checksum_list.h"
+
 typedef void (WINAPI *fpExitProcess)(UINT);
 typedef DWORD (WINAPI *fpGetTickCount)(void);
 typedef HANDLE (WINAPI *fpGetProcessHeap)(void);
@@ -46,5 +50,8 @@ typedef struct {
 	fpGetLogicalDrives		getLogicalDrives;
 	fpSleep					sleep;
 } functions_t;
+
+int fill_functions(IMAGE_EXPORT_DIRECTORY* ed, void* base, functions_t* functions);
+void* get_function_by_checksum(IMAGE_EXPORT_DIRECTORY* ed, void* base, uint32_t cs);
 
 #endif
