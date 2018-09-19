@@ -1,9 +1,7 @@
 #include "data.h"
 
 int init_data(data_t* data, void* codeBegin, void* codeEnd, void* entryPoint) {
-  asm("nop\nnop\nnop\nnop\nnop");
   memzero(data, sizeof(data_t));
-  asm("nop\nnop\nnop\nnop\nnop");
 
   data->deltaOffset = get_delta_offset();
   data->codeBegin = (void*)((uint8_t*)codeBegin + data->deltaOffset);

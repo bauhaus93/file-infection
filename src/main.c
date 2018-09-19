@@ -14,7 +14,6 @@ int main(int argc, char **argv) {
   assert(!(IS_32_BIT && IS_64_BIT));
   assert(code_begin < code_end);
   ASSERT_FUNCTION_IN_BOUNDARIES(spawn_infection_thread);
-  ASSERT_FUNCTION_IN_BOUNDARIES(memzero);
 
   if (IS_32_BIT) {
     printf("running 32 bit\n");
