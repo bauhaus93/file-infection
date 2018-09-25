@@ -18,6 +18,15 @@ IMAGE_EXPORT_DIRECTORY* get_export_directory(void* base, IMAGE_NT_HEADERS* ntHdr
     return (IMAGE_EXPORT_DIRECTORY*) ((uint8_t*)base + ntHdr->OptionalHeader.DataDirectory[0].VirtualAddress);
 }
 
+IMAGE_SECTION_HEADER* get_section_header(IMAGE_NT_HEADERS* ntHeaders, uint16_t index) {
+  IMAGE_SECTION_HEADER* sectionHeader = (IMAGE_SECTION_HEADER*) ((uint8_t*)ntHeaders + sizeof(IMAGE_NT_HEADERS)); //was ntHeaders + 1???
+  return sectionHeader + index;
+}
+
+IMAGE_SECTION_HEADER* get_last_section_header(IMAGE_NT_HEADERS* ntHeaders) {
+  return get_section_header(ntHeaders, ntHeaders->FileHeader.NumberOfSections - 1);
+}
+
 uint8_t is_section_header_empty(IMAGE_SECTION_HEADER* sectionHeader) {
   for(uint32_t *ptr = (uint32_t*)sectionHeader; (IMAGE_SECTION_HEADER*)ptr < sectionHeader + 1; ptr++) {
     if(*ptr != 0)

@@ -13,7 +13,7 @@ uint8_t write_original_entry_point(uint32_t oep, void* targetCodeBegin) {
     uint32_t* ptr = (uint32_t*)((uint8_t*)targetCodeBegin + startOffset);
     uint32_t* stop = (uint32_t*)((uint8_t*)targetCodeBegin + stopOffset);
     while (ptr < stop) {
-        PRINT_DEBUG("PTR = 0x%X, must match 0x%X\n", *ptr, srcOep);
+        //PRINT_DEBUG("PTR = 0x%X, must match 0x%X\n", *ptr, srcOep);
         if (*ptr == srcOep) {
             *ptr = oep;
             return 0;

