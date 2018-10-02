@@ -6,6 +6,10 @@
 #include "utility.h"
 #include "virus.h"
 
+#ifdef _WIN64
+#error "Currently only support Win32"
+#endif
+
 #define ASSERT_FUNCTION_IN_BOUNDARIES(func) { assert((void*)func >= (void*)code_begin && (void*)func < (void*)code_end); }
 
 int main(int argc, char **argv) {

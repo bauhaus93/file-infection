@@ -6,7 +6,7 @@ uint8_t is_pe(void* baseAddr) {
 }
 
 uint32_t align_value(uint32_t value, uint32_t alignment) {
-  return value + alignment - (value % alignment);
+  return (value + alignment) - (value % alignment);
 }
 
 IMAGE_NT_HEADERS* get_nt_header(void* base) {
