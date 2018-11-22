@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4.3)
+cmake_minimum_required(VERSION 3.4)
 project(infect C)
 
 macro(add_sources)
@@ -24,7 +24,10 @@ add_executable(${EXEC_NAME} "")
 
 set_property(TARGET ${EXEC_NAME} PROPERTY C_STANDARD 99)
 if ("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
-	target_compile_options(${EXEC_NAME} PRIVATE -Wall -fmax-errors=1 -Werror -fno-builtin)
+	target_compile_options(${EXEC_NAME} PRIVATE -Wall -fmax-errors=1 -Werror -m32 -fno-builtin)
+	target_link_libraries(${EXEC_NAME} PRIVATE -Wall -fmax-errors=1 -Werror -m32)
+elseif ("${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC")
+
 else()
 	message(SEND_ERROR "Unknown compiler: ${CMAKE_C_COMPILER_ID}")
 endif()
