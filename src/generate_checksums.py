@@ -20,7 +20,7 @@ def create_checksum_map(input_filename):
     checksum_map = {}
     with open(input_filename, "r") as f:
         for line in f:
-            name = line.rstrip()    #was [:-2] \r\n
+            name = line.rstrip()
             cs = create_checksum(name)
             if cs in checksum_map :
                 if name != checksum_map[cs]:

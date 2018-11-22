@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.4.3)
 project(infect C)
 
-#enable_language(ASM)
-
 macro(add_sources)
 	file (RELATIVE_PATH _relPath "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}")
 	foreach(_src ${ARGN})
@@ -36,4 +34,3 @@ get_property(SRCS TARGET ${EXEC_NAME} PROPERTY SRC_LIST)
 target_sources(${EXEC_NAME} PRIVATE ${SRCS})
 
 target_include_directories(${EXEC_NAME} PRIVATE src)
-#target_include_directories(${EXEC_NAME} PRIVATE D:/Programme/MinGW/include)

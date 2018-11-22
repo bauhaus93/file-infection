@@ -1210,10 +1210,6 @@ WriteTapemark
 ZombifyActCtx
 _DebugOut
 _DebugPrintf
-__wine_call_from_16_regs
-__wine_dll_register_16
-__wine_dll_unregister_16
-__wine_kernel_init
 _hread
 _hwrite
 _lclose
@@ -1241,5 +1237,3 @@ lstrcpynW
 lstrlen
 lstrlenA
 lstrlenW
-wine_get_dos_file_name
-wine_get_unix_file_name
