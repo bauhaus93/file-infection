@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#include "code_begin.h"
+#include "code_end.h"
+
 #define DISABLE_PRINT
 
 #ifndef DISABLE_PRINT
@@ -14,6 +17,7 @@
 
 #define IS_32_BIT (sizeof(void*) == 4)
 #define IS_64_BIT (sizeof(void*) == 8)
+#define ASSERT_FUNCTION_IN_BOUNDARIES(func) { assert((void*)func >= (void*)code_begin && (void*)func < (void*)code_end); }
 
 int32_t get_delta_offset(void);
 

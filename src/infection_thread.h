@@ -1,5 +1,5 @@
-#ifndef VIRUS_H
-#define VIRUS_H
+#ifndef INFECTION_THREAD_H
+#define INFECTION_THREAD_H
 
 #include <stdint.h>
 #include <stdio.h>
