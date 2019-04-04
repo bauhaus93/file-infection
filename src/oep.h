@@ -2,13 +2,18 @@
 #define OEP_H
 
 #include <stdint.h>
+#include <windows.h>
 
 #include "code_begin.h"
 #include "utility.h"
 
-#define OEP_DEFAULT (0xABCDABCD)
+#ifdef _WIN64
+#define OEP_DEFAULT (0xDEADBEEFABCD1337)
+#else
+#define OEP_DEFAULT (0xDEADBEEF)
+#endif
 
-uint32_t get_original_entry_point(void);
+size_t get_original_entry_point(void);
 uint8_t write_original_entry_point(uint32_t targetOep, void* targetImageBase);
 
 #endif

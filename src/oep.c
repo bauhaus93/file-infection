@@ -1,7 +1,7 @@
 #include "oep.h"
 
 //TODO: handle 64 bit case
-uint32_t get_original_entry_point(void) {
+size_t get_original_entry_point(void) {
     return OEP_DEFAULT;
 }
 

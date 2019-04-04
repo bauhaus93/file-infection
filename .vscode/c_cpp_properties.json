@@ -13,8 +13,7 @@
             ],
             "windowsSdkVersion": "8.1",
             "compilerPath": "D:\\Programme\\Cygwin64\\bin\\i686-w64-mingw32-gcc.exe",
-            "cStandard": "c11",
-            "cppStandard": "c++17",
+            "cStandard": "c99",
             "intelliSenseMode": "gcc-x64"
         }
     ],
