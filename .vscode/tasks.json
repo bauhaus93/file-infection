@@ -1,0 +1,61 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build_debug",
+            "type": "shell",
+            "command": "make",
+            "args": [
+                "-j10"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/debug"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "build_release",
+            "type": "shell",
+            "command": "make",
+            "args": [
+                "-j10"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/release"
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
+        },
+        {
+            "label": "create_debug",
+            "type": "shell",
+            "command": "bash ./setup_debug.sh",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "create_release",
+            "type": "shell",
+            "command": "bash ./setup_release.sh",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": []
+        }
+    ]
+}

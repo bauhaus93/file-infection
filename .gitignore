@@ -1,4 +1,5 @@
-build*/
 infect-test/
-.vscode/
-*.sh
+debug/
+release
+ipch/
+
