@@ -1,5 +1,6 @@
-infect-test/
+infection-test/
 debug/
-release
+release/
 ipch/
+resources/
 

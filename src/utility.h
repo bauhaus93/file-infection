@@ -7,7 +7,7 @@
 #include "code_begin.h"
 #include "code_end.h"
 
-#define DISABLE_PRINT
+//#define DISABLE_PRINT
 
 #ifndef DISABLE_PRINT
 #define PRINT_DEBUG(...) fprintf(stderr, __VA_ARGS__)

