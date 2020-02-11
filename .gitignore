@@ -1,6 +1,5 @@
-infection-test/
-debug/
+build/
 release/
-ipch/
-resources/
+debug/
+mxe/
 

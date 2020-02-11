@@ -1,6 +1,5 @@
 add_sources(
     main.c
-	checksum_list.h
 	code_begin.h 		code_begin.c
 	infection_thread.h	infection_thread.c
 	infect.h    		infect.c
