@@ -1,4 +1,6 @@
+#include "code_begin.h"
 #include "oep.h"
+#include "utility.h"
 
 // TODO: handle 64 bit case
 size_t get_original_entry_point(void) { return OEP_DEFAULT; }

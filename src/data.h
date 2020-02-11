@@ -4,9 +4,6 @@
 #include <stdint.h>
 
 #include "functions.h"
-#include "pe.h"
-#include "process_info.h"
-#include "utility.h"
 
 typedef struct {
     void *imageBase;

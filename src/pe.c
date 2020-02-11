@@ -1,4 +1,6 @@
 #include "pe.h"
+#include "process_info.h"
+#include "utility.h"
 
 uint8_t is_pe(void *baseAddr) {
     return *(uint16_t *)baseAddr == 0x5A4D &&

@@ -1,12 +1,9 @@
-#!/usr/bin/env pythn3
+#!/usr/bin/env python3
 import logging
 import argparse
 import os
 
-def setup_logger():
-    FORMAT = r"[%(asctime)-15s] %(levelname)s - %(message)s"
-    DATE_FORMAT = r"%Y-%m-%d %H:%M:%S"
-    logging.basicConfig(level = logging.INFO, format = FORMAT, datefmt = DATE_FORMAT)
+import util
 
 def create_checksum(string):
     a = 1
@@ -34,7 +31,7 @@ def create_checksum_map(input_filename):
     return checksum_map
 
 def create_header_file(header_filename, checksum_map):
-    safeguard = os.path.basename(header_filename).upper().replace(".", "_") + "_H"
+    safeguard = util.create_safeguard(header_filename)
     with open(header_filename, "w") as f:
         f.write(f"#ifndef {safeguard}\n#define {safeguard}\n")
         for cs, name in sorted(checksum_map.items(), key = lambda e: e[1].lower()):
@@ -43,7 +40,7 @@ def create_header_file(header_filename, checksum_map):
         f.write(f"#endif // {safeguard}")
 
 if __name__ == "__main__":
-    setup_logger()
+    util.setup_logger()
     logger = logging.getLogger()
 
     parser = argparse.ArgumentParser("Generate checksums from strings in a file, creating a c header files with #defines of the checksums.")

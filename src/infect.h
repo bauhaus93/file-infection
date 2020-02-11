@@ -5,9 +5,6 @@
 #include <windows.h>
 
 #include "data.h"
-#include "oep.h"
-#include "pe.h"
-#include "utility.h"
 
 #define INFECTION_MARKER (0xDEADBEEF)
 

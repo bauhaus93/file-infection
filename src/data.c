@@ -1,4 +1,7 @@
 #include "data.h"
+#include "pe.h"
+#include "utility.h"
+#include "process_info.h"
 
 int init_data(data_t *data, void *codeBegin, void *codeEnd, void *entryPoint) {
 

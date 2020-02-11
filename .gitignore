@@ -2,4 +2,6 @@ build/
 release/
 debug/
 mxe/
+vms/
+__pycache__/
 

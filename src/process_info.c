@@ -1,4 +1,7 @@
+#include <assert.h>
+
 #include "process_info.h"
+#include "utility.h"
 
 TEB *get_teb(void) {
     TEB *teb = NULL;

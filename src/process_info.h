@@ -1,11 +1,7 @@
 #ifndef PROCESS_INFO_H
 #define PROCESS_INFO_H
 
-#include <assert.h>
 #include <stdint.h>
-#include <stdlib.h>
-
-#include "utility.h"
 
 typedef struct {
     uint16_t len;
@@ -54,4 +50,4 @@ PEB *get_peb(void);
 void *get_image_base(void);
 void *get_kernel32_base(void);
 
-#endif
+#endif // PROCESS_INFO_H

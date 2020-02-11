@@ -4,8 +4,6 @@
 #include <stdint.h>
 #include <windows.h>
 
-#include "data.h"
-
 uint8_t is_pe(void *baseAddr);
 uint32_t align_value(uint32_t value, uint32_t alignment);
 

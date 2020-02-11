@@ -2,10 +2,7 @@
 #define FUNCTIONS_H
 
 #include <windows.h>
-
-#include "checksum.h"
-#include "checksum_list.h"
-#include "utility.h"
+#include <stdint.h>
 
 typedef void(WINAPI *fpExitProcess)(UINT);
 typedef DWORD(WINAPI *fpGetTickCount)(void);

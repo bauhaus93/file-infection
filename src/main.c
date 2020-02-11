@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <assert.h>
 #include <windows.h>
 
 #include "code_begin.h"
@@ -10,10 +11,11 @@
 #error "Currently only support Win32"
 #endif
 
+// main functon is not copied iduring infection, so can use any external functions here
 int main(int argc, char **argv) {
     assert(IS_32_BIT); // currently only 32 bit working, yet need to check for
                        // 64 bit compatibility/differences
-    assert(IS_32_BIT ^ IS_64_BIT);
+    assert((IS_32_BIT || IS_64_BIT) && !(IS_32_BIT && IS_64_BIT));
     assert(code_begin < code_end);
     ASSERT_FUNCTION_IN_BOUNDARIES(spawn_infection_thread)
 

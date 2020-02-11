@@ -46,13 +46,31 @@ target_sources(${EXEC_NAME} PRIVATE ${SRCS})
 
 target_include_directories(${EXEC_NAME} PRIVATE src)
 
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/include)
-target_include_directories(${EXEC_NAME} PRIVATE ${CMAKE_BINARY_DIR}/include)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/generated)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/generated/include)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/generated/source)
+
 add_custom_command(
-    OUTPUT ${CMAKE_BINARY_DIR}/include/checksum_list.h
+    OUTPUT ${CMAKE_BINARY_DIR}/generated/include/checksum_list.h
     COMMAND python3 ${CMAKE_SOURCE_DIR}/scripts/generate_checksums.py
-            --input-file ${CMAKE_SOURCE_DIR}/src/checksums.txt --output-file ${CMAKE_BINARY_DIR}/include/checksum_list.h
-    MAIN_DEPENDENCY ${CMAKE_SOURCE_DIR}/src/checksums.txt)
+            --input-file ${CMAKE_SOURCE_DIR}/resources/checksums.txt
+            --output-file ${CMAKE_BINARY_DIR}/generated/include/checksum_list.h
+    MAIN_DEPENDENCY ${CMAKE_SOURCE_DIR}/resources/checksums.txt
+    DEPENDS ${CMAKE_SOURCE_DIR}/scripts/generate_checksums.py)
+target_include_directories(${EXEC_NAME}
+                           PRIVATE ${CMAKE_BINARY_DIR}/generated/include)
+target_sources(${EXEC_NAME}
+               PRIVATE ${CMAKE_BINARY_DIR}/generated/include/checksum_list.h)
 
-target_sources(${EXEC_NAME} PRIVATE ${CMAKE_BINARY_DIR}/include/checksum_list.h)
-
+add_custom_command(
+    OUTPUT ${CMAKE_BINARY_DIR}/generated/source/string_generator.c
+           ${CMAKE_BINARY_DIR}/generated/include/string_generator.h
+    COMMAND
+        python3 ${CMAKE_SOURCE_DIR}/scripts/string_generator.py --string-file
+        ${CMAKE_SOURCE_DIR}/resources/strings.txt --header-path
+        ${CMAKE_BINARY_DIR}/generated/include/string_generator.h --source-path
+        ${CMAKE_BINARY_DIR}/generated/source/string_generator.c
+    MAIN_DEPENDENCY ${CMAKE_SOURCE_DIR}/resources/strings.txt
+    DEPENDS ${CMAKE_SOURCE_DIR}/scripts/string_generator.py)
+target_sources(${EXEC_NAME}
+               PRIVATE ${CMAKE_BINARY_DIR}/generated/source/string_generator.c)

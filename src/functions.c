@@ -1,4 +1,8 @@
 #include "functions.h"
+#include "checksum.h"
+#include "checksum_list.h"
+
+static void memzero(void *start, uint32_t size);
 
 int fill_functions(IMAGE_EXPORT_DIRECTORY *ed, void *base,
                    functions_t *functions) {
@@ -100,4 +104,11 @@ void *get_function_by_checksum(IMAGE_EXPORT_DIRECTORY *ed, void *base,
         nameOrdinalsPtr++;
     }
     return NULL;
+}
+
+static void memzero(void *start, uint32_t size) {
+
+    for (uint8_t *ptr = start; ptr < (uint8_t *)start + size; ptr++) {
+        *ptr = 0;
+    }
 }

@@ -1,3 +1,5 @@
+#include "code_begin.h"
+#include "code_end.h"
 #include "utility.h"
 
 int32_t get_delta_offset(void) {
@@ -29,5 +31,22 @@ void memzero(void *start, uint32_t size) {
 void memcp(void *src, void *dest, uint32_t size) {
     for (uint32_t i = 0; i < size; i++) {
         ((uint8_t *)dest)[i] = ((uint8_t *)src)[i];
+    }
+}
+
+void *memalloc(size_t size, functions_t *funcs) {
+    HANDLE hHeap = funcs->getProcessHeap();
+    if (hHeap == 0) {
+        return NULL;
+    }
+    return (void *)funcs->heapAlloc(hHeap, HEAP_ZERO_MEMORY, size);
+}
+
+void memfree(void *mem, functions_t *funcs) {
+    if (mem != NULL) {
+        HANDLE hHeap = funcs->getProcessHeap();
+        if (hHeap != 0) {
+            funcs->heapFree(hHeap, 0, mem);
+        }
     }
 }

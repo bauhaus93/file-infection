@@ -2,14 +2,15 @@
 #define UTILITY_H
 
 #include <stdint.h>
-#include <stdio.h>
+#include <windows.h>
 
-#include "code_begin.h"
-#include "code_end.h"
+#include "functions.h"
 
-//#define DISABLE_PRINT
+// #define DISABLE_PRINT
 
 #ifndef DISABLE_PRINT
+#include <stdio.h>
+#include <stdlib.h>
 #define PRINT_DEBUG(...) fprintf(stderr, __VA_ARGS__)
 #else
 #define PRINT_DEBUG(...) ((void)0)
@@ -27,5 +28,7 @@ int32_t get_delta_offset(void);
 
 void memzero(void *start, uint32_t size);
 void memcp(void *src, void *dest, uint32_t size);
+void *memalloc(size_t size, functions_t *funcs);
+void memfree(void *mem, functions_t *funcs);
 
-#endif
+#endif // UTILITY_H

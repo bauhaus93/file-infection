@@ -4,9 +4,6 @@
 #include <stdint.h>
 #include <windows.h>
 
-#include "code_begin.h"
-#include "utility.h"
-
 #ifdef _WIN64
 #define OEP_DEFAULT (0xDEADBEEFABCD1337)
 #else
