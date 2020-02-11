@@ -1,0 +1,21 @@
+{
+    "configurations": [
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/src",
+                "D:\\Programme\\Cygwin64\\usr\\i686-w64-mingw32\\sys-root\\mingw\\include"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "windowsSdkVersion": "8.1",
+            "compilerPath": "D:\\Programme\\Cygwin64\\bin\\i686-w64-mingw32-gcc.exe",
+            "cStandard": "c99",
+            "intelliSenseMode": "gcc-x64"
+        }
+    ],
+    "version": 4
+}

