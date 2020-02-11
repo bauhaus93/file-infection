@@ -1,3 +1,3 @@
 #include "code_begin.h"
 
-void code_begin(void){}
+void code_begin(void) {}

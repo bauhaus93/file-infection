@@ -3,6 +3,6 @@
 
 #include <stdint.h>
 
-uint32_t checksum(const char* str);
+uint32_t checksum(const char *str);
 
 #endif

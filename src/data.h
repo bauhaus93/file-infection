@@ -4,21 +4,21 @@
 #include <stdint.h>
 
 #include "functions.h"
-#include "utility.h"
-#include "process_info.h"
 #include "pe.h"
+#include "process_info.h"
+#include "utility.h"
 
 typedef struct {
-   void*        imageBase;
-   void*        kernel32Base;
-   void*        codeBegin;
-   void*        codeEnd;
-   uint32_t     codeSize;
-   int32_t      deltaOffset;
-   uint32_t     entryOffset;
-   functions_t  functions;
+    void *imageBase;
+    void *kernel32Base;
+    void *codeBegin;
+    void *codeEnd;
+    uint32_t codeSize;
+    int32_t deltaOffset;
+    uint32_t entryOffset;
+    functions_t functions;
 } data_t;
 
-int init_data(data_t* data, void* codeBegin, void* codeEnd, void* entryPoint);
+int init_data(data_t *data, void *codeBegin, void *codeEnd, void *entryPoint);
 
 #endif

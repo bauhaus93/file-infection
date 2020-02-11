@@ -7,11 +7,11 @@
 
 #include "checksum.h"
 #include "checksum_list.h"
-#include "utility.h"
-#include "infect.h"
-#include "data.h"
 #include "code_begin.h"
 #include "code_end.h"
+#include "data.h"
+#include "infect.h"
+#include "utility.h"
 
 void spawn_infection_thread(void);
 

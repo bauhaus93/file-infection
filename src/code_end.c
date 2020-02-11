@@ -1,3 +1,3 @@
 #include "code_end.h"
 
-void code_end(void){}
+void code_end(void) {}
