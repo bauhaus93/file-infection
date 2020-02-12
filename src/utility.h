@@ -6,9 +6,9 @@
 
 #include "functions.h"
 
-// #define DISABLE_PRINT
+#define ENABLE_PRINT
 
-#ifndef DISABLE_PRINT
+#ifdef ENABLE_PRINT
 #include <stdio.h>
 #include <stdlib.h>
 #define PRINT_DEBUG(...) fprintf(stderr, __VA_ARGS__)

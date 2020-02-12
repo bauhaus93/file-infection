@@ -34,44 +34,43 @@ def generate_alphabet_map(word_map):
     return alphabet
 
 def generate_function_get_word_length(word_map):
-    code = "static size_t get_word_length(uint16_t word_id) {\n"
-    code += "switch(word_id) {\n"
+    code = "size_t get_string_length(uint16_t id) {\n"
+    code += "switch(id) {\n"
     for word_symbol in word_map:
-        code += f"case WORD_{word_symbol}: return {len(word_map[word_symbol][1])};\n"
+        code += f"case STRING_{word_symbol}: return {len(word_map[word_symbol][1])};\n"
     code += "default: return 0;\n}}"
     return code
 
 def generate_function_generate_word(occurence_map):
-    code = "char* generate_word(uint16_t word_id, functions_t * functions) {\n"
-    code += "size_t word_len = get_word_length(word_id);\n"
-    code += "if (word_len == 0) { return NULL; }\n"
-    code += "char * word = (char*) memalloc(sizeof(char) * (word_len + 1), functions);\n"
-    code += "if (word == NULL) { return NULL; }\n"
-    code += "uint16_t index = 0;\n"
-    code += f"while(1) {{\n"
+    code = "size_t get_string(uint16_t id, char * dest, size_t dest_size) {\n"
+    code += "size_t len = get_string_length(id);\n"
+    code += "if (len == 0 || len >= dest_size) { return 0; }\n"
+    code += f"for(size_t index = 0; index < len; index++) {{\n"
     code += generate_switch(occurence_map)
-    code += "}"
+    code += "}\ndest[len] = 0;\n return len + 1;\n}"
     return code
 
 def generate_switch(alphabet_map):
     code = ""
-    code += "switch(word_id | (index++ << 16)) {\n"
+    code += "switch(id | (((uint16_t)index) << 8)) {\n"
 
     alphabet = list(alphabet_map.keys())
     random.shuffle(alphabet)
     for c in alphabet:
         for v in alphabet_map[c]:
             code += f"case {v}: "
-        code += f"word[((size_t)index) - 1] = '{c}'; break;\n"
-    code += "default: word[((size_t)index) - 1] = 0; return word;"
-    code += "}}"
+        if c == "\\":
+            c = "\\\\"
+        code += f"dest[index] = '{c}'; break;\n"
+    code += "default: return 0;\n}\n"
     return code
 
 def generate_header_code(filename, word_map):
-    code = "#include <stdint.h>\n\n#include \"functions.h\"\n\n"
+    code = "#include <stdint.h>\n\n"
     for word_symbol in word_map:
-        code += f"#define WORD_{word_symbol} ({word_map[word_symbol][0]}) // {word_map[word_symbol][1]}\n"
-    code += "\nchar * generate_word(uint16_t word_id, functions_t * functions);\n"
+        code += f"#define STRING_{word_symbol} ({word_map[word_symbol][0]}) // {word_map[word_symbol][1]}\n"
+    code += "\nsize_t get_string_length(uint16_t id);\n"
+    code += "\nsize_t get_string(uint16_t id, char * dest, size_t destSize);\n"
     return util.safeguard_code(code, filename)
 
 def generate_source_code(header_name, word_map):
