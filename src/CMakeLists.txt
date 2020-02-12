@@ -1,14 +1,13 @@
 add_sources(
     main.c
-	code_begin.c
-	infection_thread.c
-	infect.c
-	utility.c
-	data.c
-	pe.c
-	oep.c
-	function_list.c
-	checksum.c
-	process_info.c
-	code_end.c
-)
+    code_begin.c
+    infection_thread.c
+    infect.c
+    utility.c
+    data.c
+    pe.c
+    oep.c
+    function_list.c
+    checksum.c
+    process_info.c
+    code_end.c)

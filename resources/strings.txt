@@ -1,1 +1,2 @@
-KERNEL32_PATH C:\windows\system32\kernel32.dll
+KERNEL32_PATH c:\windows\system32\kernel32.dll
+EXE_SEARCH_PATTERN ./*.exe

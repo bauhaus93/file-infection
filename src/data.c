@@ -4,7 +4,6 @@
 #include "process_info.h"
 
 int init_data(data_t *data, void *code_begin_addr, void *code_end_addr, void *entry_point) {
-
     memzero(data, sizeof(data_t));
     data->delta_offset = get_delta_offset();
     data->code_begin_addr = (void *)((uint8_t *)code_begin_addr + data->delta_offset);
@@ -15,10 +14,13 @@ int init_data(data_t *data, void *code_begin_addr, void *code_end_addr, void *en
     data->image_base = get_image_base();
     data->kernel32_base = get_kernel32_base();
 
-    if (!is_pe(data->image_base)) {
+
+    if (data->image_base == NULL || !is_pe(data->image_base)) {
+        PRINT_DEBUG("invalid image_base");
         return 1;
     }
-    if (!is_pe(data->kernel32_base)) {
+    if (data->kernel32_base == NULL || !is_pe(data->kernel32_base)) {
+        PRINT_DEBUG("invalid kernel32_base");
         return 2;
     }
 

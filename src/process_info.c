@@ -31,10 +31,12 @@ void *get_kernel32_base(void) {
          entry != (LdrEntry *)&ldr->module_list;
          entry = (LdrEntry *)entry->module_list.flink) {
         UnicodeStr *uni = &entry->dll_name;
+
         if (uni->max_len / 2 == str_len) {
             uint8_t same = 1;
             for (uint16_t i = 0; i < uni->max_len / 2; i++) {
-                if ((char)uni->buffer[i] != kernel32_path[i]) {
+                if (!same_case_insensitive((char)uni->buffer[i],
+                                           kernel32_path[i])) {
                     same = 0;
                     break;
                 }
