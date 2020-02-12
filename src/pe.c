@@ -2,9 +2,9 @@
 #include "process_info.h"
 #include "utility.h"
 
-uint8_t is_pe(void *baseAddr) {
-    return *(uint16_t *)baseAddr == 0x5A4D &&
-           get_nt_header(baseAddr)->OptionalHeader.Magic ==
+uint8_t is_pe(void *base_addr) {
+    return *(uint16_t *)base_addr == 0x5A4D &&
+           get_nt_header(base_addr)->OptionalHeader.Magic ==
                (IS_32_BIT ? IMAGE_NT_OPTIONAL_HDR32_MAGIC
                           : IMAGE_NT_OPTIONAL_HDR64_MAGIC);
 }
@@ -19,57 +19,57 @@ IMAGE_NT_HEADERS *get_nt_header(void *base) {
 }
 
 IMAGE_EXPORT_DIRECTORY *get_export_directory(void *base,
-                                             IMAGE_NT_HEADERS *ntHdr) {
+                                             IMAGE_NT_HEADERS *nt_header) {
     return (IMAGE_EXPORT_DIRECTORY *)((uint8_t *)base +
-                                      ntHdr->OptionalHeader.DataDirectory[0]
+                                      nt_header->OptionalHeader.DataDirectory[0]
                                           .VirtualAddress);
 }
 
-IMAGE_SECTION_HEADER *get_section_header(IMAGE_NT_HEADERS *ntHeaders,
+IMAGE_SECTION_HEADER *get_section_header(IMAGE_NT_HEADERS *nt_headers,
                                          uint16_t index) {
-    IMAGE_SECTION_HEADER *sectionHeader =
-        (IMAGE_SECTION_HEADER *)((uint8_t *)ntHeaders +
+    IMAGE_SECTION_HEADER *section_header =
+        (IMAGE_SECTION_HEADER *)((uint8_t *)nt_headers +
                                  sizeof(
-                                     IMAGE_NT_HEADERS)); // was ntHeaders + 1???
-    return sectionHeader + index;
+                                     IMAGE_NT_HEADERS)); // was nt_headers + 1???
+    return section_header + index;
 }
 
-IMAGE_SECTION_HEADER *get_last_section_header(IMAGE_NT_HEADERS *ntHeaders) {
-    return get_section_header(ntHeaders,
-                              ntHeaders->FileHeader.NumberOfSections - 1);
+IMAGE_SECTION_HEADER *get_last_section_header(IMAGE_NT_HEADERS *nt_headers) {
+    return get_section_header(nt_headers,
+                              nt_headers->FileHeader.NumberOfSections - 1);
 }
 
-uint8_t is_section_header_empty(IMAGE_SECTION_HEADER *sectionHeader) {
-    for (uint32_t *ptr = (uint32_t *)sectionHeader;
-         (IMAGE_SECTION_HEADER *)ptr < sectionHeader + 1; ptr++) {
+uint8_t is_section_header_empty(IMAGE_SECTION_HEADER *section_header) {
+    for (uint32_t *ptr = (uint32_t *)section_header;
+         (IMAGE_SECTION_HEADER *)ptr < section_header + 1; ptr++) {
         if (*ptr != 0)
             return 0;
     }
     return 1;
 }
 
-void create_section_header(IMAGE_SECTION_HEADER *sectionHeader,
-                           IMAGE_NT_HEADERS *ntHeaders, uint32_t codeSize) {
-    ntHeaders->FileHeader.NumberOfSections++;
+void create_section_header(IMAGE_SECTION_HEADER *section_header,
+                           IMAGE_NT_HEADERS *nt_headers, uint32_t code_size) {
+    nt_headers->FileHeader.NumberOfSections++;
 
-    sectionHeader->Name[0] = '.';
-    sectionHeader->Name[1] = 'v';
-    sectionHeader->Name[2] = 'i';
-    sectionHeader->Name[3] = 'r';
-    sectionHeader->Name[4] = 'u';
-    sectionHeader->Name[5] = 's';
+    section_header->Name[0] = '.';
+    section_header->Name[1] = 'v';
+    section_header->Name[2] = 'i';
+    section_header->Name[3] = 'r';
+    section_header->Name[4] = 'u';
+    section_header->Name[5] = 's';
 
-    sectionHeader->Misc.VirtualSize = codeSize;
-    sectionHeader->VirtualAddress =
-        (sectionHeader - 1)->VirtualAddress +
-        align_value((sectionHeader - 1)->Misc.VirtualSize,
-                    ntHeaders->OptionalHeader.SectionAlignment);
-    sectionHeader->SizeOfRawData =
-        align_value(codeSize, ntHeaders->OptionalHeader.FileAlignment);
-    sectionHeader->PointerToRawData =
-        (sectionHeader - 1)->PointerToRawData +
-        align_value((sectionHeader - 1)->SizeOfRawData,
-                    ntHeaders->OptionalHeader.FileAlignment);
-    sectionHeader->Characteristics =
+    section_header->Misc.VirtualSize = code_size;
+    section_header->VirtualAddress =
+        (section_header - 1)->VirtualAddress +
+        align_value((section_header - 1)->Misc.VirtualSize,
+                    nt_headers->OptionalHeader.SectionAlignment);
+    section_header->SizeOfRawData =
+        align_value(code_size, nt_headers->OptionalHeader.FileAlignment);
+    section_header->PointerToRawData =
+        (section_header - 1)->PointerToRawData +
+        align_value((section_header - 1)->SizeOfRawData,
+                    nt_headers->OptionalHeader.FileAlignment);
+    section_header->Characteristics =
         IMAGE_SCN_CNT_CODE | IMAGE_SCN_MEM_EXECUTE | IMAGE_SCN_MEM_READ;
 }

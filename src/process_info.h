@@ -5,7 +5,7 @@
 
 typedef struct {
     uint16_t len;
-    uint16_t maxLen;
+    uint16_t max_len;
     uint16_t *buffer;
 } UnicodeStr;
 
@@ -15,26 +15,26 @@ typedef struct _ListEntry {
 } ListEntry;
 
 typedef struct {
-    ListEntry moduleList;
+    ListEntry module_list;
     void *res1[2];
-    void *dllBase;
-    void *entryPoint;
+    void *dll_base;
+    void *entry_point;
     void *res3;
-    UnicodeStr dllName;
+    UnicodeStr dll_name;
 } LdrEntry;
 
 typedef struct {
     uint8_t res1[8];
     void *res2[3];
-    ListEntry moduleList;
+    ListEntry module_list;
 } PEBLdrData;
 
 typedef struct {
     uint8_t res1[2];
-    uint8_t isDebugged;
+    uint8_t is_debugged;
     uint8_t res2[1];
     void *res3;
-    void *imageBase;
+    void *image_base;
     PEBLdrData *ldr;
     // excluding: some bytes of unneeded stuff
 } PEB;

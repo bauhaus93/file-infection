@@ -17,7 +17,7 @@ TEB *get_teb(void) {
 
 PEB *get_peb(void) { return get_teb()->peb; }
 
-void *get_image_base(void) { return get_peb()->imageBase; }
+void *get_image_base(void) { return get_peb()->image_base; }
 
 void *get_kernel32_base(void) {
     char kernel32_path[50];
@@ -27,20 +27,20 @@ void *get_kernel32_base(void) {
     }
 
     PEBLdrData *ldr = get_peb()->ldr;
-    for (LdrEntry *entry = (LdrEntry *)ldr->moduleList.flink;
-         entry != (LdrEntry *)&ldr->moduleList;
-         entry = (LdrEntry *)entry->moduleList.flink) {
-        UnicodeStr *uni = &entry->dllName;
-        if (uni->maxLen / 2 == str_len) {
+    for (LdrEntry *entry = (LdrEntry *)ldr->module_list.flink;
+         entry != (LdrEntry *)&ldr->module_list;
+         entry = (LdrEntry *)entry->module_list.flink) {
+        UnicodeStr *uni = &entry->dll_name;
+        if (uni->max_len / 2 == str_len) {
             uint8_t same = 1;
-            for (uint16_t i = 0; i < uni->maxLen / 2; i++) {
+            for (uint16_t i = 0; i < uni->max_len / 2; i++) {
                 if ((char)uni->buffer[i] != kernel32_path[i]) {
                     same = 0;
                     break;
                 }
             }
             if (same) {
-                return entry->dllBase;
+                return entry->dll_base;
             }
         }
     }

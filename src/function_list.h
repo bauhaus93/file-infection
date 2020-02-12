@@ -1,5 +1,5 @@
-#ifndef FUNCTIONS_H
-#define FUNCTIONS_H
+#ifndef FUNCTION_LIST_H
+#define FUNCTION_LIST_H
 
 #include <windows.h>
 #include <stdint.h>
@@ -31,31 +31,31 @@ typedef DWORD(WINAPI *fpGetLogicalDrives)(void);
 typedef VOID(WINAPI *fpSleep)(DWORD);
 
 typedef struct {
-    fpExitProcess exitProcess;
-    fpGetTickCount getTickCount;
-    fpGetProcessHeap getProcessHeap;
-    fpHeapAlloc heapAlloc;
-    fpHeapFree heapFree;
-    fpFindFirstFileA findFirstFileA;
-    fpFindNextFileA findNextFileA;
-    fpFindClose findClose;
-    fpCreateFileA createFileA;
-    fpGetFileSize getFileSize;
-    fpCreateFileMappingA createFileMappingA;
-    fpMapViewOfFile mapViewOfFile;
+    fpExitProcess exit_process;
+    fpGetTickCount get_tick_count;
+    fpGetProcessHeap get_process_heap;
+    fpHeapAlloc heap_alloc;
+    fpHeapFree heap_free;
+    fpFindFirstFileA find_first_file_a;
+    fpFindNextFileA find_next_file_a;
+    fpFindClose find_close;
+    fpCreateFileA create_file_a;
+    fpGetFileSize get_file_size;
+    fpCreateFileMappingA create_file_mapping_a;
+    fpMapViewOfFile map_view_of_file;
     fpFlushViewOfFile flushViewOfFile;
-    fpUnmapViewOfFile unmapViewOfFile;
-    fpSetFilePointer setFilePointer;
-    fpSetEndOfFile setEndOfFile;
-    fpCloseHandle closeHandle;
-    fpCreateThread createThread;
-    fpGetLogicalDrives getLogicalDrives;
+    fpUnmapViewOfFile unmap_view_of_file;
+    fpSetFilePointer set_file_pointer;
+    fpSetEndOfFile set_end_of_file;
+    fpCloseHandle close_handle;
+    fpCreateThread create_thread;
+    fpGetLogicalDrives get_logical_drives;
     fpSleep sleep;
-} functions_t;
+} function_list_t;
 
-int fill_functions(IMAGE_EXPORT_DIRECTORY *ed, void *base,
-                   functions_t *functions);
+int fill_function_list(IMAGE_EXPORT_DIRECTORY *ed, void *base,
+                   function_list_t *function_list);
 void *get_function_by_checksum(IMAGE_EXPORT_DIRECTORY *ed, void *base,
                                uint32_t cs);
 
-#endif
+#endif // FUNCTION_LIST_H

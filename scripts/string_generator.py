@@ -76,7 +76,7 @@ def generate_header_code(filename, word_map):
 def generate_source_code(header_name, word_map):
     alphabet_map = generate_alphabet_map(word_map)
     logging.getLogger().info(f"Alphabet size: {len(alphabet_map)}")
-    code = f"#include \"{header_name}\"\n#include \"functions.h\"\n#include \"utility.h\"\n\n"
+    code = f"#include \"{header_name}\"\n\n"
     code += generate_function_get_word_length(word_map)
     code += "\n\n"
     code += generate_function_generate_word(alphabet_map)

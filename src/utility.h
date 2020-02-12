@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <windows.h>
 
-#include "functions.h"
+#include "function_list.h"
 
 #define ENABLE_PRINT
 
@@ -28,7 +28,7 @@ int32_t get_delta_offset(void);
 
 void memzero(void *start, uint32_t size);
 void memcp(void *src, void *dest, uint32_t size);
-void *memalloc(size_t size, functions_t *funcs);
-void memfree(void *mem, functions_t *funcs);
+void *memalloc(size_t size, function_list_t *function_list);
+void memfree(void *mem, function_list_t *function_list);
 
 #endif // UTILITY_H

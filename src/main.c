@@ -11,7 +11,7 @@
 #error "Currently only support Win32"
 #endif
 
-// main functon is not copied iduring infection, so can use any external functions here
+// main functon is not copied iduring infection, so can use any external function_list here
 int main(int argc, char **argv) {
     assert(IS_32_BIT); // currently only 32 bit working, yet need to check for
                        // 64 bit compatibility/differences

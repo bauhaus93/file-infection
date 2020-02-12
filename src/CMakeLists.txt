@@ -7,7 +7,7 @@ add_sources(
 	data.c
 	pe.c
 	oep.c
-	functions.c
+	function_list.c
 	checksum.c
 	process_info.c
 	code_end.c

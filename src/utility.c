@@ -34,19 +34,19 @@ void memcp(void *src, void *dest, uint32_t size) {
     }
 }
 
-void *memalloc(size_t size, functions_t *funcs) {
-    HANDLE hHeap = funcs->getProcessHeap();
-    if (hHeap == 0) {
+void *memalloc(size_t size, function_list_t *function_list) {
+    HANDLE h_heap = function_list->get_process_heap();
+    if (h_heap == 0) {
         return NULL;
     }
-    return (void *)funcs->heapAlloc(hHeap, HEAP_ZERO_MEMORY, size);
+    return (void *)function_list->heap_alloc(h_heap, HEAP_ZERO_MEMORY, size);
 }
 
-void memfree(void *mem, functions_t *funcs) {
+void memfree(void *mem, function_list_t *function_list) {
     if (mem != NULL) {
-        HANDLE hHeap = funcs->getProcessHeap();
-        if (hHeap != 0) {
-            funcs->heapFree(hHeap, 0, mem);
+        HANDLE h_heap = function_list->get_process_heap();
+        if (h_heap != 0) {
+            function_list->heap_free(h_heap, 0, mem);
         }
     }
 }
