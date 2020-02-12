@@ -23,6 +23,7 @@ int init_data(data_t *data, void *code_begin_addr, void *code_end_addr, void *en
         PRINT_DEBUG("invalid kernel32_base");
         return 2;
     }
+    PRINT_DEBUG("kernel32_base: 0x%p", data->kernel32_base);
 
     IMAGE_NT_HEADERS *nt_header = get_nt_header(data->kernel32_base);
     IMAGE_EXPORT_DIRECTORY *export_dir =

