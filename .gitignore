@@ -1,6 +1,7 @@
 build/
 release/
 debug/
+shared/
 mxe/
 vms/
 __pycache__/
