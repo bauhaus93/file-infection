@@ -1,5 +1,6 @@
 #include "pe.h"
 #include "process_info.h"
+#include "string_generator.h"
 #include "utility.h"
 
 uint8_t is_pe(void *base_addr) {
@@ -28,9 +29,9 @@ IMAGE_EXPORT_DIRECTORY *get_export_directory(void *base,
 IMAGE_SECTION_HEADER *get_section_header(IMAGE_NT_HEADERS *nt_headers,
                                          uint16_t index) {
     IMAGE_SECTION_HEADER *section_header =
-        (IMAGE_SECTION_HEADER *)((uint8_t *)nt_headers +
-                                 sizeof(
-                                     IMAGE_NT_HEADERS)); // was nt_headers + 1???
+        (IMAGE_SECTION_HEADER
+             *)((uint8_t *)nt_headers +
+                sizeof(IMAGE_NT_HEADERS)); // was nt_headers + 1???
     return section_header + index;
 }
 
@@ -52,12 +53,9 @@ void create_section_header(IMAGE_SECTION_HEADER *section_header,
                            IMAGE_NT_HEADERS *nt_headers, uint32_t code_size) {
     nt_headers->FileHeader.NumberOfSections++;
 
-    section_header->Name[0] = '.';
-    section_header->Name[1] = 'v';
-    section_header->Name[2] = 'i';
-    section_header->Name[3] = 'r';
-    section_header->Name[4] = 'u';
-    section_header->Name[5] = 's';
+    if (get_string(STRING_SECTION_NAME, (char *)section_header->Name, IMAGE_SIZEOF_SHORT_NAME) == 0) {
+        PRINT_DEBUG("could not get string for STRING_SECTION_NAME");
+    }
 
     section_header->Misc.VirtualSize = code_size;
     section_header->VirtualAddress =

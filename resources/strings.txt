@@ -1,2 +1,3 @@
 KERNEL32_PATH c:\windows\system32\kernel32.dll
 EXE_SEARCH_PATTERN ./*.exe
+SECTION_NAME .hello

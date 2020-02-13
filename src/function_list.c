@@ -1,22 +1,26 @@
-#include "function_list.h"
 #include "checksum.h"
 #include "checksum_list.h"
+#include "function_list.h"
+#include <stdio.h>
 
 static void memzero(void *start, uint32_t size);
 
 int fill_function_list(IMAGE_EXPORT_DIRECTORY *ed, void *base,
-                   function_list_t *function_list) {
+                       function_list_t *function_list) {
     uint32_t *name_ptr = (uint32_t *)((uint8_t *)base + ed->AddressOfNames);
     uint32_t *addr_ptr = (uint32_t *)((uint8_t *)base + ed->AddressOfFunctions);
     uint16_t *name_ordinals_ptr =
         (uint16_t *)((uint8_t *)base + ed->AddressOfNameOrdinals);
     int function_counter = 0;
 
+    // name_ordinals_ptr += ed->Base; // TODO: check if really needed +ed->Base
+
     memzero((void *)function_list, sizeof(function_list_t));
 
     for (uint32_t i = 0; i < ed->NumberOfNames; i++) {
         void *function_addr =
-            (void *)((void **)base + *(addr_ptr + *name_ordinals_ptr));
+            (void *)((void **)((uint8_t*)base + *(addr_ptr + *name_ordinals_ptr)));
+
         switch (checksum((const char *)base + *name_ptr)) {
         case CS_EXITPROCESS:
             function_list->exit_process = (fpExitProcess)function_addr;
@@ -49,7 +53,8 @@ int fill_function_list(IMAGE_EXPORT_DIRECTORY *ed, void *base,
             function_list->get_file_size = (fpGetFileSize)function_addr;
             break;
         case CS_CREATEFILEMAPPINGA:
-            function_list->create_file_mapping_a = (fpCreateFileMappingA)function_addr;
+            function_list->create_file_mapping_a =
+                (fpCreateFileMappingA)function_addr;
             break;
         case CS_MAPVIEWOFFILE:
             function_list->map_view_of_file = (fpMapViewOfFile)function_addr;
@@ -58,7 +63,8 @@ int fill_function_list(IMAGE_EXPORT_DIRECTORY *ed, void *base,
             function_list->flushViewOfFile = (fpFlushViewOfFile)function_addr;
             break;
         case CS_UNMAPVIEWOFFILE:
-            function_list->unmap_view_of_file = (fpUnmapViewOfFile)function_addr;
+            function_list->unmap_view_of_file =
+                (fpUnmapViewOfFile)function_addr;
             break;
         case CS_SETFILEPOINTER:
             function_list->set_file_pointer = (fpSetFilePointer)function_addr;
@@ -73,7 +79,8 @@ int fill_function_list(IMAGE_EXPORT_DIRECTORY *ed, void *base,
             function_list->create_thread = (fpCreateThread)function_addr;
             break;
         case CS_GETLOGICALDRIVES:
-            function_list->get_logical_drives = (fpGetLogicalDrives)function_addr;
+            function_list->get_logical_drives =
+                (fpGetLogicalDrives)function_addr;
             break;
         case CS_SLEEP:
             function_list->sleep = (fpSleep)function_addr;
