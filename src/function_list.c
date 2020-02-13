@@ -18,8 +18,8 @@ int fill_function_list(IMAGE_EXPORT_DIRECTORY *ed, void *base,
     memzero((void *)function_list, sizeof(function_list_t));
 
     for (uint32_t i = 0; i < ed->NumberOfNames; i++) {
-        void *function_addr =
-            (void *)((void **)((uint8_t*)base + *(addr_ptr + *name_ordinals_ptr)));
+        void *function_addr = (void *)((
+            void **)((uint8_t *)base + *(addr_ptr + *name_ordinals_ptr)));
 
         switch (checksum((const char *)base + *name_ptr)) {
         case CS_EXITPROCESS:

