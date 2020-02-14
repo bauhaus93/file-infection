@@ -34,23 +34,6 @@ void memcp(void *src, void *dest, uint32_t size) {
     }
 }
 
-void *memalloc(size_t size, function_list_t *function_list) {
-    HANDLE h_heap = function_list->get_process_heap();
-    if (h_heap == 0) {
-        return NULL;
-    }
-    return (void *)function_list->heap_alloc(h_heap, HEAP_ZERO_MEMORY, size);
-}
-
-void memfree(void *mem, function_list_t *function_list) {
-    if (mem != NULL) {
-        HANDLE h_heap = function_list->get_process_heap();
-        if (h_heap != 0) {
-            function_list->heap_free(h_heap, 0, mem);
-        }
-    }
-}
-
 uint8_t same_case_insensitive(char a, char b) {
     if (a >= 'A' && a <= 'Z') {
         a += 0x20;
@@ -59,4 +42,16 @@ uint8_t same_case_insensitive(char a, char b) {
         b += 0x20;
     }
     return a == b;
+}
+
+void *find_value_32(uint32_t value, void *start, void *end) {
+    uint32_t *ptr = (uint32_t *)start;
+    while (ptr < (uint32_t *)end) {
+        if (*ptr == value) {
+            return (void *)ptr;
+        } else {
+            ptr = (uint32_t *)((uint8_t *)ptr + 1);
+        }
+    }
+    return NULL;
 }
