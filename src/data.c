@@ -30,6 +30,12 @@ void free_data(void){
         }
     }
 }
+void clear_data_pointer(void * target_code_begin) {
+    int32_t start_offset = BYTE_DIFF(get_data_pointer, code_begin);
+    int32_t end_offset = BYTE_DIFF(set_data_pointer, code_begin);
+    uint32_t * ptr = find_value_32((uint32_t)get_data_pointer(), BYTE_OFFSET(target_code_begin, start_offset),
+        BYTE_OFFSET(target_code_begin, end_offset));
+}
 
 #pragma GCC push_options
 #pragma GCC optimize("O0")
@@ -37,7 +43,9 @@ static data_t *__attribute__((noinline)) get_data_pointer(void) {
     return (data_t *)-1;
 }
 #pragma GCC pop_options
+// no functions between get_data_pointer and set_data_pointer!
 
+// no functions between get_data_pointer and set_data_pointer!
 static void set_data_pointer(void) {
     data_t data_local;
     memzero(&data_local, sizeof(data_t));
