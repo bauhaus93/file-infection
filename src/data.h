@@ -14,5 +14,7 @@ typedef struct {
 
 data_t * get_data(void);
 void free_data(void);
+uint8_t data_initialized(void);
+void reset_data_pointer(void *target_code_begin);
 
 #endif

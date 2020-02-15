@@ -6,9 +6,10 @@
 
 #include "code_begin.h"
 #include "code_end.h"
+#include "function.h"
 
-//#define ENABLE_PRINT
-#undef ENABLE_PRINT
+#define ENABLE_PRINT
+// #undef ENABLE_PRINT
 
 #ifdef ENABLE_PRINT
 #include <stdio.h>
@@ -35,11 +36,18 @@
 #define BYTE_DIFF(hi, lo) ((int32_t)(((uint8_t *)(hi)) - ((uint8_t *)(lo))))
 
 #define CODE_SIZE BYTE_DIFF(code_end, code_begin)
+#define CODE_BEGIN BYTE_OFFSET(code_begin, get_data()->delta_offset)
+#define CODE_END BYTE_OFFSET(code_end, get_data()->delta_offset)
 
 int32_t get_delta_offset(void);
 void memzero(void *start, uint32_t size);
 void memcp(void *src, void *dest, uint32_t size);
 uint8_t same_case_insensitive(char a, char b);
-void *find_value_32(uint32_t value, void *start, void *end);
+
+uint8_t write_value32(uint32_t value, void *memory);
+void *find_value32(uint32_t value, void *start, void *end);
+uint8_t find_replace_value32(uint32_t search_value, uint32_t new_value,
+                             void *symbol_start_addr, void *symbol_end_addr,
+                             void *target_code_begin);
 
 #endif // UTILITY_H
