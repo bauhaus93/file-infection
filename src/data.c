@@ -28,8 +28,8 @@ uint8_t data_initialized(void) { return get_data_pointer() != DATA_MARKER; }
 void free_data(void) {
     if (get_data_pointer() != DATA_MARKER) {
         data_t *ptr = get_data_pointer();
-        if (ptr->function_list.virtual_free(
-                (LPVOID)get_data_pointer(), sizeof(data_t), MEM_DECOMMIT)) {
+        if (ptr->function_list.virtual_free((LPVOID)get_data_pointer(),
+                                            sizeof(data_t), MEM_DECOMMIT)) {
             PRINT_DEBUG("freed data in data pointer");
         } else {
             PRINT_DEBUG("could not free data in data pointer");
@@ -75,8 +75,6 @@ static void load_data_pointer(void) {
         (uint32_t)DATA_MARKER,
         BYTE_OFFSET(get_data_pointer, data_ptr->delta_offset),
         BYTE_OFFSET(load_data_pointer, data_ptr->delta_offset));
-
-    PRINT_DEBUG("data marker @ 0x%p, data_ptr @ 0x%p", data_marker, data_ptr);
 
     if (data_marker != NULL) {
         DWORD old_protect;

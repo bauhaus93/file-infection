@@ -58,22 +58,12 @@ void *find_value32(uint32_t value, void *start, void *end) {
     return NULL;
 }
 
-// global data must already be initialized and pointer to it set
 uint8_t write_value32(uint32_t value, void *memory) {
-    DWORD old_protect;
-    if (!VIRTUAL_PROTECT((LPVOID)memory, (SIZE_T)sizeof(uint32_t),
-                         PAGE_EXECUTE_READWRITE, &old_protect)) {
-        PRINT_DEBUG("could not change acces rights");
-        return 1;
-    }
     *(uint32_t *)memory = value;
-    VIRTUAL_PROTECT((LPVOID)memory,
-                    (SIZE_T)sizeof(uint32_t), old_protect,
-                    &old_protect);
     return 0;
 }
 
-// global data must already be initialized and pointer to it set
+
 uint8_t find_replace_value32(uint32_t search_value, uint32_t new_value,
                              void *symbol_start_addr, void *symbol_end_addr,
                              void *target_code_begin) {

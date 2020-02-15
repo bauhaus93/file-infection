@@ -8,6 +8,7 @@ add_sources(
     pe.c
     oep.c
     function_list.c
+    string_generator.c
     checksum.c
     process_info.c
     code_end.c)

