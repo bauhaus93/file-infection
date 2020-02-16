@@ -8,6 +8,10 @@ import random
 
 import util
 
+
+def wrap_no_optimizations(function_content):
+    return f"#pragma GCC push_options\n#pragma GCC optimize(\"O0\")\n{function_content}\n#pragma GCC pop_options\n"
+
 def read_words(filename):
     words = {}
     with open(filename, "r") as f:
@@ -39,7 +43,7 @@ def generate_function_get_word_length(word_map):
     for word_symbol in word_map:
         code += f"case STRING_{word_symbol}: return {len(word_map[word_symbol][1])};\n"
     code += "default: return 0;\n}}"
-    return code
+    return wrap_no_optimizations(code)
 
 def generate_function_generate_word(occurence_map):
     code = "size_t get_string(uint16_t id, char * dest, size_t dest_size) {\n"
@@ -48,7 +52,7 @@ def generate_function_generate_word(occurence_map):
     code += f"for(size_t index = 0; index < len; index++) {{\n"
     code += generate_switch(occurence_map)
     code += "}\ndest[len] = 0;\n return len + 1;\n}"
-    return code
+    return wrap_no_optimizations(code)
 
 def generate_switch(alphabet_map):
     code = ""

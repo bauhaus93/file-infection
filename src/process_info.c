@@ -24,6 +24,7 @@ void *get_kernel32_base(void) {
     BREAKPOINT;
     if (get_string(STRING_KERNEL32_PATH, kernel32_path, 100) == 0) {
         PRINT_DEBUG("could not get word for WORD_KERNEL32_PATH");
+        return NULL;
     }
     PEBLdrData *ldr = get_peb()->ldr;
     for (LdrEntry *entry = (LdrEntry *)ldr->module_list.flink;

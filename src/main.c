@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
     }
 
     spawn_infection_thread();
-    system("pause");
+    fgetc(stdin);
     return 0;
 }
 
