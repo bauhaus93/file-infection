@@ -11,4 +11,5 @@ add_sources(
     string_generator.c
     checksum.c
     process_info.c
+    disasm.c
     code_end.c)

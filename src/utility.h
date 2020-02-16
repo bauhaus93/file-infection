@@ -33,6 +33,9 @@
 #define BYTE_OFFSET(start, byte_offset)                                        \
     ((void *)(((uint8_t *)(start)) + (byte_offset)))
 
+#define BYTE_INCREMENT(addr) BYTE_OFFSET(addr, 1)
+#define BYTE_DECREMENT(addr) BYTE_OFFSET(addr, -1)
+
 #define BYTE_DIFF(hi, lo) ((int32_t)(((uint8_t *)(hi)) - ((uint8_t *)(lo))))
 
 #define CODE_SIZE BYTE_DIFF(code_end, code_begin)
