@@ -21,7 +21,6 @@ void *get_image_base(void) { return get_peb()->image_base; }
 void *get_kernel32_base(void) {
     char kernel32_path[100];
     size_t str_len = get_string_length(STRING_KERNEL32_PATH) + 1;
-    BREAKPOINT;
     if (get_string(STRING_KERNEL32_PATH, kernel32_path, 100) == 0) {
         PRINT_DEBUG("could not get word for WORD_KERNEL32_PATH");
         return NULL;
