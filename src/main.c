@@ -24,7 +24,7 @@
 static uint8_t check_functions(void);
 
 // main function is not copied during infection, so can use any external
-// function_list here
+// function here
 int main(int argc, char **argv) {
     if (!IS_32_BIT) {
         PRINT_DEBUG("Not 32 bit, aborting");
