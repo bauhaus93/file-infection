@@ -26,7 +26,7 @@ endif()
 set(EXEC_NAME "infect")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-add_executable(${EXEC_NAME} "")
+add_executable(${EXEC_NAME} "src/main.c")
 
 set_property(TARGET ${EXEC_NAME} PROPERTY C_STANDARD 99)
 if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
@@ -55,10 +55,8 @@ add_custom_command(
         ${CMAKE_SOURCE_DIR}/src/checksum_list.h
     MAIN_DEPENDENCY ${CMAKE_SOURCE_DIR}/resources/checksums.txt
     DEPENDS ${CMAKE_SOURCE_DIR}/scripts/generate_checksums.py)
-target_include_directories(${EXEC_NAME}
-                           PRIVATE ${CMAKE_BINARY_DIR}/generated/include)
-target_sources(${EXEC_NAME}
-               PRIVATE ${CMAKE_BINARY_DIR}/generated/include/checksum_list.h)
+
+target_sources(${EXEC_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/src/checksum_list.h)
 
 add_custom_command(
     OUTPUT ${CMAKE_SOURCE_DIR}/src/string_generator.c
@@ -72,3 +70,9 @@ add_custom_command(
         ${CMAKE_SOURCE_DIR}/src/string_generator.h
     MAIN_DEPENDENCY ${CMAKE_SOURCE_DIR}/resources/strings.txt
     DEPENDS ${CMAKE_SOURCE_DIR}/scripts/string_generator.py)
+
+target_sources(${EXEC_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/src/string_generator.h
+                                    ${CMAKE_SOURCE_DIR}/src/string_generator.c)
+
+include(CTest)
+add_subdirectory(tests)

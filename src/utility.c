@@ -1,28 +1,6 @@
 #include <windows.h>
 
-#include "code_begin.h"
-#include "code_end.h"
 #include "utility.h"
-
-int32_t get_delta_offset(void) {
-    int32_t offset;
-    if (IS_32_BIT) {
-        asm("call .base\n"
-            ".base:\n"
-            "pop %%edx\n"
-            "sub $.base, %%edx\n"
-            "mov %%edx, %0"
-            : "=r"(offset));
-    } else {
-        asm("call .base\n"
-            ".base:\n"
-            "pop %%rdx\n"
-            "sub $.base, %%rdx\n"
-            "mov %%edx, %0"
-            : "=r"(offset));
-    }
-    return offset;
-}
 
 void memzero(void *start, uint32_t size) {
     for (uint8_t *ptr = start; ptr < (uint8_t *)start + size; ptr++) {
@@ -63,10 +41,9 @@ uint8_t write_value32(uint32_t value, void *memory) {
     return 0;
 }
 
-
 uint8_t find_replace_value32(uint32_t search_value, uint32_t new_value,
                              void *symbol_start_addr, void *symbol_end_addr,
-                             void *target_code_begin) {
+                             void *code_begin, void *target_code_begin) {
     if (symbol_start_addr < (void *)code_begin ||
         symbol_end_addr < (void *)code_begin) {
         PRINT_DEBUG("start/end addr smaller than code_begin: code_begin = "

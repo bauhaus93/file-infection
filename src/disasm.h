@@ -18,6 +18,7 @@ typedef struct _Instruction {
 } Instruction;
 
 Instruction *parse_instruction(void *addr);
-Instruction *next_instruction(const Instruction *instr);
+Instruction *next_instruction(const Instruction *prev_instr);
+uint8_t get_instruction_size(const Instruction *instr);
 
 #endif // DISASM_H

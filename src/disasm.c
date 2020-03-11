@@ -1,4 +1,5 @@
 #include "disasm.h"
+#include "function_kernel32.h"
 #include "malloc.h"
 #include "utility.h"
 
@@ -8,6 +9,7 @@ typedef enum {
     OPERAND_TYPE_D,
     OPERAND_TYPE_Q,
     OPERAND_TYPE_DQ,
+    OPERAND_TYPE_QQ,
     OPERAND_TYPE_V,
     OPERAND_TYPE_Z,
     OPERAND_TYPE_P
@@ -16,27 +18,28 @@ typedef enum {
 static bool is_prefix(uint8_t value);
 static uint8_t get_prefix_count(void *instruction_begin);
 static uint8_t get_opcode_size(void *instruction_begin, uint8_t prefix_count);
-static uint8_t get_instruction_size(const Instruction *instr);
 static bool is_valid_opcode(void *instruction_begin, uint8_t prefix_count,
                             uint8_t opcode_size);
 static uint8_t get_modrm_mod(uint8_t mod_rm);
 static uint8_t get_modrm_rm(uint8_t mod_rm);
-static uint8_t get_modrm_reg(uint8_t mod_rm);
+// static uint8_t get_modrm_reg(uint8_t mod_rm);
 static uint8_t get_addressing_mode(void *instruction_begin,
                                    uint8_t prefix_count);
 static uint8_t get_operand_size(void *instruction_begin, uint8_t prefix_count);
 static uint8_t get_displacement_size(uint8_t mod_rm, uint8_t addressing_mode);
 static uint8_t get_immediate_size(void *instruction_begin, uint8_t prefix_count,
-                                  uint8_t operand_size);
-static uint8_t
-get_immediate_size_opcode_extension(void *instruction_begin,
-                                    uint8_t prefix_count, uint8_t opcode_size,
-                                    uint8_t operand_size uint8_t modrm);
+                                  uint8_t opcode_size, uint8_t operand_size);
+static uint8_t get_immediate_size_opcode_extension(void *instruction_begin,
+                                                   uint8_t prefix_count,
+                                                   uint8_t opcode_size,
+                                                   uint8_t operand_size,
+                                                   uint8_t modrm);
 static bool has_modrm(void *instruction_begin, uint8_t prefix_count,
                       uint8_t opcode_size);
 static bool has_sib_byte(uint8_t mod_rm);
 static bool opcode_in_range(uint8_t opcode, uint8_t low, uint8_t high);
-static get_size_by_operand_type(OperandType type, uint8_t operand_size);
+static uint8_t get_size_by_operand_type(OperandType type, uint8_t operand_size);
+static bool has_opcode_extension_1byte(uint8_t opcode);
 
 Instruction *parse_instruction(void *addr) {
     Instruction *instr = MALLOC(sizeof(Instruction));
@@ -53,32 +56,50 @@ Instruction *parse_instruction(void *addr) {
             instr->has_modrm =
                 has_modrm(addr, instr->prefix_count, instr->opcode_size);
             if (instr->has_modrm) {
-                uint8_t mod_rm = *(uint8_t *)BYTE_OFFSET(
+                uint8_t modrm = *(uint8_t *)BYTE_OFFSET(
                     addr, instr->prefix_count + instr->opcode_size);
                 if (instr->addressing_mode == 32) {
-                    instr->has_sib = has_sib_byte(mod_rm);
+                    instr->has_sib = has_sib_byte(modrm);
                 } else {
                     instr->has_sib = false;
                 }
                 instr->displacement_size =
-                    get_displacement_size_modrm(mod_rm, instr->addressing_mode);
+                    get_displacement_size(modrm, instr->addressing_mode);
+
+                if (has_opcode_extension_1byte(
+                        *(uint8_t *)BYTE_OFFSET(addr, instr->prefix_count))) {
+                    instr->immediate_size = get_immediate_size_opcode_extension(
+                        addr, instr->prefix_count, instr->opcode_size,
+                        instr->operand_size, modrm);
+                }
             }
+            if (instr->immediate_size == 0) {
+                instr->immediate_size =
+                    get_immediate_size(addr, instr->prefix_count,
+                                       instr->opcode_size, instr->operand_size);
+            }
+        } else {
+            FREE(instr);
+            return NULL;
         }
-        instr->immediate_size =
-            get_immediate_size(addr, instr->prefix_count, instr->operand_size);
     }
     return instr;
 }
 
-Instruction *next_instruction(const Instruction *instr) {
-    void *next_addr = BYTE_OFFSET(instr->addr, get_instruction_size(instr));
+Instruction *next_instruction(const Instruction *prev_instr) {
+    void *next_addr =
+        BYTE_OFFSET(prev_instr->addr, get_instruction_size(prev_instr));
     return parse_instruction(next_addr);
 }
 
-static uint8_t get_instruction_size(const Instruction *instr) {
-    return instr->prefix_count + instr->opcode_size +
-           (instr->has_modrm ? 1 : 0) + (instr->has_sib ? 1 : 0) +
-           instr->displacement_size + instr->immediate_size;
+uint8_t get_instruction_size(const Instruction *instr) {
+    if (instr == NULL) {
+        return 0;
+    } else {
+        return instr->prefix_count + instr->opcode_size +
+               (instr->has_modrm ? 1 : 0) + (instr->has_sib ? 1 : 0) +
+               instr->displacement_size + instr->immediate_size;
+    }
 }
 
 // TODO: check opcodes
@@ -137,8 +158,8 @@ static uint8_t get_operand_size(void *instruction_begin, uint8_t prefix_count) {
 static bool opcode_in_range(uint8_t opcode, uint8_t low, uint8_t high) {
     uint8_t row = opcode >> 4;
     uint8_t col = opcode & 0xF;
-    return (row >= low >> 4) && row <= high >> 4 && col >= low & 0xF &&
-           col <= high & 0xF;
+    return (row >= low >> 4) && row <= high >> 4 && col >= (low & 0xF) &&
+           col <= (high & 0xF);
 }
 
 static bool has_immediate_Jb(uint8_t opcode) {
@@ -169,7 +190,7 @@ static bool has_immediate_Iv(uint8_t opcode) {
 static bool has_immediate_Iw(uint8_t opcode) { return opcode == 0xC2; }
 
 static bool has_immediate_Iz(uint8_t opcode) {
-    return false // TODO
+    return false; // TODO
 }
 
 static bool has_immediate_Ob(uint8_t opcode) {
@@ -187,7 +208,8 @@ static bool has_opcode_extension_1byte(uint8_t opcode) {
            opcode == 0xF7 || opcode == 0xFE || opcode == 0xFF;
 }
 
-static get_size_by_operand_type(OperandType type, uint8_t operand_size) {
+static uint8_t get_size_by_operand_type(OperandType type,
+                                        uint8_t operand_size) {
     if (type == OPERAND_TYPE_B) {
         return 1;
     } else if (type == OPERAND_TYPE_W) {
@@ -215,11 +237,12 @@ static get_size_by_operand_type(OperandType type, uint8_t operand_size) {
             return 2 + 4;
         }
     }
+    PRINT_DEBUG("Got unhandeled operand type: %d", (int)type);
+    return 0;
 }
 
 static uint8_t get_immediate_size(void *instruction_begin, uint8_t prefix_count,
-                                  uint8_t opcode_size, uint8_t operand_size,
-                                  uint8_t modrm) {
+                                  uint8_t opcode_size, uint8_t operand_size) {
     uint8_t *opcode_ptr =
         (uint8_t *)BYTE_OFFSET(instruction_begin, prefix_count);
     if (opcode_size == 1) {
@@ -235,12 +258,8 @@ static uint8_t get_immediate_size(void *instruction_begin, uint8_t prefix_count,
             return get_size_by_operand_type(OPERAND_TYPE_V, operand_size);
         } else if (has_immediate_Ap(opcode)) {
             return get_size_by_operand_type(OPERAND_TYPE_P, operand_size);
-        } else if (has_opcode_extension_1byte(
-                       opcode)) { // Assumes no immediate declared already for
-                                  // whole group group (bc would have already
-                                  // catched an if-branch
-            return get_immediate_size_opcode_extension(opcode, operand_size,
-                                                       modrm);
+        } else {
+            return 0;
         }
     } else if (opcode_size == 2) {
         // TODO: opcode_size 2
@@ -250,9 +269,11 @@ static uint8_t get_immediate_size(void *instruction_begin, uint8_t prefix_count,
         PRINT_DEBUG("invalid opcode size: expected 1/2/3, got %d", opcode_size);
         return 0;
     }
+    return 0;
 }
-
-static uint8_t get_immediate_size_opcode_extension(uint8_t opcode,
+static uint8_t get_immediate_size_opcode_extension(void *instruction_begin,
+                                                   uint8_t prefix_count,
+                                                   uint8_t opcode_size,
                                                    uint8_t operand_size,
                                                    uint8_t modrm) {
     uint8_t *opcode_ptr =
@@ -263,17 +284,15 @@ static uint8_t get_immediate_size_opcode_extension(uint8_t opcode,
         return get_size_by_operand_type(OPERAND_TYPE_B, operand_size);
     } else if (opcode == 0xF7 && modrm == 0xC0) { // Iz
         return get_size_by_operand_type(OPERAND_TYPE_Z, operand_size);
+    } else {
+        return 0;
     }
-}
-else {
-    return 0;
-}
 }
 
 static uint8_t get_displacement_size(uint8_t mod_rm, uint8_t addressing_mode) {
 
     uint8_t mod = get_modrm_mod(mod_rm);
-    if (addressing_form == 16) {
+    if (addressing_mode == 16) {
         if (mod == 0x0 && get_modrm_rm(mod_rm) == 0x6) {
             return 2;
         } else if (mod == 0x1) {
@@ -281,7 +300,7 @@ static uint8_t get_displacement_size(uint8_t mod_rm, uint8_t addressing_mode) {
         } else if (mod == 0x2) {
             return 2;
         }
-    } else if (addressing_form == 32) {
+    } else if (addressing_mode == 32) {
         if (mod == 0x0 && get_modrm_rm(mod_rm) == 0x5) {
             return 4;
         } else if (mod == 0x1) {
@@ -290,10 +309,11 @@ static uint8_t get_displacement_size(uint8_t mod_rm, uint8_t addressing_mode) {
             return 4;
         }
     } else {
-        PRINT_DEBUG("invalid addresing form: must be 16 or 32, but found %d",
-                    addressing_form);
+        PRINT_DEBUG("invalid addresing mode: must be 16 or 32, but found %d",
+                    addressing_mode);
         return 0;
     }
+    return 0;
 }
 
 // assumes addressing mode 32bit
@@ -307,7 +327,7 @@ static uint8_t get_modrm_mod(uint8_t mod_rm) { return mod_rm >> 6; }
 
 static uint8_t get_modrm_rm(uint8_t mod_rm) { return mod_rm & 0x3; }
 
-static uint8_t get_modrm_reg(uint8_t mod_rm) { return (mod_rm >> 3) & 0x3; }
+// static uint8_t get_modrm_reg(uint8_t mod_rm) { return (mod_rm >> 3) & 0x3; }
 
 // NOT 0, C, D, E, G, M, N, P, Q, R, S, U, V, W
 static bool has_modrm(void *instruction_begin, uint8_t prefix_count,

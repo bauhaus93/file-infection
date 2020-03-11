@@ -7,4 +7,5 @@ mxe/
 vms/
 executables/
 __pycache__/
+*.xcf
 
