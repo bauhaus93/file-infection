@@ -309,7 +309,7 @@ static uint8_t get_displacement_size(uint8_t mod_rm, uint8_t addressing_mode) {
             return 4;
         }
     } else {
-        PRINT_DEBUG("invalid addresing mode: must be 16 or 32, but found %d",
+        PRINT_DEBUG("invalid addressing mode: must be 16 or 32, but found %d",
                     addressing_mode);
         return 0;
     }
@@ -337,18 +337,15 @@ static bool has_modrm(void *instruction_begin, uint8_t prefix_count,
         uint8_t opcode =
             *(uint8_t *)BYTE_OFFSET(instruction_begin, prefix_count);
         return opcode_in_range(opcode, 0x00, 0x33) ||
-               opcode_in_range(opcode, 0x06, 0x17) ||
                opcode_in_range(opcode, 0x08, 0x3B) ||
-               opcode_in_range(opcode, 0x0E, 0x1E) ||
                opcode_in_range(opcode, 0x62, 0x63) ||
-               opcode_in_range(opcode, 0x6B, 0x6F) ||
                opcode_in_range(opcode, 0x80, 0x8F) ||
                opcode_in_range(opcode, 0xC0, 0xD1) ||
                opcode_in_range(opcode, 0xC4, 0xC7) ||
                opcode_in_range(opcode, 0xD2, 0xD3) ||
                opcode_in_range(opcode, 0xF6, 0xF7) ||
-               opcode_in_range(opcode, 0xFE, 0xFF) || opcode == 0x1F ||
-               opcode == 0x69;
+               opcode_in_range(opcode, 0xFE, 0xFF) || opcode == 0x69 ||
+               opcode == 0x6B;
     } else if (opcode_size == 2) {
         uint8_t opcode =
             *(uint8_t *)BYTE_OFFSET(instruction_begin, prefix_count + 1);

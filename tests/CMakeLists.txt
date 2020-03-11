@@ -4,8 +4,8 @@ if(BUILD_TESTING)
     macro(create_test)
         string(REPLACE ".s" ".bin" OUTPUT_FILENAME ${ARGV2})
         add_custom_target(
-            COMMAND
-            nasm -o ${OUTPUT_FILENAME} ${CMAKE_CURRENT_SOURCE_DIR}/${ARGV2}
+            ${ARGV0} ALL
+            COMMAND nasm -o ${OUTPUT_FILENAME} ${CMAKE_CURRENT_SOURCE_DIR}/${ARGV2}
             SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/${ARGV2})
 
         add_test(NAME ${ARGV0} COMMAND ${EXEC_TEST_INSTR} ${ARGV1}
@@ -28,5 +28,6 @@ if(BUILD_TESTING)
         ${EXEC_TEST_INSTR} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
                                    ${CMAKE_SOURCE_DIR}/src)
 
-    create_test(test_instructions_1byte 1 "instruction_1byte.s")
+    create_test(test_instructions_opcode1 1 "instruction_op1.s")
+    create_test(test_instructions_opcode1_modrm 2 "instruction_op1_modrm.s")
 endif()

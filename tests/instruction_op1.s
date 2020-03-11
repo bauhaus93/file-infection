@@ -1,4 +1,11 @@
 [bits 32]
+push es
+pop es
+push ss
+pop ss
+push cs
+push ds
+pop ds
 daa
 das
 aaa
@@ -40,3 +47,7 @@ int3
 into
 iret
 xlat
+insb
+insd
+outsb
+outsd
