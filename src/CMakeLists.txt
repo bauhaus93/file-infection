@@ -5,7 +5,7 @@ add_sources(
     utility.c
     pe.c
     oep.c
-    function_kernel32.c
+    function.c
     string_generator.c
     checksum.c
     process_info.c

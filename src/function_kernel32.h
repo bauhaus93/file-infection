@@ -5,6 +5,8 @@
 #include <windows.h>
 
 #include "checksum_list.h"
+#include "function.h"
+#include "process_info.h"
 
 typedef void(WINAPI *fpExitProcess)(UINT);
 typedef DWORD(WINAPI *fpGetTickCount)(void);
@@ -32,11 +34,8 @@ typedef HANDLE(WINAPI *fpCreateThread)(LPSECURITY_ATTRIBUTES, SIZE_T,
 typedef DWORD(WINAPI *fpGetLogicalDrives)(void);
 typedef VOID(WINAPI *fpSleep)(DWORD);
 
-void *get_kernel32_function_pointer(uint32_t function_checksum);
-
 #define CALL_KERNEL32_FUNCTION(fp, cs, ...)                                    \
-    (((fp)(get_kernel32_function_pointer(cs)))(__VA_ARGS__))
-
+    (((fp)(get_function_pointer(get_kernel32_base(), cs)))(__VA_ARGS__))
 
 
 #define VIRTUAL_ALLOC(...)                                                      \

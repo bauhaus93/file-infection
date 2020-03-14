@@ -1,17 +1,9 @@
-#include <stdio.h>
+#include "function.h"
 
-#include "checksum.h"
-#include "function_kernel32.h"
 #include "pe.h"
-#include "process_info.h"
+#include "checksum.h"
 
-static void *get_function_pointer(void *base, uint32_t function_checksum);
-
-void *get_kernel32_function_pointer(uint32_t function_checksum) {
-    return get_function_pointer(get_kernel32_base(), function_checksum);
-}
-
-static void *get_function_pointer(void *base, uint32_t function_checksum) {
+void *get_function_pointer(void *base, uint32_t function_checksum) {
     if (base == NULL) {
         return NULL;
     }

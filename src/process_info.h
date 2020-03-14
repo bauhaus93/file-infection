@@ -48,6 +48,7 @@ typedef struct {
 TEB *get_teb(void);
 PEB *get_peb(void);
 void *get_image_base(void);
+void * get_module_base(uint16_t module_string_id);
 void *get_kernel32_base(void);
 
 #endif // PROCESS_INFO_H

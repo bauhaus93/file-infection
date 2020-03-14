@@ -18,11 +18,11 @@ PEB *get_peb(void) { return get_teb()->peb; }
 
 void *get_image_base(void) { return get_peb()->image_base; }
 
-void *get_kernel32_base(void) {
-    char kernel32_path[100];
-    size_t str_len = get_string_length(STRING_KERNEL32_PATH) + 1;
-    if (get_string(STRING_KERNEL32_PATH, kernel32_path, 100) == 0) {
-        PRINT_DEBUG("could not get word for WORD_KERNEL32_PATH");
+void *get_module_base(uint16_t module_string_id) {
+    char module_path[100];
+    size_t str_len = get_string_length(module_string_id) + 1;
+    if (get_string(module_string_id, module_path, 100) == 0) {
+        PRINT_DEBUG("could not get string for id = %04X ", module_string_id);
         return NULL;
     }
     PEBLdrData *ldr = get_peb()->ldr;
@@ -36,7 +36,7 @@ void *get_kernel32_base(void) {
             uint8_t same = 1;
             for (uint16_t i = 0; i < uni->max_len / 2; i++) {
                 if (!same_case_insensitive((char)uni->buffer[i],
-                                           kernel32_path[i])) {
+                                           module_path[i])) {
                     same = 0;
                     break;
                 }
@@ -48,3 +48,5 @@ void *get_kernel32_base(void) {
     }
     return NULL;
 }
+
+void *get_kernel32_base(void) { return get_module_base(STRING_KERNEL32_PATH); }

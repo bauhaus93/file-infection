@@ -54,7 +54,6 @@ static uint8_t check_functions(void) {
            IN_BOUNDARIES(get_string) && IN_BOUNDARIES(get_string_length) &&
            IN_BOUNDARIES(parse_instruction) &&
            IN_BOUNDARIES(next_instruction) && IN_BOUNDARIES(checksum) &&
-           IN_BOUNDARIES(get_kernel32_function_pointer) &&
            IN_BOUNDARIES(spawn_infection_thread) &&
            IN_BOUNDARIES(get_original_entry_point) &&
            IN_BOUNDARIES(write_original_entry_point) && IN_BOUNDARIES(is_pe) &&
