@@ -51,3 +51,12 @@ insb
 insd
 outsb
 outsd
+int1
+hlt
+cmc
+clc
+stc
+cli
+sti
+cld
+std

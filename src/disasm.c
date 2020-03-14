@@ -180,17 +180,23 @@ static bool has_immediate_Ib(uint8_t opcode) {
            opcode_in_range(opcode, 0x0C, 0x3C) ||
            opcode_in_range(opcode, 0x80, 0x83) ||
            opcode_in_range(opcode, 0xB0, 0xB7) || opcode == 0x6A ||
-           opcode == 0x6B || opcode == 0x8A || opcode == 0xC0 || opcode == 0xC1;
+           opcode == 0x6B || opcode == 0xA8 || opcode == 0xC0 ||
+           opcode == 0xC1 || opcode == 0xC8 || opcode == 0xCD ||
+           opcode == 0xD4 || opcode == 0xD5 || opcode == 0xE4 || opcode == 0xE6;
 }
 
 static bool has_immediate_Iv(uint8_t opcode) {
     return opcode_in_range(opcode, 0xB8, 0xBF);
 }
 
-static bool has_immediate_Iw(uint8_t opcode) { return opcode == 0xC2; }
+static bool has_immediate_Iw(uint8_t opcode) {
+    return opcode == 0xC2 || opcode == 0xC8 || opcode == 0xCA;
+}
 
 static bool has_immediate_Iz(uint8_t opcode) {
-    return false; // TODO
+    return opcode_in_range(opcode, 0x05, 0x35) ||
+           opcode_in_range(opcode, 0x0D, 0x3D) || opcode == 0x68 ||
+           opcode == 0x69 || opcode == 0x81 || opcode == 0xA9 || opcode == 0xC7;
 }
 
 static bool has_immediate_Ob(uint8_t opcode) {
@@ -231,7 +237,7 @@ static uint8_t get_size_by_operand_type(OperandType type,
             return 4;
         }
     } else if (type == OPERAND_TYPE_P) {
-        if (operand_size == 15) {
+        if (operand_size == 16) {
             return 2 + 2;
         } else {
             return 2 + 4;
@@ -247,8 +253,11 @@ static uint8_t get_immediate_size(void *instruction_begin, uint8_t prefix_count,
         (uint8_t *)BYTE_OFFSET(instruction_begin, prefix_count);
     if (opcode_size == 1) {
         uint8_t opcode = *opcode_ptr;
-        if (has_immediate_Jb(opcode) || has_immediate_Ib(opcode) ||
-            has_immediate_Ob(opcode)) {
+        if (has_immediate_Ib(opcode) && has_immediate_Iw(opcode)) { // ENTER
+            return get_size_by_operand_type(OPERAND_TYPE_B, operand_size) +
+                   get_size_by_operand_type(OPERAND_TYPE_W, operand_size);
+        } else if (has_immediate_Jb(opcode) || has_immediate_Ib(opcode) ||
+                   has_immediate_Ob(opcode)) {
             return get_size_by_operand_type(OPERAND_TYPE_B, operand_size);
         } else if (has_immediate_Iz(opcode) || has_immediate_Jz(opcode)) {
             return get_size_by_operand_type(OPERAND_TYPE_Z, operand_size);

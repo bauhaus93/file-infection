@@ -63,4 +63,15 @@ mul ebx
 mul bl
 mul dword [ebx]
 mul byte [ebx]
-
+div bl
+div dword [ebx]
+div byte [ebx]
+inc byte [eax]
+dec byte [eax]
+inc dword [eax]
+dec dword [eax]
+call near [eax]
+call far [eax]
+jmp near [eax]
+jmp far [eax]
+push dword [eax]

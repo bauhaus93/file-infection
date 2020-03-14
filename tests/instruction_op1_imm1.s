@@ -1,0 +1,48 @@
+add al, 0xAB    
+adc al, 0xAB    
+and al, 0xAB    
+xor al, 0xAB    
+add al, 0xAB    
+or al, 0xAB     
+sbb al, 0xAB    
+sub al, 0xAB    
+cmp al, 0xAB    
+push byte 0x00  
+jo short 0x12   
+jno short 0x12  
+jb short 0x12   
+jnb short 0x12  
+je short 0x12   
+jne short 0x12  
+jbe short 0x12  
+jnbe short 0x12 
+js short 0x12   
+jns short 0x12  
+jp short 0x12   
+jnp short 0x12  
+jl short 0x12   
+jge short 0x12  
+jle short 0x12  
+jg short 0x12   
+;mov al, [0xAB] ;nasm makes it an dword offset, not byte offset
+;mov [0xAB], al ;nasm makes it an dword offset, not byte offset
+test al, 0xFF   
+mov al, 0xFF    
+mov cl, 0xFF    
+mov dl, 0xFF    
+mov bl, 0xFF    
+mov ah, 0xFF    
+mov ch, 0xFF    
+mov dh, 0xFF    
+mov bh, 0xFF    
+int 0x20        
+aam 0xFF        
+aad 0xFF        
+loopne 0x20     
+loope 0x20      
+loop 0x20       
+jecxz 0x20      
+in al, 0xFF     
+out 0xFF, al    
+jmp short 0x20  
+
