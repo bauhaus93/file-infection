@@ -14,6 +14,7 @@
 #include "process_info.h"
 #include "string_generator.h"
 #include "utility.h"
+#include "memory.h"
 
 #ifdef _WIN64
 #error "Currently only support Win32"

@@ -13,6 +13,7 @@
 #include "string_generator.h"
 #include "utility.h"
 #include "delta.h"
+#include "memory.h"
 
 static DWORD WINAPI infection_thread(LPVOID param);
 

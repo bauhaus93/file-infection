@@ -1,6 +1,6 @@
 #include "disasm.h"
-#include "function_kernel32.h"
 #include "malloc.h"
+#include "memory.h"
 #include "utility.h"
 
 typedef enum {
@@ -40,6 +40,13 @@ static bool has_sib_byte(uint8_t mod_rm);
 static bool opcode_in_range(uint8_t opcode, uint8_t low, uint8_t high);
 static uint8_t get_size_by_operand_type(OperandType type, uint8_t operand_size);
 static bool has_opcode_extension_1byte(uint8_t opcode);
+
+typedef struct {
+	Instruction curr;
+	Instruction prev;
+	uint8_t index;
+}Disassembler;
+
 
 Instruction *parse_instruction(void *addr) {
     Instruction *instr = MALLOC(sizeof(Instruction));

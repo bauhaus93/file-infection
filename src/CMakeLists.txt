@@ -11,4 +11,5 @@ add_sources(
     process_info.c
     delta.c
     disasm.c
+	memory.c
     code_end.c)

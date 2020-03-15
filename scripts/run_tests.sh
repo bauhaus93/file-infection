@@ -1,7 +1,6 @@
 #!/bin/sh
 
-export PATH=$PWD/mxe/usr/bin:$PATH && \
-cmake --build release -j8 && \
-pushd release && \
-ctest --output-on-failure -j8 && \
+pushd build_native && \
+make -j8 disasm && \
+ctest -V --output-on-failure -j8
 popd

@@ -2,10 +2,7 @@
 #define UTILITY_H
 
 #include <stdint.h>
-#include <windows.h>
-
-#include "code_begin.h"
-#include "code_end.h"
+#include <stddef.h>
 
 // #define ENABLE_PRINT
 // #undef ENABLE_PRINT
@@ -37,12 +34,6 @@
 
 #define BYTE_DIFF(hi, lo) ((int32_t)(((uint8_t *)(hi)) - ((uint8_t *)(lo))))
 
-#define CODE_SIZE BYTE_DIFF(code_end, code_begin)
-#define CODE_BEGIN BYTE_OFFSET(code_begin, get_data()->delta_offset)
-#define CODE_END BYTE_OFFSET(code_end, get_data()->delta_offset)
-
-void memzero(void *start, uint32_t size);
-void memcp(void *src, void *dest, uint32_t size);
 uint8_t same_case_insensitive(char a, char b);
 
 uint8_t write_value32(uint32_t value, void *memory);
