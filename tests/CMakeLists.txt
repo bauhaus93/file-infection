@@ -22,4 +22,6 @@ if(BUILD_TESTING)
     target_compile_definitions(${LIB_NAME} PRIVATE USE_STANDARD_MALLOC)
 
     create_instruction_size_test(instructions_op1_basic)
+    create_instruction_size_test(instructions_op1_extensions)
+    create_instruction_size_test(instructions_op1_sib)
 endif()
