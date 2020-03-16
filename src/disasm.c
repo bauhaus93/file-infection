@@ -15,6 +15,8 @@ typedef enum {
     OPERAND_TYPE_P
 } OperandType;
 
+static bool parse_instruction(void *addr, Instruction *instr);
+uint8_t get_instruction_size(const Instruction *instr);
 static bool is_prefix(uint8_t value);
 static uint8_t get_prefix_count(void *instruction_begin);
 static uint8_t get_opcode_size(void *instruction_begin, uint8_t prefix_count);
@@ -41,16 +43,41 @@ static bool opcode_in_range(uint8_t opcode, uint8_t low, uint8_t high);
 static uint8_t get_size_by_operand_type(OperandType type, uint8_t operand_size);
 static bool has_opcode_extension_1byte(uint8_t opcode);
 
-typedef struct {
-	Instruction curr;
-	Instruction prev;
-	uint8_t index;
-}Disassembler;
+Disassembler *init_disasm(void *start_address) {
+    Disassembler *disasm = (Disassembler *) MALLOC(sizeof(Disassembler));
+    if (disasm != NULL) {
+        memzero(disasm, sizeof(Disassembler));
+        disasm->instr[0].addr = start_address;
+    }
+    return disasm;
+}
 
+void destroy_disasm(Disassembler *disasm) {
+    if (disasm != NULL) {
+        FREE(disasm);
+    }
+}
 
-Instruction *parse_instruction(void *addr) {
-    Instruction *instr = MALLOC(sizeof(Instruction));
-    if (instr != NULL) {
+bool next_instruction(Disassembler *disasm) {
+    if (disasm != NULL) {
+        void *next_addr =
+            BYTE_OFFSET(disasm->instr[disasm->index].addr,
+                        get_instruction_size(&disasm->instr[disasm->index]));
+        disasm->index = (disasm->index + 1) % INSTRUCTION_HISTORY_SIZE;
+        return parse_instruction(next_addr, &disasm->instr[disasm->index]);
+    }
+    return false;
+}
+
+uint8_t get_current_instruction_size(Disassembler *disasm) {
+    if (disasm != NULL) {
+        return get_instruction_size(&disasm->instr[disasm->index]);
+    }
+    return 0;
+}
+
+static bool parse_instruction(void *addr, Instruction *instr) {
+    if (addr != NULL && instr != NULL) {
         memzero(instr, sizeof(Instruction));
         instr->addr = addr;
         instr->prefix_count = get_prefix_count(addr);
@@ -86,17 +113,10 @@ Instruction *parse_instruction(void *addr) {
                                        instr->opcode_size, instr->operand_size);
             }
         } else {
-            FREE(instr);
-            return NULL;
+            return false;
         }
     }
-    return instr;
-}
-
-Instruction *next_instruction(const Instruction *prev_instr) {
-    void *next_addr =
-        BYTE_OFFSET(prev_instr->addr, get_instruction_size(prev_instr));
-    return parse_instruction(next_addr);
+    return true;
 }
 
 uint8_t get_instruction_size(const Instruction *instr) {

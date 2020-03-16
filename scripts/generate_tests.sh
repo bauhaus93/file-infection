@@ -1,5 +1,9 @@
 #!/bin/sh
 
-rm -rf build_native && \
-mkdir -p build_native && \
-cmake -B build_native \ -S . -DCMAKE_BUILD_TYPE="Release"
+TARGET_DIR="$PWD/build_native"
+CMAKE="cmake"
+
+rm -rf $TARGET_DIR && \
+mkdir -p $TARGET_DIR && \
+export PATH=$PWD/mxe/usr/bin:$PATH && \
+$CMAKE -B $TARGET_DIR \ -S . -DCMAKE_BUILD_TYPE="Release"

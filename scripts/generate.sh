@@ -1,6 +1,9 @@
 #!/bin/sh
 
-rm -rf release && \
-mkdir -p release && \
+TARGET_DIR="$PWD/build_mingw"
+CMAKE="i686-w64-mingw32.static-cmake"
+
+rm -rf $TARGET_DIR && \
+mkdir -p $TARGET_DIR && \
 export PATH=$PWD/mxe/usr/bin:$PATH && \
-i686-w64-mingw32.static-cmake -B release \ -S . -DCMAKE_BUILD_TYPE="Release"
+$CMAKE -B $TARGET_DIR \ -S . -DCMAKE_BUILD_TYPE="Release"

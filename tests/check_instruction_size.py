@@ -15,33 +15,42 @@ def setup_logger():
 	DATE_FORMAT = r"%Y-%m-%d %H:%M:%S"
 	logging.basicConfig(level = logging.INFO, format = FORMAT, datefmt = DATE_FORMAT)
 
+
 class Disassembler:
 
-	def __init__(self, lib_path):
+	def __init__(self, start_address, lib_path):
 		self.lib = ctypes.cdll.LoadLibrary(lib_path)
 
-	def parse_instruction(self, memory_addr):
-		self.curr_instruction = self.lib.parse_instruction(ctypes.c_void_p(memory))
-		return True
-	
+		self.lib.init_disasm.restype = ctypes.c_void_p
+		self.lib.init_disasm.argtypes = [ctypes.c_void_p]
+
+		self.lib.destroy_disasm.argtypes = [ctypes.c_void_p]
+
+		self.lib.next_instruction.restype = ctypes.c_bool
+		self.lib.next_instruction.argtypes = [ctypes.c_void_p]
+
+		self.lib.get_instruction_size.restype = ctypes.c_ubyte
+		self.lib.get_instruction_size.argtypes = [ctypes.c_void_p]
+
+		self.disasm = self.lib.init_disasm(start_address)
+
+	def __del__(self):
+		try:
+			if self.disasm:
+				self.lib.destroy_disasm(ctypes.byref(self.disasm))
+		except:
+			pass
+
 	def next_instruction(self):
-		# TODO free allocated memory
-		try:
-			self.curr_instruction = self.lib.next_instruction(self.curr_instruction)
-		except:
-			return False
-		return True
-	
+		return bool(self.lib.next_instruction(self.disasm))
+
 	def get_instruction_size(self):
-		try:
-			return self.lib.get_instruction_size(self.curr_instruction)
-		except:
-			return 0
-	
+		return int(self.lib.get_current_instruction_size(ctypes.c_void_p(self.disasm)))
+
 
 def check_instructions(file_path, bit_width):
 	total = 0
-	errors = []
+	mismatches = 0
 	with open(file_path, "r") as f:
 		for line in f.readlines():
 			line = line.rstrip()
@@ -52,10 +61,21 @@ def check_instructions(file_path, bit_width):
 				return False
 			if len(data) == 0:
 				continue
-			logger.info(f"instruction | {line:20s} | size = {len(data):2d} byte")
+			try:
+				disasm = Disassembler(data, lib_path)
+				if disasm.next_instruction():
+					found_size = disasm.get_instruction_size()
+					if len(data) != found_size:
+						logger.error(f"Mismatch: instruction = '{line}', expected = {len(data)}, found = {found_size}")
+
+			except Exception as e:
+				logger.error(f"Exception during disassembly: {e}")
+				return False
+
+			logger.debug(f"instruction | {line:40s} | size = {len(data):2d} byte")
 			total += 1
-	logger.info(f"Checked {total} instructions, {len(errors)} errors")
-	return len(errors) == 0
+	logger.info(f"Instruction match finished:  {total - mismatches}/{total} OK")
+	return mismatches == 0
 
 def compile_instruction(instruction, bit_width):
 	input_file = os.path.join(tempfile.gettempdir(), str(uuid.uuid4()) + ".s")
@@ -87,7 +107,7 @@ def compile_instruction(instruction, bit_width):
 
 if __name__ == "__main__":
 	setup_logger()
-	parser = argparse.ArgumentParser(description = "Compiles the given asm file, then checks the size of the instructions with the size given in the source file as a comment.")
+	parser = argparse.ArgumentParser(description = "Compiles each line from the asm file, then checks the compiled size against the size determined by the disassembly library.")
 	parser.add_argument('source_file', metavar = "FILE", type = str, help = "File for which to check instruction sizes")
 	parser.add_argument('--bit-width', choices = [32, 64], type = int, default = 32, help = "Set the bit width used for compilation of the instructions.")
 	parser.add_argument('--disasm-lib', metavar = "FILE", type = str, required = True, help = "Disassembler libary to be checked")
@@ -102,12 +122,6 @@ if __name__ == "__main__":
 	if not os.path.isfile(lib_path):
 		logger.error(f"Could not find disassembler libary '{lib_path}')")
 		exit(1)
-	try:
-		disasm = Disassembler(lib_path)
-	except OSError as e:
-		logger.error(f"Could not load disassembler library: {e}")
-		exit(1)
-
 	if check_instructions(source_path, args.bit_width):
 		exit(0)
 	else:

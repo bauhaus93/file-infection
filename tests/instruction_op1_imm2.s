@@ -1,3 +1,0 @@
-[bits 32]
-retn 0xABCD
-retf 0xABCD
