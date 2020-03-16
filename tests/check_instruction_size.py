@@ -68,7 +68,7 @@ def check_instructions(file_path, bit_width):
 				if disasm.next_instruction():
 					found_size = disasm.get_instruction_size()
 					if len(data) != found_size:
-						logger.error(f"Mismatch | {line:20s} | {bin_str:20s} | expected = {len(data)}, found = {found_size}")
+						logger.error(f"Mismatch | {line:40s} | {bin_str:20s} | expected = {len(data)}, found = {found_size}")
 						mismatches += 1
 					else:
 						logger.debug(f"Instruction | {line:40s} | {bin_str:20s} | {len(data):2d} byte")
