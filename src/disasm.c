@@ -320,6 +320,8 @@ static uint8_t get_immediate_size_opcode_extension(void *instruction_begin,
         return get_size_by_operand_type(OPERAND_TYPE_B, operand_size);
     } else if (opcode == 0xF7 && modrm == 0xC0) { // Iz
         return get_size_by_operand_type(OPERAND_TYPE_Z, operand_size);
+	} else if(opcode == 0xFF && (modrm == 0xC0 || modrm == 0xC8 || modrm == 0xD0)) {	// Ev
+		return get_size_by_operand_type(OPERAND_TYPE_V, operand_size);	
     } else {
         return 0;
     }

@@ -13,7 +13,7 @@ logger = logging.getLogger()
 def setup_logger():
 	FORMAT = r"[%(asctime)-15s %(levelname)-5s] %(message)s"
 	DATE_FORMAT = r"%Y-%m-%d %H:%M:%S"
-	logging.basicConfig(level = logging.INFO, format = FORMAT, datefmt = DATE_FORMAT)
+	logging.basicConfig(level = logging.DEBUG, format = FORMAT, datefmt = DATE_FORMAT)
 
 
 class Disassembler:
@@ -61,18 +61,23 @@ def check_instructions(file_path, bit_width):
 				return False
 			if len(data) == 0:
 				continue
+
+			bin_str = " ".join([f"{v:02X}" for v in data])
 			try:
 				disasm = Disassembler(data, lib_path)
 				if disasm.next_instruction():
 					found_size = disasm.get_instruction_size()
 					if len(data) != found_size:
-						logger.error(f"Mismatch: instruction = '{line}', expected = {len(data)}, found = {found_size}")
+						logger.error(f"Mismatch | {line:20s} | {bin_str:20s} | expected = {len(data)}, found = {found_size}")
+						mismatches += 1
+					else:
+						logger.debug(f"Instruction | {line:40s} | {bin_str:20s} | {len(data):2d} byte")
 
 			except Exception as e:
 				logger.error(f"Exception during disassembly: {e}")
 				return False
 
-			logger.debug(f"instruction | {line:40s} | size = {len(data):2d} byte")
+
 			total += 1
 	logger.info(f"Instruction match finished:  {total - mismatches}/{total} OK")
 	return mismatches == 0
@@ -89,7 +94,7 @@ def compile_instruction(instruction, bit_width):
 		logger.error(f"subprocess.run: {e}")
 		return None
 	if result.returncode != 0:
-		logger.error(f"Could not compile instruction")
+		logger.error(f"Could not compile instruction '{instruction}'")
 		for line in str(result.stdout).split("\\n"):
 			if len((line[2:])) > 0:
 				logger.error("stdout: " + line[2:])

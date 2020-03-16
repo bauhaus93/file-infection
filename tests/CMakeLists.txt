@@ -21,7 +21,5 @@ if(BUILD_TESTING)
     target_include_directories(${LIB_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/src)
     target_compile_definitions(${LIB_NAME} PRIVATE USE_STANDARD_MALLOC)
 
-    create_instruction_size_test(instructions_op1)
-    create_instruction_size_test(instructions_op1_immediate)
-
+    create_instruction_size_test(instructions_op1_basic)
 endif()
