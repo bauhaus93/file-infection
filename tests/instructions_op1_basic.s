@@ -1,8 +1,8 @@
 ;0x00-0x07
 add bl, cl
 add ebx, ecx
-add bl, [0xABCDABCD]
-add ebx, [0xABCDABCD]
+add bl, [eax]
+add ebx, [eax]
 add al, 0xAB
 add eax, 0xABCDABCD
 push es
@@ -10,16 +10,16 @@ pop es
 ;0x08-0x0F
 or bl, cl
 or ebx, ecx
-or bl, [0xABCDABCD]
-or ebx, [0xABCDABCD]
+or bl, [eax]
+or ebx, [eax]
 or al, 0xAB
 or eax, 0xABCDABCD
 push cs
 ;0x10-0x17
 adc bl, cl
 adc ebx, ecx
-adc bl, [0xABCDABCD]
-adc ebx, [0xABCDABCD]
+adc bl, [eax]
+adc ebx, [eax]
 adc al, 0xAB
 adc eax, 0xABCDABCD
 push ss
@@ -27,8 +27,8 @@ pop ss
 ;0x18-0x1F
 sbb bl, cl
 sbb ebx, ecx
-sbb bl, [0xABCDABCD]
-sbb ebx, [0xABCDABCD]
+sbb bl, [eax]
+sbb ebx, [eax]
 sbb al, 0xAB
 sbb eax, 0xABCDABCD
 push ds
@@ -36,32 +36,32 @@ pop ds
 ;0x20-0x27
 and bl, cl
 and ebx, ecx
-and bl, [0xABCDABCD]
-and ebx, [0xABCDABCD]
+and bl, [eax]
+and ebx, [eax]
 and al, 0xAB
 and eax, 0xABCDABCD
 daa
 ;0x28-0x2F
 sub bl, cl
 sub ebx, ecx
-sub bl, [0xABCDABCD]
-sub ebx, [0xABCDABCD]
+sub bl, [eax]
+sub ebx, [eax]
 sub al, 0xAB
 sub eax, 0xABCDABCD
 das
 ;0x30-0x37
 xor bl, cl
 xor ebx, ecx
-xor bl, [0xABCDABCD]
-xor ebx, [0xABCDABCD]
+xor bl, [eax]
+xor ebx, [eax]
 xor al, 0xAB
 xor eax, 0xABCDABCD
 aaa
 ;0x38-0x3F
 cmp bl, cl
 cmp ebx, ecx
-cmp bl, [0xABCDABCD]
-cmp ebx, [0xABCDABCD]
+cmp bl, [eax]
+cmp ebx, [eax]
 cmp al, 0xAB
 cmp eax, 0xABCDABCD
 aas
@@ -165,10 +165,10 @@ popf
 sahf
 lahf
 ;0xA0-0xA7
-mov al, [0xABCDABCD]
-mov eax, [0xABCDABCD]
-mov [0xABCDABCD], al
-mov [0xABCDABCD], eax
+mov al, [eax]
+mov eax, [eax]
+mov [eax], al
+mov [eax], eax
 movsb
 movsd
 cmpsb
@@ -207,9 +207,9 @@ loope 0xAB
 loop 0xAB
 jecxz 0xAB
 in al, 0xAB
-in eax, 0xABCDABCD
+in eax, 0xAB
 out 0xAB, al
-out 0xABCDABCD, eax
+out 0xAB, eax
 ;0xE8-0xEF
 call 0xABCDABCD
 jmp near 0xABCDABCD

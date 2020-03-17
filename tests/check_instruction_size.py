@@ -53,6 +53,7 @@ def check_instructions(file_path, bit_width):
 	mismatches = 0
 	with open(file_path, "r") as f:
 		for line in f.readlines():
+
 			line = line.rstrip()
 			if len(line) == 0 or line[0] == ";":
 				continue
@@ -68,10 +69,13 @@ def check_instructions(file_path, bit_width):
 				if disasm.next_instruction():
 					found_size = disasm.get_instruction_size()
 					if len(data) != found_size:
-						logger.error(f"Mismatch | {line:40s} | {bin_str:20s} | expected = {len(data)}, found = {found_size}")
+						logger.error(f"Mismatch    | {line:40s} | {bin_str:20s} | expected = {len(data):2d} | found = {found_size:2d}")
 						mismatches += 1
 					else:
 						logger.debug(f"Instruction | {line:40s} | {bin_str:20s} | {len(data):2d} byte")
+				else:
+					mismatches += 1
+					logger.error(f"Expected valid instruction, but disassembler determined instruction invalid | {line} | {bin_str}")
 
 			except Exception as e:
 				logger.error(f"Exception during disassembly: {e}")

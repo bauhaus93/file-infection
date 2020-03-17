@@ -1,0 +1,16 @@
+#ifndef OPERAND_TYPE_H
+#define OPERAND_TYPE_H
+
+typedef enum {
+    OPERAND_TYPE_B,
+    OPERAND_TYPE_W,
+    OPERAND_TYPE_D,
+    OPERAND_TYPE_Q,
+    OPERAND_TYPE_DQ,
+    OPERAND_TYPE_QQ,
+    OPERAND_TYPE_V,
+    OPERAND_TYPE_Z,
+    OPERAND_TYPE_P
+} OperandType;
+
+#endif // OPERAND_TYPE_H
