@@ -173,6 +173,15 @@ movsb
 movsd
 cmpsb
 cmpsd
+;0xA8-0xAF
+test al, 0xFF
+test eax, 0xABCDABCD
+stosb
+stosd
+lodsb
+lodsd
+scasb
+scasd
 ;0xB8-0xBF
 mov eax, 0xABCDABCD
 mov eax, 0xABCDABCD
