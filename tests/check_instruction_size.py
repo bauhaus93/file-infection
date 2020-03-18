@@ -29,8 +29,8 @@ class Disassembler:
 		self.lib.next_instruction.restype = ctypes.c_bool
 		self.lib.next_instruction.argtypes = [ctypes.c_void_p]
 
-		self.lib.get_instruction_size.restype = ctypes.c_ubyte
-		self.lib.get_instruction_size.argtypes = [ctypes.c_void_p]
+		self.lib.get_current_instruction_size.restype = ctypes.c_ubyte
+		self.lib.get_current_instruction_size.argtypes = [ctypes.c_void_p]
 
 		self.disasm = self.lib.init_disasm(start_address)
 

@@ -7,8 +7,9 @@
 #include "utility.h"
 
 static uint8_t get_immediate_size(const Instruction *instr);
-static uint8_t get_immediate_size_opcode_extension(const Instruction *instr);
+static uint8_t get_opcode_extension_immediate_size(const Instruction *instr);
 static uint8_t get_modrm_displacement_size(const Instruction *instr);
+static uint8_t get_sib_displacement_size(const Instruction *instr);
 static bool is_valid_opcode(uint8_t opcode);
 static bool has_opcode_extension(uint8_t opcode);
 static bool has_modrm(uint8_t opcode);
@@ -31,11 +32,17 @@ bool handle_1byte_instruction(Instruction *instr) {
 
         if (instr->addressing_mode == 32 && has_sib_byte(*instr->modrm)) {
             instr->sib = (uint8_t *)BYTE_INCREMENT(instr->modrm);
+            instr->displacement_size = get_sib_displacement_size(instr);
+            if (instr->displacement_size > 0) {
+                instr->displacement = (void *)BYTE_INCREMENT(instr->sib);
+            }
         }
-        instr->displacement_size = get_modrm_displacement_size(instr);
-        if (instr->displacement_size > 0) {
-            instr->displacement = (void *)BYTE_INCREMENT(
-                instr->sib != NULL ? instr->sib : instr->modrm);
+        if (instr->displacement == NULL) {
+            instr->displacement_size = get_modrm_displacement_size(instr);
+            if (instr->displacement_size > 0) {
+                instr->displacement = (void *)BYTE_INCREMENT(
+                    instr->sib != NULL ? instr->sib : instr->modrm);
+            }
         }
     }
     instr->immediate_size = get_immediate_size(instr);
@@ -53,7 +60,7 @@ bool handle_1byte_instruction(Instruction *instr) {
     }
     if (has_opcode_extension(instr->opcode[0])) {
         uint8_t additional_immediate =
-            get_immediate_size_opcode_extension(instr);
+            get_opcode_extension_immediate_size(instr);
         if (additional_immediate > 0 && instr->immediate == NULL)
             if (instr->displacement != NULL) {
                 instr->immediate =
@@ -132,14 +139,14 @@ static uint8_t get_immediate_size(const Instruction *instr) {
     if (has_immediate_Ib(opcode) && has_immediate_Iw(opcode)) { // ENTER
         return get_size_by_operand_type(OPERAND_TYPE_B, instr->operand_size) +
                get_size_by_operand_type(OPERAND_TYPE_W, instr->operand_size);
-    } else if (has_immediate_Jb(opcode) || has_immediate_Ib(opcode) ||
-               has_immediate_Ob(opcode)) {
+    } else if (has_immediate_Jb(opcode) || has_immediate_Ib(opcode)) {
         return get_size_by_operand_type(OPERAND_TYPE_B, instr->operand_size);
-    } else if (has_immediate_Iz(opcode) || has_immediate_Jz(opcode)) {
+    } else if (has_immediate_Iz(opcode) || has_immediate_Jz(opcode) ||
+               has_immediate_Ob(opcode) || has_immediate_Ov(opcode)) {
         return get_size_by_operand_type(OPERAND_TYPE_Z, instr->operand_size);
     } else if (has_immediate_Iw(opcode)) {
         return get_size_by_operand_type(OPERAND_TYPE_W, instr->operand_size);
-    } else if (has_immediate_Iv(opcode) || has_immediate_Ov(opcode)) {
+    } else if (has_immediate_Iv(opcode)) {
         return get_size_by_operand_type(OPERAND_TYPE_V, instr->operand_size);
     } else if (has_immediate_Ap(opcode)) {
         return get_size_by_operand_type(OPERAND_TYPE_P, instr->operand_size);
@@ -148,18 +155,16 @@ static uint8_t get_immediate_size(const Instruction *instr) {
     }
     return 0;
 }
-static uint8_t get_immediate_size_opcode_extension(const Instruction *instr) {
-    if (instr->opcode == NULL) {
-        return 0;
-    }
+static uint8_t get_opcode_extension_immediate_size(const Instruction *instr) {
     if (instr->modrm == NULL) {
         return 0;
     }
     uint8_t opcode = instr->opcode[0];
     uint8_t modrm = *instr->modrm;
-    if (opcode == 0xF6 && modrm >= 0xC0 && modrm <= 0xC3) { // Ib
+    uint8_t nnn = get_modrm_reg(modrm);
+    if (opcode == 0xF6 && nnn == 0x00) { // Ib
         return get_size_by_operand_type(OPERAND_TYPE_B, instr->operand_size);
-    } else if ((opcode == 0xF7 && modrm >= 0xC0 && modrm <= 0xC3)) { // Iz
+    } else if (opcode == 0xF7 && nnn == 0x00) {
         return get_size_by_operand_type(OPERAND_TYPE_Z, instr->operand_size);
     } else if (opcode == 0xFF &&
                (modrm == 0xC0 || modrm == 0xC8 || modrm == 0xD0)) { // Ev
@@ -210,4 +215,18 @@ static uint8_t get_modrm_displacement_size(const Instruction *instr) {
         return 0;
     }
     return 0;
+}
+
+static uint8_t get_sib_displacement_size(const Instruction *instr) {
+    if (instr->modrm == NULL || instr->sib == NULL) {
+        return 0;
+    }
+    if (get_sib_base(*instr->sib) == 0x05) {
+        uint8_t mod = get_modrm_mod(*instr->modrm);
+        if (mod == 0x00 || mod == 0x02) {
+            return 4;
+        } else if (mod == 0x01) {
+            return 1;
+        }
+    }
 }
