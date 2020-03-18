@@ -141,8 +141,7 @@ static uint8_t get_immediate_size(const Instruction *instr) {
                get_size_by_operand_type(OPERAND_TYPE_W, instr->operand_size);
     } else if (has_immediate_Jb(opcode) || has_immediate_Ib(opcode)) {
         return get_size_by_operand_type(OPERAND_TYPE_B, instr->operand_size);
-    } else if (has_immediate_Iz(opcode) || has_immediate_Jz(opcode) ||
-               has_immediate_Ob(opcode) || has_immediate_Ov(opcode)) {
+    } else if (has_immediate_Iz(opcode) || has_immediate_Jz(opcode)) {
         return get_size_by_operand_type(OPERAND_TYPE_Z, instr->operand_size);
     } else if (has_immediate_Iw(opcode)) {
         return get_size_by_operand_type(OPERAND_TYPE_W, instr->operand_size);
@@ -150,10 +149,11 @@ static uint8_t get_immediate_size(const Instruction *instr) {
         return get_size_by_operand_type(OPERAND_TYPE_V, instr->operand_size);
     } else if (has_immediate_Ap(opcode)) {
         return get_size_by_operand_type(OPERAND_TYPE_P, instr->operand_size);
+    } else if (has_immediate_Ob(opcode) || has_immediate_Ov(opcode)) {
+        return instr->addressing_mode / 8;
     } else {
         return 0;
     }
-    return 0;
 }
 static uint8_t get_opcode_extension_immediate_size(const Instruction *instr) {
     if (instr->modrm == NULL) {
