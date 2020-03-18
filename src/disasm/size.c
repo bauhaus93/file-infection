@@ -1,5 +1,6 @@
 #include "size.h"
 #include "utility.h"
+#include "disasm_utility.h"
 
 // assuming the default operand size to be 32bit
 uint8_t get_operand_size(uint8_t *prefix, uint8_t prefix_count) {
@@ -62,5 +63,42 @@ uint8_t get_size_by_operand_type(OperandType type, uint8_t operand_size) {
         }
     }
     PRINT_DEBUG("Got unhandeled operand type: %d", (int)type);
+    return 0;
+}
+
+uint8_t get_modrm_displacement_size(uint8_t modrm, uint8_t addressing_mode) {
+    printf("MODRM = 0x%02X\n", modrm);
+    uint8_t mod = get_modrm_mod(modrm);
+    if (addressing_mode == 16) {
+        if (mod == 0x0 && get_modrm_rm(modrm) == 0x6) {
+            return 2;
+        } else if (mod == 0x1) {
+            return 1;
+        } else if (mod == 0x2) {
+            return 2;
+        }
+    } else if (addressing_mode == 32) {
+        if (mod == 0x0 && get_modrm_rm(modrm) == 0x5) {
+            return 4;
+        } else if (mod == 0x1) {
+            return 1;
+        } else if (mod == 0x2) {
+            return 4;
+        }
+    } else {
+        return 0;
+    }
+    return 0;
+}
+
+uint8_t get_sib_displacement_size(uint8_t modrm, uint8_t sib) {
+    if (get_sib_base(sib) == 0x05) {
+        uint8_t mod = get_modrm_mod(modrm);
+        if (mod == 0x00 || mod == 0x02) {
+            return 4;
+        } else if (mod == 0x01) {
+            return 1;
+        }
+    }
     return 0;
 }

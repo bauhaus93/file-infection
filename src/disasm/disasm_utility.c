@@ -8,16 +8,16 @@ bool opcode_in_range(uint8_t opcode, uint8_t low, uint8_t high) {
            col <= (high & 0xF);
 }
 
-uint8_t get_modrm_mod(uint8_t mod_rm) { return mod_rm >> 6; }
+uint8_t get_modrm_mod(uint8_t modrm) { return modrm >> 6; }
 
-uint8_t get_modrm_rm(uint8_t mod_rm) { return mod_rm & 0x7; }
+uint8_t get_modrm_rm(uint8_t modrm) { return modrm & 0x7; }
 
-uint8_t get_modrm_reg(uint8_t mod_rm) { return (mod_rm >> 3) & 0x7; }
+uint8_t get_modrm_reg(uint8_t modrm) { return (modrm >> 3) & 0x7; }
 
 // assumes addressing mode 32bit
-bool has_sib_byte(uint8_t mod_rm) {
-    uint8_t mod = get_modrm_mod(mod_rm);
-    uint8_t rm = get_modrm_rm(mod_rm);
+bool has_sib_byte(uint8_t modrm) {
+    uint8_t mod = get_modrm_mod(modrm);
+    uint8_t rm = get_modrm_rm(modrm);
     return mod <= 0x2 && rm == 0x4;
 }
 

@@ -74,6 +74,7 @@ static bool parse_instruction(void *addr, Instruction *instr) {
         }
         instr->end = (void *)BYTE_OFFSET(instr->start,
                                          calculate_instruction_size(instr));
+
         return true;
     } else {
         return false;

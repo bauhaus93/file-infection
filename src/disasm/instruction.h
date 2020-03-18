@@ -28,5 +28,6 @@ typedef struct {
 } Instruction;
 
 uint8_t get_instruction_size(const Instruction *instr);
+void print_instruction(const Instruction * instr);
 
 #endif // INSTRUCTION_H

@@ -8,8 +8,6 @@
 
 static uint8_t get_immediate_size(const Instruction *instr);
 static uint8_t get_opcode_extension_immediate_size(const Instruction *instr);
-static uint8_t get_modrm_displacement_size(const Instruction *instr);
-static uint8_t get_sib_displacement_size(const Instruction *instr);
 static bool is_valid_opcode(uint8_t opcode);
 static bool has_opcode_extension(uint8_t opcode);
 static bool has_modrm(uint8_t opcode);
@@ -32,13 +30,15 @@ bool handle_1byte_instruction(Instruction *instr) {
 
         if (instr->addressing_mode == 32 && has_sib_byte(*instr->modrm)) {
             instr->sib = (uint8_t *)BYTE_INCREMENT(instr->modrm);
-            instr->displacement_size = get_sib_displacement_size(instr);
+            instr->displacement_size =
+                get_sib_displacement_size(*instr->modrm, *instr->sib);
             if (instr->displacement_size > 0) {
                 instr->displacement = (void *)BYTE_INCREMENT(instr->sib);
             }
         }
         if (instr->displacement == NULL) {
-            instr->displacement_size = get_modrm_displacement_size(instr);
+            instr->displacement_size = get_modrm_displacement_size(
+                *instr->modrm, instr->addressing_mode);
             if (instr->displacement_size > 0) {
                 instr->displacement = (void *)BYTE_INCREMENT(
                     instr->sib != NULL ? instr->sib : instr->modrm);
@@ -77,8 +77,9 @@ bool handle_1byte_instruction(Instruction *instr) {
     return true;
 }
 
-static bool is_valid_opcode(uint8_t opcode) {
-    return true; // TODO: Handle
+static bool
+is_valid_opcode(uint8_t opcode) { // ignoring invalid opcode extensions
+    return opcode != 0xD6 && (!opcode_in_range(opcode, 0xD8, 0xDF));
 }
 
 static bool has_immediate_Jb(uint8_t opcode) {
@@ -185,48 +186,4 @@ static bool has_modrm(uint8_t opcode) {
            opcode_in_range(opcode, 0xF6, 0xF7) ||
            opcode_in_range(opcode, 0xFE, 0xFF) || opcode == 0x69 ||
            opcode == 0x6B;
-}
-
-static uint8_t get_modrm_displacement_size(const Instruction *instr) {
-    if (instr->modrm == NULL) {
-        return 0;
-    }
-
-    uint8_t mod = get_modrm_mod(*instr->modrm);
-    if (instr->addressing_mode == 16) {
-        if (mod == 0x0 && get_modrm_rm(*instr->modrm) == 0x6) {
-            return 2;
-        } else if (mod == 0x1) {
-            return 1;
-        } else if (mod == 0x2) {
-            return 2;
-        }
-    } else if (instr->addressing_mode == 32) {
-        if (mod == 0x0 && get_modrm_rm(*instr->modrm) == 0x5) {
-            return 4;
-        } else if (mod == 0x1) {
-            return 1;
-        } else if (mod == 0x2) {
-            return 4;
-        }
-    } else {
-        PRINT_DEBUG("invalid addressing mode: must be 16 or 32, but found %d",
-                    instr->addressing_mode);
-        return 0;
-    }
-    return 0;
-}
-
-static uint8_t get_sib_displacement_size(const Instruction *instr) {
-    if (instr->modrm == NULL || instr->sib == NULL) {
-        return 0;
-    }
-    if (get_sib_base(*instr->sib) == 0x05) {
-        uint8_t mod = get_modrm_mod(*instr->modrm);
-        if (mod == 0x00 || mod == 0x02) {
-            return 4;
-        } else if (mod == 0x01) {
-            return 1;
-        }
-    }
 }
