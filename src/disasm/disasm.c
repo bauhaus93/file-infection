@@ -42,6 +42,12 @@ uint8_t get_current_instruction_size(Disassembler *disasm) {
     return 0;
 }
 
+void print_current_instruction(Disassembler *disasm) {
+	if (disasm != NULL) {
+		print_instruction(&disasm->instr[disasm->index]);
+	}
+}
+
 static bool parse_instruction(void *addr, Instruction *instr) {
     if (addr != NULL && instr != NULL) {
         memzero(instr, sizeof(Instruction));

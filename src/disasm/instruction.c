@@ -22,9 +22,9 @@ bool has_prefix(const Instruction *instr, uint8_t prefix) {
 }
 
 void print_instruction(const Instruction *instr) {
-    printf("Instruction\n\tSize = %d\n\tPrefix count = %d\n\tOpcode size = "
-           "%d\n\tmodrm = %s\n\tsib = %s\n\tDisplacement size = "
-           "%d\n\tImmediate size = %d\n",
+    printf("Instruction | size: %2d | prefix count: %1d | opcode size: %1d | "
+           "modrm: %3s | sib: %3s | displacement size: %1d | immediate size: "
+           "%1d\n",
            get_instruction_size(instr), instr->prefix_count, instr->opcode_size,
            instr->modrm == NULL ? "no" : "yes",
            instr->sib == NULL ? "no" : "yes", instr->displacement_size,

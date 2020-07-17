@@ -72,8 +72,8 @@ bool handle_1byte_instruction(Instruction *instr) {
             } else {
                 instr->immediate = BYTE_INCREMENT(instr->opcode);
             }
+            instr->immediate_size += additional_immediate;
         }
-        instr->immediate_size += additional_immediate;
     }
     return true;
 }
@@ -157,6 +157,7 @@ static uint8_t get_immediate_size(const Instruction *instr) {
         return 0;
     }
 }
+
 static uint8_t get_opcode_extension_immediate_size(const Instruction *instr) {
     if (instr->modrm == NULL) {
         return 0;
@@ -168,9 +169,9 @@ static uint8_t get_opcode_extension_immediate_size(const Instruction *instr) {
         return get_size_by_operand_type(OPERAND_TYPE_B, instr->operand_size);
     } else if (opcode == 0xF7 && nnn == 0x00) {
         return get_size_by_operand_type(OPERAND_TYPE_Z, instr->operand_size);
-    } else if (opcode == 0xFF &&
+    /*} else if (opcode == 0xFF &&
                (modrm == 0xC0 || modrm == 0xC8 || modrm == 0xD0)) { // Ev
-        return get_size_by_operand_type(OPERAND_TYPE_V, instr->operand_size);
+        return get_size_by_operand_type(OPERAND_TYPE_V, instr->operand_size);*/
     } else {
         return 0;
     }

@@ -6,7 +6,9 @@
 #include "utility.h"
 
 static bool has_modrm(uint8_t opcode);
+static bool has_opcode_extension(uint8_t opcode);
 static bool is_valid_opcode(uint8_t opcode);
+static uint8_t get_opcode_extension_immediate_size(const Instruction *instr);
 static bool has_immediate_Ib(uint8_t opcode);
 static bool has_immediate_Jz(uint8_t opcode);
 static uint8_t get_immediate_size(const Instruction *instr);
@@ -50,6 +52,24 @@ bool handle_2byte_instruction(Instruction *instr) {
         }
     }
 
+    if (has_opcode_extension(instr->opcode[1])) {
+        uint8_t additional_immediate =
+            get_opcode_extension_immediate_size(instr);
+        if (additional_immediate > 0 && instr->immediate == NULL) {
+            if (instr->displacement != NULL) {
+                instr->immediate =
+                    BYTE_OFFSET(instr->displacement, instr->displacement_size);
+            } else if (instr->sib != NULL) {
+                instr->immediate = BYTE_INCREMENT(instr->sib);
+            } else if (instr->modrm != NULL) {
+                instr->immediate = BYTE_INCREMENT(instr->modrm);
+            } else {
+                instr->immediate = BYTE_OFFSET(instr->opcode, 2);
+            }
+            instr->immediate_size += additional_immediate;
+        }
+    }
+
     return true;
 }
 
@@ -81,9 +101,15 @@ static bool has_modrm(uint8_t opcode) {
            opcode == 0x1F || opcode == 0xB8 || opcode == 0xFF;
 }
 
+static bool has_opcode_extension(uint8_t opcode) {
+    return opcode_in_range(opcode, 0x71, 0x73) || opcode == 0x00 ||
+           opcode == 0x01 || opcode == 0xBA || opcode == 0xC7 ||
+           opcode == 0xB9 || opcode == 0xAE || opcode == 0x18;
+}
+
 static bool has_immediate_Ib(uint8_t opcode) {
     return opcode_in_range(opcode, 0xC4, 0xC6) || opcode == 0x70 ||
-           opcode == 0xA4 || opcode == 0xAC || opcode == 0xC2;
+           opcode == 0xA4 || opcode == 0xAC || opcode == 0xBA || opcode == 0xC2;
 }
 
 static bool has_immediate_Jz(uint8_t opcode) {
@@ -96,6 +122,23 @@ static uint8_t get_immediate_size(const Instruction *instr) {
         return get_size_by_operand_type(OPERAND_TYPE_B, instr->operand_size);
     } else if (has_immediate_Jz(opcode)) {
         return get_size_by_operand_type(OPERAND_TYPE_Z, instr->operand_size);
+    } else {
+        return 0;
+    }
+}
+
+static uint8_t get_opcode_extension_immediate_size(const Instruction *instr) {
+    if (instr->modrm == NULL) {
+        return 0;
+    }
+    uint8_t opcode = instr->opcode[1];
+    uint8_t modrm = *instr->modrm;
+    uint8_t nnn = get_modrm_reg(modrm);
+    if ((opcode == 0x71 || opcode == 0x72) &&
+        (nnn == 0x2 || nnn == 0x4 || nnn == 0x6)) {
+        return get_size_by_operand_type(OPERAND_TYPE_B, instr->operand_size);
+    } else if (opcode == 0x73 && (nnn == 0x2 || nnn == 0x3 || nnn >= 0x6)) {
+        return get_size_by_operand_type(OPERAND_TYPE_B, instr->operand_size);
     } else {
         return 0;
     }

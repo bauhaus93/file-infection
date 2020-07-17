@@ -52,6 +52,14 @@ target_sources(${EXEC_NAME} PRIVATE ${SRCS})
 
 target_include_directories(${EXEC_NAME} PRIVATE src)
 
+if(STRIP_PROGRAM)
+	if(NOT STRIP_ARGS)
+		set(STRIP_ARGS "")
+	endif()
+	add_custom_command(TARGET ${EXEC_NAME} POST_BUILD
+		COMMAND ${STRIP_PROGRAM} ${STRIP_ARGS} $<TARGET_FILE:${EXEC_NAME}>)
+endif()
+
 add_custom_command(
   OUTPUT ${CMAKE_SOURCE_DIR}/src/checksum_list.h
   COMMAND

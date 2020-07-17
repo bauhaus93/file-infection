@@ -23,6 +23,9 @@ class Disassembler:
         self.lib.get_current_instruction_size.restype = ctypes.c_ubyte
         self.lib.get_current_instruction_size.argtypes = [ctypes.c_void_p]
 
+        #self.lib.print_current_instruction.restype = ctypes.c_void
+        self.lib.print_current_instruction.argtypes = [ctypes.c_void_p]
+
         self.disasm = self.lib.init_disasm(start_address)
 
     def __del__(self):
@@ -37,6 +40,9 @@ class Disassembler:
 
     def get_instruction_size(self):
         return int(self.lib.get_current_instruction_size(ctypes.c_void_p(self.disasm)))
+
+    def print_instruction(self):
+        self.lib.print_current_instruction(ctypes.c_void_p(self.disasm))
 
 
 def setup_logger():
@@ -67,6 +73,7 @@ def check_instructions(file_path, bit_width, lib_path):
                         logger.error(
                             f"Mismatch    | {line:40s} | {bin_str:20s} | expected = {len(data):2d} | found = {found_size:2d}"
                         )
+                        disasm.print_instruction()
                         mismatches += 1
                     else:
                         logger.debug(
@@ -88,11 +95,15 @@ def check_instructions(file_path, bit_width, lib_path):
 
 
 def compile_instruction(instruction, bit_width, silent_error=False):
-    input_file = os.path.join(tempfile.gettempdir(), str(os.getpid()) + "_" + str(uuid.uuid4()) + ".s")
+    input_file = os.path.join(
+        tempfile.gettempdir(), str(os.getpid()) + "_" + str(uuid.uuid4()) + ".s"
+    )
     with open(input_file, "w") as f:
         f.write(f"[bits {bit_width}]\n{instruction}")
 
-    output_file = os.path.join(tempfile.gettempdir(), str(os.getpid()) + "_" + str(uuid.uuid4()) + ".bin")
+    output_file = os.path.join(
+        tempfile.gettempdir(), str(os.getpid()) + "_" + str(uuid.uuid4()) + ".bin"
+    )
     try:
         result = subprocess.run(
             ["nasm", "-o", output_file, input_file], capture_output=True

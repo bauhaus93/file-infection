@@ -147,7 +147,7 @@ def discover_instructions(directory):
             if file_name.endswith(".s"):
                 file_path = os.path.join(dir_path, file_name)
                 instrs.extend(collect_instructions(file_path))
-    return list(set(instrs))
+    return list(set(instrs).difference(set(["ud0", "ud1", "ud2"])))
 
 
 def create_random_instructions_file(filename, num, instructions):

@@ -5,6 +5,8 @@ BUILD_DIR="$BUILD_ROOT/build"
 MXE_DIR="$BUILD_ROOT/mxe"
 MXE_TARGETS="i686-w64-mingw32.static"
 CMAKE="i686-w64-mingw32.static-cmake"
+STRIP_PROGRAM="i686-w64-mingw32.static-strip"
+STRIP_ARGS=""
 
 MODE="BUILD"
 while getopts "sb" option
@@ -36,10 +38,10 @@ then
 	pushd $MXE_DIR && \
 	make -j8 MXE_TARGETS="$MXE_TARGETS" gcc cmake && \
 	popd && \
-	$CMAKE -B $BUILD_DIR -S $PWD -DCMAKE_BUILD_TYPE="Release"
+	$CMAKE -B $BUILD_DIR -S $PWD -DCMAKE_BUILD_TYPE="Release" -DSTRIP_PROGRAM="$STRIP_PROGRAM" -DSTRIP_ARGS="$STRIP_ARGS"
 fi
 
 if [ $MODE = "BUILD" ]
 then
-	$CMAKE --build $BUILD_DIR -j8 --target infect
+	$CMAKE --build $BUILD_DIR -j8 --target infect 
 fi
