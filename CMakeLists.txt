@@ -23,6 +23,12 @@ if(NOT CMAKE_BUILD_TYPE)
       CACHE STRING "Choose build type" FORCE)
 endif()
 
+if(NOT BUILD_TESTING)
+  set(BUILD_TESTING
+      OFF
+      CACHE STRING "Enable testing" FORCE)
+endif()
+
 set(EXEC_NAME "infect")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
@@ -75,4 +81,6 @@ target_sources(${EXEC_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/src/string_generator.h
 				    ${CMAKE_SOURCE_DIR}/src/string_generator.c)
 
 include(CTest)
-add_subdirectory(tests)
+if(BUILD_TESTING)
+  add_subdirectory(tests)
+endif()

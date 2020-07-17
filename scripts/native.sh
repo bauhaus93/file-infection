@@ -18,7 +18,7 @@ if [ $MODE = "SETUP" ]
 then
 	rm -rf $BUILD_DIR && \
 	mkdir -p $BUILD_DIR && \
-	$CMAKE -B $BUILD_DIR -S $PWD -DCMAKE_BUILD_TYPE="Release"
+	$CMAKE -B $BUILD_DIR -S $PWD -DCMAKE_BUILD_TYPE="Release" -DBUILD_TESTING="ON"
 fi
 
 if [ $MODE = "BUILD" ] || [ $MODE = "TEST" ]
