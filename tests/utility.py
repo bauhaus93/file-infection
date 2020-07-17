@@ -128,5 +128,6 @@ def compile_instruction(instruction, bit_width, silent_error=False):
     os.remove(input_file)
     os.remove(output_file)
     if len(data) == 0:
+        logger.error(f"Assembly successful, but output file is empty for '{instruction}'")
         return None
     return data

@@ -4,5 +4,6 @@ add_sources(
   instruction.c
   instruction_op1.c
   instruction_op2.c
+  instruction_op3.c
   prefix.c
   size.c)

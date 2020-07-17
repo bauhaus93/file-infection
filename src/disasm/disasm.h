@@ -8,10 +8,6 @@
 
 #define INSTRUCTION_HISTORY_SIZE (2)
 
-#if INSTRUCTION_HISTORY_SIZE < 2
-#error INSTRUCTION_HISTORY_SIZE must be at least 2, but was less than 2.
-#endif
-
 typedef struct {
     Instruction instr[INSTRUCTION_HISTORY_SIZE];
     unsigned int index;

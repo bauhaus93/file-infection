@@ -87,7 +87,7 @@ xsaveopt [eax]
 clflush [eax]
 
 lfence
-rfence
+mfence
 sfence
 
 ;Group 16 / 0x0F18

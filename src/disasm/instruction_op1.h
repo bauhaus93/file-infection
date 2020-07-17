@@ -2,9 +2,14 @@
 #define INSTRUCTION_OP1_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "instruction.h"
 
-bool handle_1byte_instruction(Instruction *instr);
+bool is_valid_opcode_1byte(uint8_t opcode);
+bool has_modrm_1byte(uint8_t opcode);
+bool has_opcode_extension_1byte(uint8_t opcode);
+uint8_t get_immediate_size_1byte(const Instruction *instr);
+uint8_t get_opcode_extension_immediate_size_1byte(const Instruction *instr);
 
 #endif // INSTRUCTION_OP1_H
