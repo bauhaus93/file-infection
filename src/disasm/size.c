@@ -1,6 +1,8 @@
+#include <stdio.h>
+
+#include "disasm_utility.h"
 #include "size.h"
 #include "utility.h"
-#include "disasm_utility.h"
 
 // assuming the default operand size to be 32bit
 uint8_t get_operand_size(uint8_t *prefix, uint8_t prefix_count) {
@@ -67,7 +69,6 @@ uint8_t get_size_by_operand_type(OperandType type, uint8_t operand_size) {
 }
 
 uint8_t get_modrm_displacement_size(uint8_t modrm, uint8_t addressing_mode) {
-    printf("MODRM = 0x%02X\n", modrm);
     uint8_t mod = get_modrm_mod(modrm);
     if (addressing_mode == 16) {
         if (mod == 0x0 && get_modrm_rm(modrm) == 0x6) {

@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include <stdio.h>
 
 #include "instruction.h"
 #include "utility.h"
@@ -9,6 +10,15 @@ uint8_t get_instruction_size(const Instruction *instr) {
     } else {
         return 0;
     }
+}
+
+bool has_prefix(const Instruction *instr, uint8_t prefix) {
+    for (uint8_t i = 0; i < instr->prefix_count; i++) {
+        if (instr->prefix[i] == prefix) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void print_instruction(const Instruction *instr) {

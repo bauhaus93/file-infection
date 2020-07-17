@@ -61,7 +61,7 @@ bool handle_1byte_instruction(Instruction *instr) {
     if (has_opcode_extension(instr->opcode[0])) {
         uint8_t additional_immediate =
             get_opcode_extension_immediate_size(instr);
-        if (additional_immediate > 0 && instr->immediate == NULL)
+        if (additional_immediate > 0 && instr->immediate == NULL) {
             if (instr->displacement != NULL) {
                 instr->immediate =
                     BYTE_OFFSET(instr->displacement, instr->displacement_size);
@@ -72,6 +72,7 @@ bool handle_1byte_instruction(Instruction *instr) {
             } else {
                 instr->immediate = BYTE_INCREMENT(instr->opcode);
             }
+        }
         instr->immediate_size += additional_immediate;
     }
     return true;

@@ -1,0 +1,2 @@
+call eax
+ud0

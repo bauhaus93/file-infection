@@ -1,11 +1,10 @@
 tags
-build*/
-release/
-debug/
+checksum_list.h
+string_generator.h
+string_generator.c
+build-*/
 shared/
-mxe/
 vms/
+opcode_maps/
 executables/
 __pycache__/
-*.xcf
-

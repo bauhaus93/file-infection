@@ -7,6 +7,9 @@
 
 static bool has_modrm(uint8_t opcode);
 static bool is_valid_opcode(uint8_t opcode);
+static bool has_immediate_Ib(uint8_t opcode);
+static bool has_immediate_Jz(uint8_t opcode);
+static uint8_t get_immediate_size(const Instruction *instr);
 
 bool handle_2byte_instruction(Instruction *instr) {
     if (instr == NULL || !is_valid_opcode(instr->opcode[1])) {
@@ -33,22 +36,67 @@ bool handle_2byte_instruction(Instruction *instr) {
         }
     }
 
+    instr->immediate_size = get_immediate_size(instr);
+    if (instr->immediate_size > 0) {
+        if (instr->displacement != NULL) {
+            instr->immediate =
+                BYTE_OFFSET(instr->displacement, instr->displacement_size);
+        } else if (instr->sib != NULL) {
+            instr->immediate = BYTE_INCREMENT(instr->sib);
+        } else if (instr->modrm != NULL) {
+            instr->immediate = BYTE_INCREMENT(instr->modrm);
+        } else {
+            instr->immediate = BYTE_OFFSET(instr->opcode, 2);
+        }
+    }
+
     return true;
 }
 
 static bool is_valid_opcode(uint8_t opcode) {
-    return true; // TODO: add check
+    return !(opcode_in_range(opcode, 0x1C, 0x1E) ||
+             opcode_in_range(opcode, 0x24, 0x27) ||
+             opcode_in_range(opcode, 0x38, 0x3F) || opcode == 0x07 ||
+             opcode == 0x0A || opcode == 0x0C || opcode == 0x0E ||
+             opcode == 0x36 || opcode == 0x0F || opcode == 0x19 ||
+             opcode == 0xA6 || opcode == 0xA7);
 }
 
 static bool has_modrm(uint8_t opcode) {
     return opcode_in_range(opcode, 0x00, 0x03) ||
+           opcode_in_range(opcode, 0x1A, 0x1B) ||
            opcode_in_range(opcode, 0x10, 0x28) ||
            opcode_in_range(opcode, 0x29, 0x2F) ||
-           opcode_in_range(opcode, 0x40, 0x7F) ||
-           opcode_in_range(opcode, 0x90, 0xF7) ||
+           opcode_in_range(opcode, 0x40, 0x6F) ||
+           opcode_in_range(opcode, 0x70, 0x76) ||
+           opcode_in_range(opcode, 0x78, 0x7F) ||
+           opcode_in_range(opcode, 0x90, 0x97) ||
+           opcode_in_range(opcode, 0xA3, 0xA7) ||
+           opcode_in_range(opcode, 0xB0, 0xF7) ||
            opcode_in_range(opcode, 0x98, 0x9F) ||
            opcode_in_range(opcode, 0xAB, 0xAF) ||
-           opcode_in_range(opcode, 0xB8, 0xBF) ||
+           opcode_in_range(opcode, 0xBA, 0xBF) ||
            opcode_in_range(opcode, 0xD8, 0xFE) ||
-           opcode_in_range(opcode, 0xDF, 0xEF);
+           opcode_in_range(opcode, 0xDF, 0xEF) || opcode == 0x0D ||
+           opcode == 0x1F || opcode == 0xB8 || opcode == 0xFF;
+}
+
+static bool has_immediate_Ib(uint8_t opcode) {
+    return opcode_in_range(opcode, 0xC4, 0xC6) || opcode == 0x70 ||
+           opcode == 0xA4 || opcode == 0xAC || opcode == 0xC2;
+}
+
+static bool has_immediate_Jz(uint8_t opcode) {
+    return opcode_in_range(opcode, 0x80, 0x8F);
+}
+
+static uint8_t get_immediate_size(const Instruction *instr) {
+    uint8_t opcode = instr->opcode[1];
+    if (has_immediate_Ib(opcode)) {
+        return get_size_by_operand_type(OPERAND_TYPE_B, instr->operand_size);
+    } else if (has_immediate_Jz(opcode)) {
+        return get_size_by_operand_type(OPERAND_TYPE_Z, instr->operand_size);
+    } else {
+        return 0;
+    }
 }

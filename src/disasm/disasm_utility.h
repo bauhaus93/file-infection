@@ -5,6 +5,8 @@
 #include <stdint.h>
 
 bool opcode_in_range(uint8_t opcode, uint8_t low, uint8_t high);
+uint8_t get_col(uint8_t opcode);
+uint8_t get_row(uint8_t opcode);
 uint8_t get_modrm_mod(uint8_t modrm);
 uint8_t get_modrm_rm(uint8_t modrm);
 uint8_t get_modrm_reg(uint8_t modrm);

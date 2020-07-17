@@ -1,0 +1,54 @@
+;Group 17
+
+blsr eax, [ebx]
+blsmsk eax, [ebx]
+blsi eax, [ebx]
+
+vzeroupper
+vzeroall
+
+
+
+;0xE0-0xE7
+vpavgb xmm0, [eax]
+vpsraw xmm0, [eax]
+vpsrad xmm0, [eax]
+vpavgw xmm0, [eax]
+vpmulhuw xmm0, [eax]
+vpmulhw xmm0, [eax]
+vcvttpd2dq xmm0, [eax]
+vmovntdq [eax], xmm0
+vcvtdq2pd xmm0, [eax]
+vcvtpd2dq xmm0, [eax]
+
+;0xE8-0xEF
+vpsubsb xmm0, [eax]
+vpsubsw xmm0, [eax]
+vpminsw xmm0, [eax]
+vpor xmm0, [eax]
+vpaddsb xmm0, [eax]
+vpaddsw xmm0, [eax]
+vpmaxsw xmm0, [eax]
+vpxor xmm0, [eax]
+
+;0xF0-0xF7
+vpsllw xmm0, [eax]
+vpslld xmm0, [eax]
+vpsllq xmm0, [eax]
+vpmuludq xmm0, [eax]
+vpmaddwd xmm0, [eax]
+vpsadbw xmm0, [eax]
+vmaskmovdqu xmm0, xmm1
+vlddqu xmm0, [eax]
+
+;0xF8-0xFF
+vpsubb xmm0, [eax]
+vpsubw xmm0, [eax]
+vpsubd xmm0, [eax]
+vpsubq xmm0, [eax]
+vpaddb xmm0, [eax]
+vpaddw xmm0, [eax]
+vpaddd xmm0, [eax]
+
+
+

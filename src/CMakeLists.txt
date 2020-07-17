@@ -1,19 +1,19 @@
 add_sources(code_begin.c)
 
 add_sources(
-    code_begin.c
-    infection_thread.c
-    infect.c
-    utility.c
-    pe.c
-    oep.c
-    function.c
-    string_generator.c
-    checksum.c
-    process_info.c
-    delta.c
-	memory.c)
+  code_begin.c
+  infection_thread.c
+  infect.c
+  utility.c
+  pe.c
+  oep.c
+  function.c
+  string_generator.c
+  checksum.c
+  process_info.c
+  delta.c
+  memory.c)
 
 add_subdirectory(disasm)
 
-add_sources( code_end.c)
+add_sources(code_end.c)
