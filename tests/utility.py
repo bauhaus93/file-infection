@@ -4,6 +4,7 @@ import subprocess
 import tempfile
 import uuid
 import ctypes
+import threading
 
 logger = logging.getLogger()
 
@@ -94,9 +95,35 @@ def check_instructions(file_path, bit_width, lib_path):
     return mismatches == 0
 
 
-def compile_instruction(instruction, bit_width, silent_error=False):
+def validate_instructions_binary(instructions, bit_width):
     input_file = os.path.join(
         tempfile.gettempdir(), str(os.getpid()) + "_" + str(uuid.uuid4()) + ".s"
+    )
+    with open(input_file, "w") as f:
+        f.write(f"[bits {bit_width}]\n" + "\n".join(instructions))
+
+    output_file = os.path.join(
+        tempfile.gettempdir(), str(os.getpid()) + "_" + str(uuid.uuid4()) + ".bin"
+    )
+    result = subprocess.call(["nasm", "-o", output_file, input_file], stdout = subprocess.DEVNULL, stderr= subprocess.DEVNULL)
+    os.remove(input_file)
+    if result == 0:
+        os.remove(output_file)
+        return instructions
+    elif len(instructions) == 1:
+        return []
+    else:
+        left = instructions[:len(instructions)//2]
+        right = instructions[len(instructions)//2:]
+
+        valid = []
+        valid.extend(validate_instructions_binary(left, bit_width))
+        valid.extend(validate_instructions_binary(right, bit_width))
+        return valid
+
+def compile_instruction(instruction, bit_width, silent_error=False):
+    input_file = os.path.join(
+        tempfile.gettempdir(), str(os.getpid()) + "_" + str(threading.current_thread().ident) + "_" + str(uuid.uuid4()) + ".s"
     )
     with open(input_file, "w") as f:
         f.write(f"[bits {bit_width}]\n{instruction}")
