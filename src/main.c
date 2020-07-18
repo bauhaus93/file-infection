@@ -36,7 +36,7 @@ int main(int argc, char **argv) {
     PRINT_DEBUG("bit_width: %d", IS_32_BIT ? 32 : IS_64_BIT ? 64 : 0);
     PRINT_DEBUG("code_begin: 0x%p", code_begin);
     PRINT_DEBUG("code_end: 0x%p", code_end);
-    PRINT_DEBUG("code_size: %.2fkiB", (float)CODE_SIZE / 1024.);
+    PRINT_DEBUG("code_size: %.2fkiB", (float)BYTE_DIFF(code_end, code_begin) / 1024.);
     uint8_t sane_function_locations = check_functions();
     PRINT_DEBUG("sane function locations: %s",
                 sane_function_locations ? "yes" : "no");

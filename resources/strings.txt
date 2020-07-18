@@ -1,3 +1,3 @@
 KERNEL32_PATH c:\windows\system32\kernel32.dll
-EXE_SEARCH_PATTERN \\10.0.2.4\qemu\target\*.exe
+EXE_SEARCH_PATTERN \\10.0.2.4\qemu\*.exe
 SECTION_NAME .hello
