@@ -180,11 +180,11 @@ static void handle_opcode_extension(Instruction *instr) {
 
 static bool is_valid_opcode(const Instruction *instr) {
     if (instr->opcode_size == 1) {
-        return is_valid_opcode_1byte(instr->opcode[0]);
+        return is_valid_opcode_1byte(instr);
     } else if (instr->opcode_size == 2) {
-        return is_valid_opcode_2byte(instr->opcode[1]);
+        return is_valid_opcode_2byte(instr);
     } else if (instr->opcode_size == 3) {
-        return is_valid_opcode_3byte(instr->opcode[2]);
+        return is_valid_opcode_3byte(instr);
     } else {
         return false;
     }
@@ -192,9 +192,11 @@ static bool is_valid_opcode(const Instruction *instr) {
 
 static bool has_modrm(const Instruction *instr) {
     if (instr->opcode_size == 1) {
-        return has_modrm_1byte(instr->opcode[0]);
+        return has_modrm_1byte(instr);
     } else if (instr->opcode_size == 2) {
-        return has_modrm_2byte(instr->opcode[1]);
+        return has_modrm_2byte(instr);
+    } else if (instr->opcode_size == 3) {
+        return has_modrm_3byte(instr);
     } else {
         return false;
     }
@@ -202,9 +204,11 @@ static bool has_modrm(const Instruction *instr) {
 
 static bool has_opcode_extension(const Instruction *instr) {
     if (instr->opcode_size == 1) {
-        return has_opcode_extension_1byte(instr->opcode[0]);
+        return has_opcode_extension_1byte(instr);
     } else if (instr->opcode_size == 2) {
-        return has_opcode_extension_2byte(instr->opcode[1]);
+        return has_opcode_extension_2byte(instr);
+    } else if (instr->opcode_size == 3) {
+        return has_opcode_extension_3byte(instr);
     } else {
         return 0;
     }
@@ -215,6 +219,8 @@ static uint8_t get_immediate_size(const Instruction *instr) {
         return get_immediate_size_1byte(instr);
     } else if (instr->opcode_size == 2) {
         return get_immediate_size_2byte(instr);
+    } else if (instr->opcode_size == 3) {
+        return get_immediate_size_3byte(instr);
     } else {
         return 0;
     }
@@ -225,6 +231,8 @@ static uint8_t get_opcode_extension_immediate_size(const Instruction *instr) {
         return get_opcode_extension_immediate_size_1byte(instr);
     } else if (instr->opcode_size == 2) {
         return get_opcode_extension_immediate_size_2byte(instr);
+    } else if (instr->opcode_size == 3) {
+        return get_opcode_extension_immediate_size_3byte(instr);
     } else {
         return 0;
     }

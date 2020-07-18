@@ -40,14 +40,18 @@ STANDARD_REGS = create_standard_regs()
 SSE_MMX_REGS = create_sse_mmx_regs()
 DEBUG_REGS = list([f"dr{i}" for i in range(7)])
 CONTROL_REGS = list([f"dr{i}" for i in range(7)])
+SEGMENTS = ["fs", "gs", "cs", "ss", "ds", "es"]
 
 PREFIXES = ["rep", "repe", "repne", "repnz", "repz", "lock"]
 
 TARGET_TEMPLATES = [
-    *STANDARD_REGS,
-    *SSE_MMX_REGS,
-    *DEBUG_REGS,
-    *CONTROL_REGS,
+    "eax",
+    "ax",
+    "al",
+    "xmm0",
+    "mm0",
+    "dr0",
+    "cr0",
     "0",
     "[0]",
 ]
@@ -71,41 +75,106 @@ def filter_instructions(instructions, arguments):
     i = 0
     last_print = time.time()
     with ThreadPoolExecutor() as executor:
-        for (instr, valid) in executor.map(lambda instr: (instr, compiles_any(instr, arguments)), instructions):
+        for (instr, valid) in executor.map(
+            lambda instr: (instr, compiles_any(instr, arguments)), instructions
+        ):
             if valid:
                 valids.append(instr)
             i += 1
-            if time.time() - last_print  > 5:
+            if time.time() - last_print > 5:
                 last_print = time.time()
                 diff = time.time() - start
                 if diff > 0:
                     rate = i / diff
                     if rate > 0:
                         eta = (len(instructions) - i) / rate
-                        eta = f"{int(eta // 60):2}m {int(eta % 60):2}s" if eta >= 60 else f"{int(eta):2}s"
+                        eta = (
+                            f"{int(eta // 60):2}m {int(eta % 60):2}s"
+                            if eta >= 60
+                            else f"{int(eta):2}s"
+                        )
                     else:
                         eta = "NA"
                 else:
                     eta = "NA"
-                logger.info(f"Progress: {100. * i / len(instructions):4.1f}% | ETA: {eta:10s}")
-            
+                logger.info(
+                    f"Progress: {100. * i / len(instructions):4.1f}% | ETA: {eta:10s}"
+                )
     return valids
 
 
 def filter_argument_count(instructions, arg_count):
-    combinations = list(itertools.combinations(TARGET_TEMPLATES, arg_count))
+    if arg_count <= 2:
+        combinations = list(itertools.combinations(TARGET_TEMPLATES, arg_count))
+    elif arg_count == 3:
+        combinations = list(
+            itertools.product(TARGET_TEMPLATES, TARGET_TEMPLATES, ["0FFh",])
+        )
+    else:
+        logger.error("Only 0-3 args allowed")
+        return []
     return filter_instructions(instructions, combinations)
 
 
 def filter_immediate(instructions, arg_count):
     IMMEDIATE_ARGS = ["0FFh", "0FFFFh", "0FFFFFFFFh"]
     if arg_count == 1:
-        combinations = IMMEDIATE_ARGS
+        combinations = list(map(lambda e: (e,), IMMEDIATE_ARGS))
     elif arg_count == 2:
         combinations = list(itertools.product(TARGET_TEMPLATES, IMMEDIATE_ARGS))
     else:
-        logger.error(f"Only 1 or 2 args allowed")
-        return []
+        combinations = list(
+            itertools.product(TARGET_TEMPLATES, TARGET_TEMPLATES, IMMEDIATE_ARGS)
+        )
+    return filter_instructions(instructions, combinations)
+
+
+def filter_dest_reg_standard(instructions):
+    combinations = list(itertools.product(STANDARD_REGS, TARGET_TEMPLATES))
+    combinations.extend(list(map(lambda e: (e,), STANDARD_REGS)))
+    combinations.extend(
+        list(itertools.product(STANDARD_REGS, TARGET_TEMPLATES, ["0FFh",]))
+    )
+    return filter_instructions(instructions, combinations)
+
+
+def filter_dest_reg_sse_mmx(instructions):
+    combinations = list(itertools.product(SSE_MMX_REGS, TARGET_TEMPLATES))
+    combinations.extend(list(map(lambda e: (e,), SSE_MMX_REGS)))
+    combinations.extend(
+        list(itertools.product(SSE_MMX_REGS, TARGET_TEMPLATES, ["0FFh",]))
+    )
+    return filter_instructions(instructions, combinations)
+
+
+def filter_src_reg_standard(instructions):
+    combinations = list(itertools.product(TARGET_TEMPLATES, STANDARD_REGS))
+    combinations.extend(
+        list(itertools.product(TARGET_TEMPLATES, STANDARD_REGS, ["0FFh",]))
+    )
+    return filter_instructions(instructions, combinations)
+
+
+def filter_src_reg_sse_mmx(instructions):
+    combinations = list(itertools.product(TARGET_TEMPLATES, SSE_MMX_REGS))
+    combinations.extend(
+        list(itertools.product(TARGET_TEMPLATES, SSE_MMX_REGS, ["0FFh",]))
+    )
+    return filter_instructions(instructions, combinations)
+
+
+def filter_dest_mem(instructions):
+    MEM_ARGS = ["[0FFFFFFFFh]", "[eax]"]
+    combinations = list(itertools.product(MEM_ARGS, TARGET_TEMPLATES))
+    combinations.extend(list(map(lambda e: (e,), MEM_ARGS)))
+    combinations.extend(list(itertools.product(MEM_ARGS, TARGET_TEMPLATES, ["0FFh",])))
+    return filter_instructions(instructions, combinations)
+
+
+def filter_src_mem(instructions):
+    MEM_ARGS = ["[0FFFFFFFFh]", "[eax]"]
+    combinations = list(itertools.product(TARGET_TEMPLATES, MEM_ARGS))
+    combinations.extend(list(itertools.product(TARGET_TEMPLATES, MEM_ARGS, ["0FFh",])))
     return filter_instructions(instructions, combinations)
 
 
@@ -124,79 +193,150 @@ def random_address_register():
     return random.choice(ADDRESS_REGS)
 
 
-def random_register():
-    return random.choice([*STANDARD_REGS, *SSE_MMX_REGS])
+def random_standard_register():
+    return random.choice(STANDARD_REGS)
+
+
+def random_sse_mmx_register():
+    return random.choice(SSE_MMX_REGS)
+
+
+def random_segment():
+    return random.choice(SEGMENTS)
 
 
 def random_prefix():
     return random.choice(PREFIXES)
 
 
-def create_direct_memory():
-    return random_hex_string()
+def random_memory_location():
+    n = random.randint(0, 4)
+    if n == 0:
+        return f"[{random_hex_string()}]"
+    elif n == 1:
+        return f"[{random_address_register()}]"
+    elif n == 2:
+        return f"[{random_address_register()} + {random_hex_string()}]"
+    elif n == 3:
+        scale = str(random.choice([1, 2, 4]))
+        return f"[{random_address_register()} + {scale} * {random_address_register()}]"
+    elif n == 4:
+        offset = random.choice([random_address_register(), random_hex_string()])
+        return f"[{random_segment()}:{offset}]"
 
 
-def create_reg_offset_memory():
-    op = random.choice(["+", "-"])
-    return f"{random_address_register()} {op} {random_hex_string()}"
+def choose_non_empty_intersection(fixed, options, instruction_info):
+    return random.choice(
+        list(
+            filter(
+                lambda opt: len(
+                    instruction_info[fixed].intersection(instruction_info[opt])
+                )
+                > 0,
+                options,
+            )
+        )
+    )
 
 
-def create_sib_memory():
-    op = random.choice(["+", "-"])
-    size = random.choice(["1", "2", "4"])
-    return f"{random_address_register()} {op} {size} * {random_address_register()}"
+def create_random_instruction(instruction_info):
+    num_args = random.choices([0, 1, 2, 3], weights=[1, 5, 10, 5])[0]
 
+    all_dest = ["dest_reg_std", "dest_reg_sse_mmx", "dest_mem"]
+    if num_args == 0:
+        instr = random.choice(list(instruction_info["arg0"]))
+        dest_type = None
+        src_type = None
+    elif num_args == 1:
+        all_dest.append("imm1")
+        instr_argc = "arg1"
+        dest_type = random.choice(
+            list(
+                filter(
+                    lambda opt: len(
+                        instruction_info[instr_argc].intersection(instruction_info[opt])
+                    )
+                    > 0,
+                    all_dest,
+                )
+            )
+        )
+        instr = random.choice(
+            list(instruction_info[instr_argc].intersection(instruction_info[dest_type]))
+        )
+        src_type = None
+    elif num_args == 2:
+        all_src = ["imm2", "src_mem", "src_reg_std", "src_reg_sse_mmx"]
+        dest_src_combs = list(itertools.product(all_dest, all_src))
+        instr_argc = "arg2"
+        dest_type, src_type = random.choice(
+            list(
+                filter(
+                    lambda opt_comb: len(
+                        instruction_info[instr_argc]
+                        .intersection(instruction_info[opt_comb[0]])
+                        .intersection(instruction_info[opt_comb[1]])
+                    )
+                    > 0,
+                    dest_src_combs,
+                )
+            )
+        )
+        instr = random.choice(
+            list(
+                instruction_info[instr_argc]
+                .intersection(instruction_info[dest_type])
+                .intersection(instruction_info[src_type])
+            )
+        )
+    elif num_args == 3:
+        all_src = ["imm3", "src_mem", "src_reg_std", "src_reg_sse_mmx"]
+        dest_src_combs = list(itertools.product(all_dest, all_src))
+        instr_argc = "arg3"
+        dest_type, src_type = random.choice(
+            list(
+                filter(
+                    lambda opt_comb: len(
+                        instruction_info[instr_argc]
+                        .intersection(instruction_info[opt_comb[0]])
+                        .intersection(instruction_info[opt_comb[1]])
+                    )
+                    > 0,
+                    dest_src_combs,
+                )
+            )
+        )
+        instr = random.choice(
+            list(
+                instruction_info[instr_argc]
+                .intersection(instruction_info[dest_type])
+                .intersection(instruction_info[src_type])
+            )
+        )
 
-def create_random_value():
-    if random.random() < 0.5:
-        return random_hex_string()
-    else:
-        return random_register()
+    args = []
+    if dest_type == "dest_reg_std":
+        args.append(random_standard_register())
+    elif dest_type == "dest_reg_sse_mmx":
+        args.append(random_sse_mmx_register())
+    elif dest_type == "dest_mem":
+        args.append(random_memory_location())
+    elif dest_type == "imm1":
+        args.append(random_hex_string())
 
+    if src_type == "imm2":
+        args.append(random_hex_string())
+    elif src_type == "src_mem":
+        args.append(random_memory_location())
+    elif src_type == "src_reg_std":
+        args.append(random_standard_register())
+    elif src_type == "src_reg_sse_mmx":
+        args.append(random_sse_mmx_register())
 
-def create_random_mem_location():
-    n = random.random()
-    if n < 0.1:
-        loc = create_direct_memory()
-    elif n < 0.5:
-        loc = create_reg_offset_memory()
-    else:
-        loc = create_sib_memory()
-    return f"[{loc}]"
+    if num_args == 3:
+        args.append(random_hex_string()[:3] + "h")
 
-
-def create_random_instruction(instructions):
-    num_args = random.choice([0, *([1] * 10), *([2] * 10)])
-    if num_args > 0:
-        dest_mem = random.choice([True, False])
-        if num_args == 2:
-            if dest_mem:
-                src_mem = False
-            else:
-                src_mem = random.choice([True, False])
-
-            if src_mem:
-                src = create_random_mem_location()
-            else:
-                src = create_random_value()
-
-        if dest_mem:
-            dest = create_random_mem_location()
-        else:
-            dest = create_random_value()
-
-    if random.random() < 0.05:
-        line = random_prefix() + " "
-    else:
-        line = ""
-
-    line += random.choice(instructions)
-
-    if num_args >= 1:
-        line += f" {dest}"
-    if num_args >= 2:
-        line += f", {src}"
-    return line
+    return (instr + " " + ", ".join(args)).strip()
 
 
 def collect_instructions(file_name):
@@ -230,13 +370,13 @@ def discover_instructions(directory):
     return list(set(instrs).difference(set(["ud0", "ud1", "ud2"])))
 
 
-def create_random_instructions_file(filename, num, instructions):
+def create_random_instructions_file(filename, num, instruction_info):
     with open(filename, "w") as f:
         logger.info(f"Creating {num} random instructions")
         for i in range(num):
-            instr = create_random_instruction(instructions)
+            instr = create_random_instruction(instruction_info)
             while compile_instruction(instr, 32, silent_error=True) is None:
-                instr = create_random_instruction(instructions)
+                instr = create_random_instruction(instruction_info)
             f.write(instr + "\n")
             if num >= 10 and i % (num // 10) == 0:
                 logger.info(f"Progress: {100. * (i / num):.1f}%")
@@ -270,6 +410,13 @@ def get_filtered_instructions(target_file, fallback_function):
 
 
 def collect_instruction_info(instructions, root_dir):
+    if not os.path.isdir(root_dir):
+        try:
+            os.makedirs(root_dir)
+        except OSError as e:
+            logger.error(f"Could not create working dir: {e}")
+            return
+
     instructions = set(instructions)
 
     arg0_path = os.path.join(root_dir, "arg0.txt")
@@ -290,11 +437,70 @@ def collect_instruction_info(instructions, root_dir):
         ),
     )
 
+    arg3_path = os.path.join(root_dir, "arg3.txt")
+    arg3 = get_filtered_instructions(
+        arg3_path,
+        lambda: filter_argument_count(
+            instructions.difference(arg0).difference(arg1).difference(arg2), 3
+        ),
+    )
+
     imm1_path = os.path.join(root_dir, "imm1.txt")
     imm1 = get_filtered_instructions(imm1_path, lambda: filter_immediate(arg1, 1))
 
     imm2_path = os.path.join(root_dir, "imm2.txt")
     imm2 = get_filtered_instructions(imm2_path, lambda: filter_immediate(arg2, 2))
+
+    imm3_path = os.path.join(root_dir, "imm3.txt")
+    imm3 = get_filtered_instructions(imm3_path, lambda: filter_immediate(arg3, 3))
+
+    dest_reg_std_path = os.path.join(root_dir, "dest_reg_std.txt")
+    dest_reg_std = get_filtered_instructions(
+        dest_reg_std_path,
+        lambda: filter_dest_reg_standard(arg1.union(arg2).union(arg3)),
+    )
+
+    dest_reg_sse_mmx_path = os.path.join(root_dir, "dest_reg_sse_mmx.txt")
+    dest_reg_sse_mmx = get_filtered_instructions(
+        dest_reg_sse_mmx_path,
+        lambda: filter_dest_reg_sse_mmx(arg1.union(arg2).union(arg3)),
+    )
+
+    src_reg_std_path = os.path.join(root_dir, "src_reg_std.txt")
+    src_reg_std = get_filtered_instructions(
+        src_reg_std_path, lambda: filter_src_reg_standard(arg2.union(arg3))
+    )
+
+    src_reg_sse_mmx_path = os.path.join(root_dir, "src_reg_sse_mmx.txt")
+    src_reg_sse_mmx = get_filtered_instructions(
+        src_reg_sse_mmx_path, lambda: filter_src_reg_sse_mmx(arg2.union(arg3))
+    )
+
+    dest_mem_path = os.path.join(root_dir, "dest_mem.txt")
+    dest_mem = get_filtered_instructions(
+        dest_mem_path, lambda: filter_dest_mem(arg1.union(arg2).union(arg3))
+    )
+
+    src_mem_path = os.path.join(root_dir, "src_mem.txt")
+    src_mem = get_filtered_instructions(
+        src_mem_path, lambda: filter_src_mem(arg2.union(arg3))
+    )
+
+    return {
+        "arg0": arg0,
+        "arg1": arg1,
+        "arg2": arg2,
+        "arg3": arg3,
+        "imm1": imm1,
+        "imm2": imm2,
+        "imm3": imm3,
+        "dest_reg_std": dest_reg_std,
+        "dest_reg_sse_mmx": dest_reg_sse_mmx,
+        "dest_mem": dest_mem,
+        "src_reg_std": src_reg_std,
+        "src_reg_sse_mmx": src_reg_sse_mmx,
+        "src_mem": src_mem,
+    }
 
 
 if __name__ == "__main__":
@@ -308,6 +514,14 @@ if __name__ == "__main__":
         type=str,
         required=True,
         help="Directory in which to search for .s files",
+    )
+
+    parser.add_argument(
+        "--info-dir",
+        metavar="DIRECTORY",
+        type=str,
+        required=True,
+        help="Where to save/load instruction information",
     )
     parser.add_argument(
         "--output-file",
@@ -329,12 +543,12 @@ if __name__ == "__main__":
     logger.info("Creating random test file")
     random.seed(args.seed)
     input_dir = os.path.abspath(args.input_dir)
+    info_dir = os.path.abspath(args.info_dir)
     output_file = os.path.abspath(args.output_file)
     instructions = discover_instructions(input_dir)
 
     logger.info(f"Seed is '{args.seed}'")
     logger.info(f"Instruction pool: {len(instructions)}")
 
-    collect_instruction_info(instructions, os.path.abspath("info"))
-
-    # create_random_instructions_file(output_file, args.count, instructions)
+    instruction_info = collect_instruction_info(instructions, info_dir)
+    create_random_instructions_file(output_file, args.count, instruction_info)

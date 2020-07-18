@@ -19,25 +19,24 @@ if(BUILD_TESTING)
   macro(create_random_instruction_test)
     set(TEST_DRIVER
 	"${CMAKE_CURRENT_SOURCE_DIR}/generate_random_instructions.py")
-    set(TEST_FILE "${CMAKE_CURRENT_BINARY_DIR}/random_${ARGV0}.s")
+    set(TEST_FILE "${CMAKE_CURRENT_BINARY_DIR}/${ARGV0}.s")
 
-    if(NOT EXISTS ${TEST_FILE})
-      execute_process(
-	COMMAND
-	  python3 ${TEST_DRIVER} --output-file ${TEST_FILE} --seed ${ARGV0}
-	  --count ${ARGV1} --input-dir ${CMAKE_CURRENT_SOURCE_DIR})
+    execute_process(
+      COMMAND
+	python3 ${TEST_DRIVER} --output-file ${TEST_FILE} --seed ${ARGV0}
+	--count ${ARGV1} --input-dir ${CMAKE_CURRENT_SOURCE_DIR} --info-dir
+	${CMAKE_CURRENT_BINARY_DIR}/instruction_info)
 
-      add_test(
-	NAME ${ARGV0}
-	COMMAND
-	  python3 ${CMAKE_CURRENT_SOURCE_DIR}/instruction_test_driver.py
-	  --bit-width 32 --disasm-lib "$<TARGET_FILE:${LIB_NAME}>" ${TEST_FILE})
+    add_test(
+      NAME test_${ARGV0}
+      COMMAND
+	python3 ${CMAKE_CURRENT_SOURCE_DIR}/instruction_test_driver.py
+	--bit-width 32 --disasm-lib "$<TARGET_FILE:${LIB_NAME}>" ${TEST_FILE})
 
-      set_tests_properties(
-	${ARGV0}
-	PROPERTIES REQUIRED_FILES
-		   "$<TARGET_FILE:${LIB_NAME}>;${TEST_DRIVER};${TEST_FILE}")
-    endif()
+    set_tests_properties(
+      test_${ARGV0}
+      PROPERTIES REQUIRED_FILES
+		 "$<TARGET_FILE:${LIB_NAME}>;${TEST_DRIVER};${TEST_FILE}")
   endmacro()
 
   list(
@@ -67,7 +66,8 @@ if(BUILD_TESTING)
   create_instruction_size_test(instructions_op2_basic)
   create_instruction_size_test(suspects)
   create_instruction_size_test(instructions_op2_extensions)
+  create_instruction_size_test(instructions_op3_basic)
 
-  create_random_instruction_test("RandomTest0_1000" 1000)
+  create_random_instruction_test("random_01_1000" 1000)
 
 endif()

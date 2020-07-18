@@ -9,7 +9,8 @@
 static bool has_immediate_Ib(uint8_t opcode);
 static bool has_immediate_Jz(uint8_t opcode);
 
-bool is_valid_opcode_2byte(uint8_t opcode) {
+bool is_valid_opcode_2byte(const Instruction *instr) {
+    uint8_t opcode = instr->opcode[1];
     return !(opcode_in_range(opcode, 0x1C, 0x1E) ||
              opcode_in_range(opcode, 0x24, 0x27) ||
              opcode_in_range(opcode, 0x38, 0x3F) || opcode == 0x07 ||
@@ -18,7 +19,8 @@ bool is_valid_opcode_2byte(uint8_t opcode) {
              opcode == 0xA6 || opcode == 0xA7);
 }
 
-bool has_modrm_2byte(uint8_t opcode) {
+bool has_modrm_2byte(const Instruction *instr) {
+    uint8_t opcode = instr->opcode[1];
     return opcode_in_range(opcode, 0x00, 0x03) ||
            opcode_in_range(opcode, 0x1A, 0x1B) ||
            opcode_in_range(opcode, 0x10, 0x28) ||
@@ -37,7 +39,8 @@ bool has_modrm_2byte(uint8_t opcode) {
            opcode == 0x1F || opcode == 0xB8 || opcode == 0xFF;
 }
 
-bool has_opcode_extension_2byte(uint8_t opcode) {
+bool has_opcode_extension_2byte(const Instruction *instr) {
+    uint8_t opcode = instr->opcode[1];
     return opcode_in_range(opcode, 0x71, 0x73) || opcode == 0x00 ||
            opcode == 0x01 || opcode == 0xBA || opcode == 0xC7 ||
            opcode == 0xB9 || opcode == 0xAE || opcode == 0x18;

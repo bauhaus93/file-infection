@@ -19,11 +19,13 @@ static bool has_immediate_Ob(uint8_t opcode);
 static bool has_immediate_Ov(uint8_t opcode);
 
 bool is_valid_opcode_1byte(
-    uint8_t opcode) { // ignoring invalid opcode extensions
+    const Instruction *instr) { // ignoring invalid opcode extensions
+    uint8_t opcode = instr->opcode[0];
     return opcode != 0xD6 && (!opcode_in_range(opcode, 0xD8, 0xDF));
 }
 
-bool has_modrm_1byte(uint8_t opcode) {
+bool has_modrm_1byte(const Instruction *instr) {
+    uint8_t opcode = instr->opcode[0];
     return opcode_in_range(opcode, 0x00, 0x33) ||
            opcode_in_range(opcode, 0x08, 0x3B) ||
            opcode_in_range(opcode, 0x62, 0x63) ||
@@ -36,7 +38,8 @@ bool has_modrm_1byte(uint8_t opcode) {
            opcode == 0x6B;
 }
 
-bool has_opcode_extension_1byte(uint8_t opcode) {
+bool has_opcode_extension_1byte(const Instruction *instr) {
+    uint8_t opcode = instr->opcode[0];
     return opcode_in_range(opcode, 0x80, 0x83) ||
            opcode_in_range(opcode, 0xD0, 0xD3) || opcode == 0x8F ||
            opcode == 0xC0 || opcode == 0xC1 || opcode == 0xF6 ||

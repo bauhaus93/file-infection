@@ -50,5 +50,102 @@ vpaddb xmm0, [eax]
 vpaddw xmm0, [eax]
 vpaddd xmm0, [eax]
 
+;########### 3 BYTE ############
+
+;0x00-0x0F
+vpshufb xmm0, [eax]
+vphaddw xmm0, [eax]
+vphaddd xmm0, [eax]
+vphaddsw xmm0, [eax]
+vpmaddubsw xmm0, [eax]
+vphsubw xmm0, [eax]
+vphsubd xmm0, [eax]
+vphsubsw xmm0, [eax]
+vsignb xmm0, [eax]
+vsignw xmm0, [eax]
+vsignd xmm0, [eax]
+vpmulhrsw xmm0, [eax]
+vpermilps xmm0, [eax]
+vpermilpd xmm0, [eax]
+vtestps xmm0, [eax]
+vtestpd xmm0, [eax]
+
+;0x10-0x1F
+vcvtph2ps xmm0, 0FFh
+vpermps xmm0, [eax]
+vptest xmm0, [eax]
+vbroadcastss xmm0, [eax]
+vbroadcastsd xmm0, [eax]
+vbroadcastf128 xmm0, [eax]
+vpabsb xmm0, [eax]
+vpabsw xmm0, [eax]
+vpabsd xmm0, [eax]
+
+;0x20-0x2F
+vpmovsxbw xmm0, [eax]
+vpmovsxbd xmm0, [eax]
+vpmovsxwd xmm0, [eax]
+vpmovsxwq xmm0, [eax]
+vpmovsxdq xmm0, [eax]
+vpmuldq xmm0, [eax]
+vpcmpeqq xmm0, [eax]
+vmovntdqa xmm0, [eax]
+vpackusdw xmm0, [eax]
+vmaskmovps xmm0, [eax]
+vmaskmovpd xmm0, [eax]
+vmaskmovps [eax], xmm0
+vmaskmovpd [eax], xmm0
+
+;0x30-0x3F
+vpmovzxbw xmm0, [eax]
+vpmovzxbd xmm0, [eax]
+vpmovzxbq xmm0, [eax]
+vpmovzxwd xmm0, [eax]
+vpmovzxwq xmm0, [eax]
+vpmovzxdq xmm0, [eax]
+vpermd xmm0, [eax]
+vpcmpgtq xmm0, [eax]
+vpminsb xmm0, [eax]
+vpminsd xmm0, [eax]
+vpminuw xmm0, [eax]
+vpminud xmm0, [eax]
+vpmaxsb xmm0, [eax]
+vpmaxsd xmm0, [eax]
+vpmaxuw xmm0, [eax]
+vpmaxud xmm0, [eax]
+
+;0x40-0x4F
+vpmulld xmm0, [eax]
+vphminposuw xmm0, [eax]
+vpsrlvd xmm0, [eax]
+vpsrlvq xmm0, [eax]
+vpsllvd xmm0, [eax]
+vpsllvq xmm0, [eax]
 
 
+;0x50-0x5F
+vpbroadcastd xmm0, [eax]
+vpbroadcastq xmm0, [eax]
+vpbroadcasti128 xmm0, [eax]
+
+;0x70-0x7F
+vpbroadcastb xmm0, [eax]
+vpbroadcastw xmm0, [eax]
+
+;0x80-0x8F
+vpmaskmovd xmm0, [eax]
+vpmaskmovq xmm0, [eax]
+vpmaskmovd [eax], xmm0
+vpmaskmovq [eax], xmm0
+
+
+########ALL VEX OMMITTED FROM 0x90 TILL 0xFF
+;0x90-0x97
+vgatherdd xmm0, [eax]
+vgatherdq xmm0, [eax]
+vgatherqd xmm0, [eax]
+vgatherqq xmm0, [eax]
+vgatherps xmm0, [eax]
+vgatherpd xmm0, [eax]
+vgatherqps xmm0, [eax]
+vgatherqpd xmm0, [eax]
