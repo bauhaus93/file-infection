@@ -28,12 +28,16 @@ static uint8_t get_opcode_extension_immediate_size(const Instruction *instr);
 
 Disassembler *init_disasm(void *start_address) {
     Disassembler *disasm = (Disassembler *)MALLOC(sizeof(Disassembler));
+    setup_disasm(start_address, disasm);
+    return disasm;
+}
+
+void setup_disasm(void *start_address, Disassembler *disasm) {
     if (disasm != NULL) {
         memzero(disasm, sizeof(Disassembler));
-        disasm->instr[0].start = start_address;
-        disasm->instr[0].end = start_address;
+        set_next_address(start_address, disasm);
+        disasm->next_addr = start_address;
     }
-    return disasm;
 }
 
 void destroy_disasm(Disassembler *disasm) {
@@ -42,23 +46,38 @@ void destroy_disasm(Disassembler *disasm) {
     }
 }
 
+void set_next_address(void *next_address, Disassembler *disasm) {
+    if (disasm != NULL) {
+        disasm->next_addr = next_address;
+    }
+}
+
 bool next_instruction(Disassembler *disasm) {
     if (disasm != NULL) {
-        void *next_addr = disasm->instr[disasm->index].end;
         disasm->index = (disasm->index + 1) % INSTRUCTION_HISTORY_SIZE;
-        return parse_instruction(next_addr, &disasm->instr[disasm->index]);
+        bool result =
+            parse_instruction(disasm->next_addr, &disasm->instr[disasm->index]);
+        disasm->next_addr = get_current_instruction(disasm)->end;
+        return result;
     }
     return false;
 }
 
 uint8_t get_current_instruction_size(Disassembler *disasm) {
     if (disasm != NULL) {
-        return get_instruction_size(&disasm->instr[disasm->index]);
+        return get_instruction_size(get_current_instruction(disasm));
     }
     return 0;
 }
 
-void print_current_instruction(Disassembler *disasm) {
+Instruction *get_current_instruction(Disassembler *disasm) {
+    if (disasm != NULL) {
+        return &disasm->instr[disasm->index];
+    }
+    return NULL;
+}
+
+void print_current_instruction(const Disassembler *disasm) {
     if (disasm != NULL) {
         print_instruction(&disasm->instr[disasm->index]);
     }

@@ -29,6 +29,14 @@ typedef struct {
 
 uint8_t get_instruction_size(const Instruction *instr);
 bool has_prefix(const Instruction *instr, uint8_t prefix);
+bool is_call(const Instruction *instr);
+bool is_call_direct_offset(const Instruction *instr);
+void *get_call_target(const Instruction *instr);
+bool is_return(const Instruction *instr);
+bool is_jump(const Instruction *instr);
+bool is_conditional_jump(const Instruction *instr);
+bool is_unconditional_jump(const Instruction *instr);
+void *get_jump_target(const Instruction *instr);
 void print_instruction(const Instruction *instr);
 
 #endif // INSTRUCTION_H

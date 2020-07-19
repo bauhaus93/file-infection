@@ -15,7 +15,7 @@
 #include "delta.h"
 #include "memory.h"
 
-static DWORD WINAPI infection_thread(LPVOID param);
+// static DWORD WINAPI infection_thread(LPVOID param);
 
 void spawn_infection_thread(void) {
     asm volatile("nop\nnop\nnop");
@@ -33,7 +33,7 @@ void spawn_infection_thread(void) {
     }
 }
 
-static DWORD WINAPI infection_thread(LPVOID param) {
+DWORD WINAPI infection_thread(LPVOID param) {
     PRINT_DEBUG("infection thread started");
     WIN32_FIND_DATAA find_data;
     HANDLE h_find;

