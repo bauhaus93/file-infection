@@ -10,14 +10,15 @@ typedef struct {
 } Function;
 
 typedef struct FunctionList_ {
-	Function * function;
-	struct FunctionList_ * next;
-}FunctionList;
+    Function *function;
+    struct FunctionList_ *next;
+} FunctionList;
 
-FunctionList *analyze_function(void *entrypoint, FunctionList * function_list);
-void free_function_list(FunctionList * function_list);
+FunctionList *analyze_function(void *entrypoint, FunctionList *function_list);
+void free_function_list(FunctionList *function_list);
 Function *top_function(FunctionList *function_list);
 CallList *collect_calls_from_function(Function *function);
-void print_function(const Function * function);
+size_t get_function_size(const Function *function);
+void print_function(const Function *function);
 
 #endif // DISASM_ANALYSIS_FUNCTION_H

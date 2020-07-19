@@ -21,7 +21,7 @@ CodeAnalysis *analyze_code(void **entry_points, size_t entrypoint_count,
 
     CallList *pending_calls = NULL;
     for (size_t i = 0; i < entrypoint_count; i++) {
-        pending_calls = push_call(entry_points[i], pending_calls);
+        pending_calls = push_call(entry_points[i], NULL, pending_calls);
     }
     CallList *checked_calls = NULL;
 
@@ -42,7 +42,8 @@ CodeAnalysis *analyze_code(void **entry_points, size_t entrypoint_count,
                                           top_function(analysis->function_list),
                                           min_addr, max_addr);
     }
-    PRINT_DEBUG("Found %d functions", function_count);
+    PRINT_DEBUG("Found %d functions, total size = %.2f kiB", function_count,
+                (float)get_code_size(analysis) / 1024.);
     return analysis;
 }
 
@@ -51,10 +52,21 @@ static void *get_next_entrypoint(CallList **pending_calls,
     if (*pending_calls != NULL) {
         void *entrypoint = top_call(*pending_calls);
         *pending_calls = pop_call(*pending_calls);
-        *checked_calls = push_call(entrypoint, *checked_calls);
+        *checked_calls = push_call(entrypoint, NULL, *checked_calls);
         return entrypoint;
     }
     return NULL;
+}
+
+size_t get_code_size(const CodeAnalysis *analysis) {
+    size_t sum = 0;
+    if (analysis != NULL) {
+        for (FunctionList *fle = analysis->function_list; fle != NULL;
+             fle = fle->next) {
+            sum += get_function_size(fle->function);
+        }
+    }
+    return sum;
 }
 
 static CallList *collect_new_calls(CallList *pending_calls,
@@ -66,7 +78,7 @@ static CallList *collect_new_calls(CallList *pending_calls,
         if (new_target >= min_addr && new_target <= max_addr) {
             if (!call_in_list(new_target, pending_calls) &&
                 !call_in_list(new_target, checked_calls)) {
-                pending_calls = push_call(new_target, pending_calls);
+                pending_calls = push_call(new_target, NULL, pending_calls);
             }
         }
         new_calls = pop_call(new_calls);
@@ -80,11 +92,12 @@ void free_code_analysis(CodeAnalysis *analysis) {
     }
 }
 
-void print_analysis(const CodeAnalysis * analysis) {
-	if (analysis != NULL) {
-		PRINT_DEBUG("### Code analysis ###");
-		for (FunctionList * fl = analysis->function_list; fl != NULL; fl = fl->next) {
-			print_function(fl->function);		
-		}
-	}
+void print_analysis(const CodeAnalysis *analysis) {
+    if (analysis != NULL) {
+        PRINT_DEBUG("### Code analysis ###");
+        for (FunctionList *fl = analysis->function_list; fl != NULL;
+             fl = fl->next) {
+            print_function(fl->function);
+        }
+    }
 }

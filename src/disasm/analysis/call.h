@@ -3,12 +3,15 @@
 
 #include <stdbool.h>
 
+#include "disasm/instruction.h"
+
 typedef struct CallList_ {
+	const Instruction * src;
     void *address;
     struct CallList_ *next;
 } CallList;
 
-CallList *push_call(void *call_address, CallList *calls);
+CallList *push_call(void *call_address, const Instruction * src, CallList *calls);
 CallList *pop_call(CallList *calls);
 void *top_call(CallList *calls);
 void free_call_list(CallList * calls);

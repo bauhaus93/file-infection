@@ -9,7 +9,7 @@ static FunctionList *push_function(void *entrypoint,
 static void free_function(Function *function);
 
 FunctionList *analyze_function(void *entrypoint, FunctionList *function_list) {
-    PRINT_DEBUG("Analyzing function, entrypoint = 0x%p", entrypoint);
+    // PRINT_DEBUG("Analyzing function, entrypoint = 0x%p", entrypoint);
 
     function_list = push_function(entrypoint, function_list);
     if (function_list != NULL) {
@@ -76,8 +76,20 @@ CallList *collect_calls_from_function(Function *function) {
     return NULL;
 }
 
+size_t get_function_size(const Function * function) {
+	size_t sum = 0;
+	if (function != NULL) {
+		for (BlockList * bl = function->blocks; bl != NULL; bl = bl->next) {
+			sum += bl->block->end - bl->block->start;
+		}
+	}
+	return sum;
+}
+
 void print_function(const Function *function) {
     if (function != NULL) {
         PRINT_DEBUG("Function: entrypoint = 0x%p", function->entrypoint);
     }
 }
+
+

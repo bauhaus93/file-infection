@@ -23,7 +23,7 @@ BlockList *analyze_block(void *start_address, BlockList *block_list) {
      	if (is_call(instr)) {
             void *target = get_call_target(instr);
             if (target != NULL) {
-                block->calls = push_call(target, block->calls);
+                block->calls = push_call(target, instr, block->calls);
             }
         } else if (is_return(instr)) {
             break;
@@ -118,7 +118,7 @@ CallList *collect_calls_from_blocks(BlockList *block_list) {
         for (CallList *call = ptr->block->calls; call != NULL;
              call = call->next) {
             if (!call_in_list(call->address, calls)) {
-                calls = push_call(call->address, calls);
+                calls = push_call(call->address, NULL, calls);
             }
         }
     }
