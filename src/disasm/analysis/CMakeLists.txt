@@ -1,6 +1,1 @@
-
-add_sources(
-	analysis.c
-	function.c
-	block.c
-	call.c)
+add_sources(analysis.c function.c block.c call.c)

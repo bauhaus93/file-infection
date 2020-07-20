@@ -11,6 +11,7 @@
 #endif
 
 size_t get_original_entry_point(void);
-uint8_t write_original_entry_point(uint32_t target_oep, void *target_image_base);
+uint8_t write_original_entry_point(uint32_t target_oep,
+                                   void *target_image_base);
 
 #endif

@@ -37,8 +37,7 @@ typedef VOID(WINAPI *fpSleep)(DWORD);
 #define CALL_KERNEL32_FUNCTION(fp, cs, ...)                                    \
     (((fp)(get_function_pointer(get_kernel32_base(), cs)))(__VA_ARGS__))
 
-
-#define VIRTUAL_ALLOC(...)                                                      \
+#define VIRTUAL_ALLOC(...)                                                     \
     (CALL_KERNEL32_FUNCTION(fpVirualAlloc, CS_VIRTUALALLOC, __VA_ARGS__))
 #define VIRTUAL_FREE(...)                                                      \
     (CALL_KERNEL32_FUNCTION(fpVirtualFree, CS_VIRTUALFREE, __VA_ARGS__))
@@ -72,4 +71,4 @@ typedef VOID(WINAPI *fpSleep)(DWORD);
 #define FIND_CLOSE(...)                                                        \
     (CALL_KERNEL32_FUNCTION(fpFindClose, CS_FINDCLOSE, __VA_ARGS__))
 
-#endif // FUNCTION_KERNEL32_H 
+#endif // FUNCTION_KERNEL32_H

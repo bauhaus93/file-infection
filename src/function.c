@@ -1,7 +1,7 @@
 #include "function.h"
 
-#include "pe.h"
 #include "checksum.h"
+#include "pe.h"
 
 void *get_function_pointer(void *base, uint32_t function_checksum) {
     if (base == NULL) {

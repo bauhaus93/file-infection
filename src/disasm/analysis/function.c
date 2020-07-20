@@ -1,5 +1,5 @@
-#include "block.h"
 #include "disasm/analysis/function.h"
+#include "block.h"
 #include "malloc.h"
 #include "utility.h"
 
@@ -57,7 +57,7 @@ Function *top_function(FunctionList *function_list) {
     if (function_list != NULL) {
         return function_list->function;
     }
-	return NULL;
+    return NULL;
 }
 
 void free_function_list(FunctionList *function_list) {
@@ -76,14 +76,14 @@ CallList *collect_calls_from_function(Function *function) {
     return NULL;
 }
 
-size_t get_function_size(const Function * function) {
-	size_t sum = 0;
-	if (function != NULL) {
-		for (BlockList * bl = function->blocks; bl != NULL; bl = bl->next) {
-			sum += bl->block->end - bl->block->start;
-		}
-	}
-	return sum;
+size_t get_function_size(const Function *function) {
+    size_t sum = 0;
+    if (function != NULL) {
+        for (BlockList *bl = function->blocks; bl != NULL; bl = bl->next) {
+            sum += bl->block->end - bl->block->start;
+        }
+    }
+    return sum;
 }
 
 void print_function(const Function *function) {
@@ -91,5 +91,3 @@ void print_function(const Function *function) {
         PRINT_DEBUG("Function: entrypoint = 0x%p", function->entrypoint);
     }
 }
-
-

@@ -8,13 +8,9 @@ bool opcode_in_range(uint8_t opcode, uint8_t low, uint8_t high) {
            col <= (high & 0xF);
 }
 
-uint8_t get_col(uint8_t opcode) {
-    return opcode & 0xF;
-}
+uint8_t get_col(uint8_t opcode) { return opcode & 0xF; }
 
-uint8_t get_row(uint8_t opcode) {
-    return (opcode >> 4);
-}
+uint8_t get_row(uint8_t opcode) { return (opcode >> 4); }
 
 uint8_t get_modrm_mod(uint8_t modrm) { return modrm >> 6; }
 

@@ -21,7 +21,7 @@ CodeAnalysis *analyze_code(void **entry_points, size_t entrypoint_count,
 
     CallList *pending_calls = NULL;
     for (size_t i = 0; i < entrypoint_count; i++) {
-        pending_calls = push_call(entry_points[i], NULL, pending_calls);
+        pending_calls = push_call(entry_points[i], pending_calls);
     }
     CallList *checked_calls = NULL;
 
@@ -52,7 +52,7 @@ static void *get_next_entrypoint(CallList **pending_calls,
     if (*pending_calls != NULL) {
         void *entrypoint = top_call(*pending_calls);
         *pending_calls = pop_call(*pending_calls);
-        *checked_calls = push_call(entrypoint, NULL, *checked_calls);
+        *checked_calls = push_call(entrypoint, *checked_calls);
         return entrypoint;
     }
     return NULL;
@@ -78,7 +78,7 @@ static CallList *collect_new_calls(CallList *pending_calls,
         if (new_target >= min_addr && new_target <= max_addr) {
             if (!call_in_list(new_target, pending_calls) &&
                 !call_in_list(new_target, checked_calls)) {
-                pending_calls = push_call(new_target, NULL, pending_calls);
+                pending_calls = push_call(new_target, pending_calls);
             }
         }
         new_calls = pop_call(new_calls);

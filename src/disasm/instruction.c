@@ -29,21 +29,21 @@ bool is_call(const Instruction *instr) {
                                get_modrm_reg(*instr->modrm) == 3));
 }
 
-bool is_call_direct_offset(const Instruction * instr) {
-	return instr->opcode[0] == 0xE8;
+bool is_call_direct_offset(const Instruction *instr) {
+    return instr->opcode[0] == 0xE8;
 }
 
-void * get_call_target(const Instruction * instr) {
-	if (is_call_direct_offset(instr)) {
-		if (instr->immediate_size == 2) {
-			return BYTE_OFFSET(instr->end, *(int16_t *)instr->immediate);
+void *get_call_target(const Instruction *instr) {
+    if (is_call_direct_offset(instr)) {
+        if (instr->immediate_size == 2) {
+            return BYTE_OFFSET(instr->end, *(int16_t *)instr->immediate);
         } else if (instr->immediate_size == 4) {
             return BYTE_OFFSET(instr->end, *(int32_t *)instr->immediate);
         }
-	} else {
-		// PRINT_DEBUG("WARN: NON-Direct offset");
-	}
-	return NULL;
+    } else {
+        // PRINT_DEBUG("WARN: NON-Direct offset");
+    }
+    return NULL;
 }
 
 bool is_return(const Instruction *instr) {

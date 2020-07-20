@@ -3,10 +3,9 @@
 #include "call.h"
 #include "malloc.h"
 
-CallList *push_call(void *call_address, const Instruction * src, CallList *calls) {
+CallList *push_call(void *call_address, CallList *calls) {
     CallList *new_call = (CallList *)MALLOC(sizeof(CallList));
     new_call->address = call_address;
-	new_call->src = src;
     new_call->next = calls;
     return new_call;
 }

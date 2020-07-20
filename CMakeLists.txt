@@ -37,7 +37,7 @@ add_executable(${EXEC_NAME} "src/main.c")
 set_property(TARGET ${EXEC_NAME} PROPERTY C_STANDARD 99)
 if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
   target_compile_options(${EXEC_NAME} PRIVATE -m32 -Wall -fmax-errors=1 -Werror
-					      -fno-builtin)
+                                              -fno-builtin)
   target_link_libraries(${EXEC_NAME} -Wall -m32 -fmax-errors=1 -Werror)
 else()
   message(SEND_ERROR "Unknown compiler: ${CMAKE_C_COMPILER_ID}")
@@ -53,11 +53,13 @@ target_sources(${EXEC_NAME} PRIVATE ${SRCS})
 target_include_directories(${EXEC_NAME} PRIVATE src)
 
 if(STRIP_PROGRAM)
-	if(NOT STRIP_ARGS)
-		set(STRIP_ARGS "")
-	endif()
-	add_custom_command(TARGET ${EXEC_NAME} POST_BUILD
-		COMMAND ${STRIP_PROGRAM} ${STRIP_ARGS} $<TARGET_FILE:${EXEC_NAME}>)
+  if(NOT STRIP_ARGS)
+    set(STRIP_ARGS "")
+  endif()
+  add_custom_command(
+    TARGET ${EXEC_NAME}
+    POST_BUILD
+    COMMAND ${STRIP_PROGRAM} ${STRIP_ARGS} $<TARGET_FILE:${EXEC_NAME}>)
 endif()
 
 add_custom_command(
@@ -74,7 +76,7 @@ target_sources(${EXEC_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/src/checksum_list.h)
 
 add_custom_command(
   OUTPUT ${CMAKE_SOURCE_DIR}/src/string_generator.c
-	 ${CMAKE_SOURCE_DIR}/src/string_generator.h
+         ${CMAKE_SOURCE_DIR}/src/string_generator.h
   COMMAND
     python3 ${CMAKE_SOURCE_DIR}/scripts/file_generation/string_generator.py
     --string-file ${CMAKE_SOURCE_DIR}/resources/strings.txt --header-path
@@ -86,7 +88,7 @@ add_custom_command(
   DEPENDS ${CMAKE_SOURCE_DIR}/scripts/file_generation/string_generator.py)
 
 target_sources(${EXEC_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/src/string_generator.h
-				    ${CMAKE_SOURCE_DIR}/src/string_generator.c)
+                                    ${CMAKE_SOURCE_DIR}/src/string_generator.c)
 
 include(CTest)
 if(BUILD_TESTING)

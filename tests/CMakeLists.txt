@@ -7,50 +7,50 @@ if(BUILD_TESTING)
     add_test(
       NAME ${ARGV0}
       COMMAND
-	python3 ${TEST_DRIVER} --bit-width 32 --disasm-lib
-	"$<TARGET_FILE:${LIB_NAME}>" ${TEST_FILE})
+        python3 ${TEST_DRIVER} --bit-width 32 --disasm-lib
+        "$<TARGET_FILE:${LIB_NAME}>" ${TEST_FILE})
 
     set_tests_properties(
       ${ARGV0}
       PROPERTIES REQUIRED_FILES
-		 "$<TARGET_FILE:${LIB_NAME}>;${TEST_DRIVER};${TEST_FILE}")
+                 "$<TARGET_FILE:${LIB_NAME}>;${TEST_DRIVER};${TEST_FILE}")
   endmacro()
 
   macro(create_random_instruction_test)
     set(TEST_DRIVER
-	"${CMAKE_CURRENT_SOURCE_DIR}/generate_random_instructions.py")
+        "${CMAKE_CURRENT_SOURCE_DIR}/generate_random_instructions.py")
     set(TEST_FILE "${CMAKE_CURRENT_BINARY_DIR}/${ARGV0}.s")
 
     execute_process(
       COMMAND
-	python3 ${TEST_DRIVER} --output-file ${TEST_FILE} --seed ${ARGV0}
-	--count ${ARGV1} --input-dir ${CMAKE_CURRENT_SOURCE_DIR} --info-dir
-	${CMAKE_CURRENT_BINARY_DIR}/instruction_info)
+        python3 ${TEST_DRIVER} --output-file ${TEST_FILE} --seed ${ARGV0}
+        --count ${ARGV1} --input-dir ${CMAKE_CURRENT_SOURCE_DIR} --info-dir
+        ${CMAKE_CURRENT_BINARY_DIR}/instruction_info)
 
     add_test(
       NAME test_${ARGV0}
       COMMAND
-	python3 ${CMAKE_CURRENT_SOURCE_DIR}/instruction_test_driver.py
-	--bit-width 32 --disasm-lib "$<TARGET_FILE:${LIB_NAME}>" ${TEST_FILE})
+        python3 ${CMAKE_CURRENT_SOURCE_DIR}/instruction_test_driver.py
+        --bit-width 32 --disasm-lib "$<TARGET_FILE:${LIB_NAME}>" ${TEST_FILE})
 
     set_tests_properties(
       test_${ARGV0}
       PROPERTIES REQUIRED_FILES
-		 "$<TARGET_FILE:${LIB_NAME}>;${TEST_DRIVER};${TEST_FILE}")
+                 "$<TARGET_FILE:${LIB_NAME}>;${TEST_DRIVER};${TEST_FILE}")
   endmacro()
 
   list(
     APPEND DISASM_SOURCES
-	   ${CMAKE_SOURCE_DIR}/src/disasm/disasm.c
-	   ${CMAKE_SOURCE_DIR}/src/disasm/disasm_utility.c
-	   ${CMAKE_SOURCE_DIR}/src/disasm/instruction.c
-	   ${CMAKE_SOURCE_DIR}/src/disasm/instruction_op1.c
-	   ${CMAKE_SOURCE_DIR}/src/disasm/instruction_op2.c
-	   ${CMAKE_SOURCE_DIR}/src/disasm/instruction_op3.c
-	   ${CMAKE_SOURCE_DIR}/src/disasm/prefix.c
-	   ${CMAKE_SOURCE_DIR}/src/disasm/size.c
-	   ${CMAKE_SOURCE_DIR}/src/memory.c
-	   ${CMAKE_SOURCE_DIR}/src/utility.c)
+           ${CMAKE_SOURCE_DIR}/src/disasm/disasm.c
+           ${CMAKE_SOURCE_DIR}/src/disasm/disasm_utility.c
+           ${CMAKE_SOURCE_DIR}/src/disasm/instruction.c
+           ${CMAKE_SOURCE_DIR}/src/disasm/instruction_op1.c
+           ${CMAKE_SOURCE_DIR}/src/disasm/instruction_op2.c
+           ${CMAKE_SOURCE_DIR}/src/disasm/instruction_op3.c
+           ${CMAKE_SOURCE_DIR}/src/disasm/prefix.c
+           ${CMAKE_SOURCE_DIR}/src/disasm/size.c
+           ${CMAKE_SOURCE_DIR}/src/memory.c
+           ${CMAKE_SOURCE_DIR}/src/utility.c)
 
   add_library(${LIB_NAME} SHARED ${DISASM_SOURCES})
   target_compile_options(${LIB_NAME} PRIVATE -Wall -Werror)

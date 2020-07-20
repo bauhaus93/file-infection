@@ -3,6 +3,6 @@
 
 #define INFECTION_MARKER (0xDEADBEEF)
 
-int infect(const char *filename, void * entry_function_addr);
+int infect(const char *filename, void *entry_function_addr);
 
 #endif

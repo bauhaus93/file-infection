@@ -10,7 +10,7 @@ static void free_block(Block *block);
 static Block *find_block_for_address(void *addr, BlockList *block_list);
 
 BlockList *analyze_block(void *start_address, BlockList *block_list) {
-	// PRINT_DEBUG("Analysing block: start = 0x%p", start_address);
+    // PRINT_DEBUG("Analysing block: start = 0x%p", start_address);
     Disassembler disasm;
     setup_disasm(start_address, &disasm);
 
@@ -19,11 +19,11 @@ BlockList *analyze_block(void *start_address, BlockList *block_list) {
 
     while (next_instruction(&disasm)) {
         const Instruction *instr = get_current_instruction(&disasm);
-		block->end = instr->end;
-     	if (is_call(instr)) {
+        block->end = instr->end;
+        if (is_call(instr)) {
             void *target = get_call_target(instr);
             if (target != NULL) {
-                block->calls = push_call(target, instr, block->calls);
+                block->calls = push_call(target, block->calls);
             }
         } else if (is_return(instr)) {
             break;
@@ -118,7 +118,7 @@ CallList *collect_calls_from_blocks(BlockList *block_list) {
         for (CallList *call = ptr->block->calls; call != NULL;
              call = call->next) {
             if (!call_in_list(call->address, calls)) {
-                calls = push_call(call->address, NULL, calls);
+                calls = push_call(call->address, calls);
             }
         }
     }

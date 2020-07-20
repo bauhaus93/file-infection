@@ -5,7 +5,7 @@ VM_DIR="$PWD/resources/vms"
 
 
 MODE="-snapshot"
-while getopts "rb" option
+while getopts "sb" option
 do
 	case "$option"
 	in
