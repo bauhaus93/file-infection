@@ -1,11 +1,11 @@
 #ifndef DISASM_ANALYSIS_H
 #define DISASM_ANALYSIS_H
 
-#include "disasm/analysis/function.h"
-#include "disasm/instruction.h"
+#include "block.h"
 
 typedef struct {
-    FunctionList *function_list;
+	BlockList * block_list;
+	int function_count;
 } CodeAnalysis;
 
 CodeAnalysis *analyze_code(void **entry_points, size_t entrypoint_count,

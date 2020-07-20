@@ -4,6 +4,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "instruction.h"
+
 bool is_valid_opcode_3byte(const Instruction *instr);
 bool has_modrm_3byte(const Instruction *instr);
 bool has_opcode_extension_3byte(const Instruction *instr);

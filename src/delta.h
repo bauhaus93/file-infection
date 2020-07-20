@@ -4,6 +4,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-int32_t get_delta_offset(void);
+extern int32_t get_delta_offset(void);
 
 #endif // DELTA_H

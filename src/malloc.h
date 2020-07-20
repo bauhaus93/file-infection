@@ -3,6 +3,7 @@
 
 #ifndef USE_STANDARD_MALLOC
 #include "function_kernel32.h"
+#include "windows_wrapper.h"
 
 #define MALLOC(size)                                                           \
     VIRTUAL_ALLOC(NULL, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE)

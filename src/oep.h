@@ -1,8 +1,10 @@
 #ifndef OEP_H
 #define OEP_H
 
+#include <stddef.h>
 #include <stdint.h>
-#include <windows.h>
+
+#include "windows_wrapper.h"
 
 #ifdef _WIN64
 #define OEP_DEFAULT (0xDEADBEEFABCD1337)

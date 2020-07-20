@@ -1,9 +1,15 @@
-#include "function.h"
+#include <stddef.h>
+#ifdef WINDOWS_HEADER_DUMMY
+#include <stdio.h>
+#include <stdlib.h>
+#endif
 
 #include "checksum.h"
+#include "function.h"
 #include "pe.h"
 
 void *get_function_pointer(void *base, uint32_t function_checksum) {
+#ifndef WINDOWS_HEADER_DUMMY
     if (base == NULL) {
         return NULL;
     }
@@ -27,5 +33,9 @@ void *get_function_pointer(void *base, uint32_t function_checksum) {
         name_ptr++;
         name_ordinals_ptr++;
     }
+#else
+	fprintf(stderr, "Wanted to use get_function_pointer(), but using WINDOWS_HEADER_DUMMY\n");
+	exit(1);
+#endif
     return NULL;
 }

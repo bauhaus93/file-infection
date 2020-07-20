@@ -18,12 +18,12 @@ if [ $MODE = "SETUP" ]
 then
 	rm -rf $BUILD_DIR && \
 	mkdir -p $BUILD_DIR && \
-	$CMAKE -B $BUILD_DIR -S $PWD -DCMAKE_BUILD_TYPE="Release" -DBUILD_TESTING="ON"
+	$CMAKE -B $BUILD_DIR -S $PWD -DCMAKE_BUILD_TYPE="Release" -DBUILD_TESTING="ON" -DSTRIP_PROGRAM="strip" -DENV64="ON"
 fi
 
 if [ $MODE = "BUILD" ] || [ $MODE = "TEST" ]
 then
-	$CMAKE --build $BUILD_DIR -j8 --target disasm
+	$CMAKE --build $BUILD_DIR -j8 --target disasm --target find_functions
 fi
 
 if [ $MODE = "TEST" ]

@@ -70,7 +70,7 @@ def generate_switch(alphabet_map):
     return code
 
 def generate_header_code(filename, word_map):
-    code = "#include <stdint.h>\n\n"
+    code = "#include <stdint.h>\n#include <stddef.h>\n\n"
     for word_symbol in word_map:
         code += f"#define STRING_{word_symbol} ({word_map[word_symbol][0]}) // {word_map[word_symbol][1]}\n"
     code += "\nsize_t get_string_length(uint16_t id);\n"

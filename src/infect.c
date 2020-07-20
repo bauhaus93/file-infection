@@ -1,5 +1,4 @@
 #include <stdint.h>
-#include <windows.h>
 
 #include "code_begin.h"
 #include "code_size.h"
@@ -10,6 +9,7 @@
 #include "oep.h"
 #include "pe.h"
 #include "utility.h"
+#include "windows_wrapper.h"
 
 typedef struct {
     HANDLE h_file;

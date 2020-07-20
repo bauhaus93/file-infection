@@ -2,6 +2,7 @@
 #include "process_info.h"
 #include "string_generator.h"
 #include "utility.h"
+#include "windows_wrapper.h"
 
 uint8_t is_pe(void *base) {
     return *(uint16_t *)base == 0x5A4D &&

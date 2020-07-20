@@ -5,9 +5,9 @@
 #include "malloc.h"
 #include "utility.h"
 
-static Block *top_block(BlockList *block_list);
 static void free_block(Block *block);
 static Block *find_block_for_address(void *addr, BlockList *block_list);
+static CallList *find_calls_in_block(const Block *block);
 
 BlockList *analyze_block(void *start_address, BlockList *block_list) {
     // PRINT_DEBUG("Analysing block: start = 0x%p", start_address);
@@ -20,12 +20,7 @@ BlockList *analyze_block(void *start_address, BlockList *block_list) {
     while (next_instruction(&disasm)) {
         const Instruction *instr = get_current_instruction(&disasm);
         block->end = instr->end;
-        if (is_call(instr)) {
-            void *target = get_call_target(instr);
-            if (target != NULL) {
-                block->calls = push_call(target, block->calls);
-            }
-        } else if (is_return(instr)) {
+        if (is_return(instr)) {
             break;
         } else if (is_jump(instr)) {
             if (is_conditional_jump(instr)) {
@@ -52,12 +47,18 @@ BlockList *analyze_block(void *start_address, BlockList *block_list) {
     return block_list;
 }
 
+size_t get_block_size(const Block * block) {
+	if (block != NULL) {
+		return BYTE_DIFF(block->end, block->start);
+	}
+	return 0;
+}
+
 static Block *create_block(void *start) {
     Block *block = (Block *)MALLOC(sizeof(Block));
     if (block != NULL) {
         block->start = start;
         block->end = start;
-        block->calls = NULL;
         block->last_instruction = NULL;
     }
     return block;
@@ -65,7 +66,6 @@ static Block *create_block(void *start) {
 
 static void free_block(Block *block) {
     if (block != NULL) {
-        free_call_list(block->calls);
         FREE(block);
     }
 }
@@ -96,7 +96,7 @@ void free_block_list(BlockList *block_list) {
     }
 }
 
-static Block *top_block(BlockList *block_list) {
+Block *top_block(BlockList *block_list) {
     if (block_list != NULL) {
         return block_list->block;
     }
@@ -112,11 +112,32 @@ static Block *find_block_for_address(void *addr, BlockList *block_list) {
     return NULL;
 }
 
+static CallList *find_calls_in_block(const Block *block) {
+    Disassembler disasm;
+    setup_disasm(block->start, &disasm);
+
+    CallList *calls = NULL;
+
+    while (next_instruction(&disasm)) {
+        const Instruction *instr = get_current_instruction(&disasm);
+		if (instr->end > block->end) {
+			break;
+		}
+        if (is_call(instr)) {
+            void *target = get_call_target(instr);
+            if (target != NULL) {
+                calls = push_call(target, calls);
+            }
+        }
+    }
+    return calls;
+}
+
 CallList *collect_calls_from_blocks(BlockList *block_list) {
     CallList *calls = NULL;
     for (BlockList *ptr = block_list; ptr != NULL; ptr = ptr->next) {
-        for (CallList *call = ptr->block->calls; call != NULL;
-             call = call->next) {
+        CallList *block_calls = find_calls_in_block(ptr->block);
+        for (CallList *call = block_calls; call != NULL; call = call->next) {
             if (!call_in_list(call->address, calls)) {
                 calls = push_call(call->address, calls);
             }

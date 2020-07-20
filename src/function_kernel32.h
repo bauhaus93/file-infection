@@ -2,8 +2,8 @@
 #define FUNCTION_KERNEL32_H
 
 #include <stdint.h>
-#include <windows.h>
 
+#include "windows_wrapper.h"
 #include "checksum_list.h"
 #include "function.h"
 #include "process_info.h"
@@ -33,6 +33,7 @@ typedef HANDLE(WINAPI *fpCreateThread)(LPSECURITY_ATTRIBUTES, SIZE_T,
                                        LPDWORD);
 typedef DWORD(WINAPI *fpGetLogicalDrives)(void);
 typedef VOID(WINAPI *fpSleep)(DWORD);
+
 
 #define CALL_KERNEL32_FUNCTION(fp, cs, ...)                                    \
     (((fp)(get_function_pointer(get_kernel32_base(), cs)))(__VA_ARGS__))

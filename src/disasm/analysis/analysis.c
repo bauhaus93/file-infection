@@ -2,7 +2,7 @@
 #include <stdint.h>
 
 #include "analysis.h"
-#include "disasm/analysis/function.h"
+#include "block.h"
 #include "disasm/disasm.h"
 #include "disasm/instruction.h"
 #include "malloc.h"
@@ -12,12 +12,15 @@ static void *get_next_entrypoint(CallList **pending_calls,
                                  CallList **checked_calls);
 
 static CallList *collect_new_calls(CallList *pending_calls,
-                                   CallList *checked_calls, Function *function,
-                                   void *min_addr, void *max_addr);
+                                   CallList *checked_calls,
+                                   BlockList *block_list, void *min_addr,
+                                   void *max_addr);
 
 CodeAnalysis *analyze_code(void **entry_points, size_t entrypoint_count,
                            void *min_addr, void *max_addr) {
     CodeAnalysis *analysis = (CodeAnalysis *)MALLOC(sizeof(CodeAnalysis));
+    analysis->function_count = 0;
+    analysis->block_list = NULL;
 
     CallList *pending_calls = NULL;
     for (size_t i = 0; i < entrypoint_count; i++) {
@@ -25,25 +28,24 @@ CodeAnalysis *analyze_code(void **entry_points, size_t entrypoint_count,
     }
     CallList *checked_calls = NULL;
 
-    int function_count = 0;
     while (pending_calls != NULL) {
-        function_count++;
+        analysis->function_count++;
         void *entrypoint = get_next_entrypoint(&pending_calls, &checked_calls);
 
-        analysis->function_list =
-            analyze_function(entrypoint, analysis->function_list);
-        if (analysis->function_list == NULL) {
-            free_call_list(pending_calls);
-            free_call_list(checked_calls);
+        analysis->block_list = analyze_block(entrypoint, analysis->block_list);
+        if (analysis->block_list == NULL) {
             free_code_analysis(analysis);
-            return NULL;
+            analysis = NULL;
+            break;
         }
-        pending_calls = collect_new_calls(pending_calls, checked_calls,
-                                          top_function(analysis->function_list),
-                                          min_addr, max_addr);
+        if (pending_calls == NULL) {
+            pending_calls =
+                collect_new_calls(pending_calls, checked_calls,
+                                  analysis->block_list, min_addr, max_addr);
+        }
     }
-    PRINT_DEBUG("Found %d functions, total size = %.2f kiB", function_count,
-                (float)get_code_size(analysis) / 1024.);
+    free_call_list(pending_calls);
+    free_call_list(checked_calls);
     return analysis;
 }
 
@@ -61,18 +63,19 @@ static void *get_next_entrypoint(CallList **pending_calls,
 size_t get_code_size(const CodeAnalysis *analysis) {
     size_t sum = 0;
     if (analysis != NULL) {
-        for (FunctionList *fle = analysis->function_list; fle != NULL;
-             fle = fle->next) {
-            sum += get_function_size(fle->function);
+        for (BlockList *ble = analysis->block_list; ble != NULL;
+             ble = ble->next) {
+            sum += get_block_size(ble->block);
         }
     }
     return sum;
 }
 
 static CallList *collect_new_calls(CallList *pending_calls,
-                                   CallList *checked_calls, Function *function,
-                                   void *min_addr, void *max_addr) {
-    CallList *new_calls = collect_calls_from_function(function);
+                                   CallList *checked_calls,
+                                   BlockList *block_list, void *min_addr,
+                                   void *max_addr) {
+    CallList *new_calls = collect_calls_from_blocks(block_list);
     while (new_calls != NULL) {
         void *new_target = top_call(new_calls);
         if (new_target >= min_addr && new_target <= max_addr) {
@@ -88,16 +91,6 @@ static CallList *collect_new_calls(CallList *pending_calls,
 
 void free_code_analysis(CodeAnalysis *analysis) {
     if (analysis != NULL) {
-        free_function_list(analysis->function_list);
-    }
-}
-
-void print_analysis(const CodeAnalysis *analysis) {
-    if (analysis != NULL) {
-        PRINT_DEBUG("### Code analysis ###");
-        for (FunctionList *fl = analysis->function_list; fl != NULL;
-             fl = fl->next) {
-            print_function(fl->function);
-        }
+        free_block_list(analysis->block_list);
     }
 }

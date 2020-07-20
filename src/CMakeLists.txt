@@ -9,9 +9,9 @@ add_sources(
   oep.c
   function.c
   string_generator.c
+  delta.c
   checksum.c
   process_info.c
-  delta.c
   memory.c)
 
 add_subdirectory(disasm)

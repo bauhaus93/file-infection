@@ -2,7 +2,8 @@
 #define PE_H
 
 #include <stdint.h>
-#include <windows.h>
+
+#include "windows_wrapper.h"
 
 uint8_t is_pe(void *base_addr);
 uint32_t align_value(uint32_t value, uint32_t alignment);
