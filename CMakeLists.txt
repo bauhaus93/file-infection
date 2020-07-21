@@ -48,16 +48,6 @@ target_link_options(${EXEC_NAME} PRIVATE -m32)
 target_compile_definitions(${EXEC_NAME} PRIVATE ENABLE_POISON)
 set_property(TARGET ${EXEC_NAME} PROPERTY C_STANDARD 99)
 
-if(STRIP_PROGRAM)
-  if(NOT STRIP_ARGS)
-    set(STRIP_ARGS "")
-  endif()
-  add_custom_command(
-    TARGET ${EXEC_NAME}
-    POST_BUILD
-    COMMAND ${STRIP_PROGRAM} ${STRIP_ARGS} $<TARGET_FILE:${EXEC_NAME}>)
-endif()
-
 add_custom_command(
   OUTPUT ${CMAKE_SOURCE_DIR}/src/checksum_list.h
   COMMAND

@@ -122,5 +122,7 @@ int main(int argc, char **argv) {
             }
         }
     }
+	free_code_analysis(analysis);
+	free(found_list);
     return found != expected;
 }
