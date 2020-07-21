@@ -91,11 +91,11 @@ void *get_jump_target(const Instruction *instr) {
 }
 
 void print_instruction(const Instruction *instr) {
-    printf("Instruction | size: %2d | prefix count: %1d | opcode size: %1d | "
-           "modrm: %3s | sib: %3s | displacement size: %1d | immediate size: "
-           "%1d\n",
-           get_instruction_size(instr), instr->prefix_count, instr->opcode_size,
-           instr->modrm == NULL ? "no" : "yes",
-           instr->sib == NULL ? "no" : "yes", instr->displacement_size,
-           instr->immediate_size);
+    PRINT_DEBUG(
+        "Instruction | size: %2d | prefix count: %1d | opcode size: %1d | "
+        "modrm: %3s | sib: %3s | displacement size: %1d | immediate size: "
+        "%1d",
+        get_instruction_size(instr), instr->prefix_count, instr->opcode_size,
+        instr->modrm == NULL ? "no" : "yes", instr->sib == NULL ? "no" : "yes",
+        instr->displacement_size, instr->immediate_size);
 }

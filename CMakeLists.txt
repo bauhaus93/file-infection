@@ -30,8 +30,6 @@ if(NOT BUILD_TESTING)
       CACHE STRING "Enable testing" FORCE)
 endif()
 
-
-
 if(${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
   add_compile_options(-fno-asynchronous-unwind-tables -fno-jump-tables
 		      -fmax-errors=1 -Wall -Werror -fno-builtin)
