@@ -1,4 +1,5 @@
 #include "memory.h"
+#include "utility.h"
 
 void memzero(void *start, uint32_t size) {
     for (uint8_t *ptr = start; ptr < (uint8_t *)start + size; ptr++) {

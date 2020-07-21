@@ -43,10 +43,14 @@ if(BUILD_TESTING)
   get_property(SRCS GLOBAL PROPERTY ALL_SOURCES)
 
   add_library(${LIB_NAME} SHARED ${SRCS})
-  target_compile_definitions(${LIB_NAME} PRIVATE USE_STANDARD_MALLOC WINDOWS_HEADER_DUMMY)
-  strip_relocation_before_linking(${LIB_NAME})
+  target_compile_options(${LIB_NAME} PRIVATE -m64)
+  target_link_options(${LIB_NAME} PRIVATE -m64)
+  target_compile_definitions(${LIB_NAME} PRIVATE USE_STANDARD_MALLOC
+						 WINDOWS_HEADER_DUMMY)
 
   add_executable(${FIND_FUNC_EXEC} "find_own_functions.c" ${SRCS})
+  target_compile_options(${FIND_FUNC_EXEC} PRIVATE -m32)
+  target_link_options(${FIND_FUNC_EXEC} PRIVATE -m32)
   target_compile_definitions(${FIND_FUNC_EXEC} PRIVATE USE_STANDARD_MALLOC
 						       WINDOWS_HEADER_DUMMY)
   add_test(NAME find_own_functions COMMAND ${FIND_FUNC_EXEC})
@@ -61,7 +65,5 @@ if(BUILD_TESTING)
   create_instruction_size_test(suspects)
   create_instruction_size_test(instructions_op2_extensions)
   create_instruction_size_test(instructions_op3_basic)
-
-
 
 endif()

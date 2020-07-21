@@ -9,8 +9,8 @@ static void free_block(Block *block);
 static Block *find_block_for_address(void *addr, BlockList *block_list);
 static CallList *find_calls_in_block(const Block *block);
 
-BlockList *analyze_block(void *start_address, BlockList *block_list) {
-    // PRINT_DEBUG("Analysing block: start = 0x%p", start_address);
+BlockList *analyze_block(void *start_address, BlockList *block_list, void * min_addr, void * max_addr) {
+    PRINT_DEBUG("Analysing block: start = 0x%p", start_address);
     Disassembler disasm;
     setup_disasm(start_address, &disasm);
 
@@ -24,14 +24,14 @@ BlockList *analyze_block(void *start_address, BlockList *block_list) {
             break;
         } else if (is_jump(instr)) {
             if (is_conditional_jump(instr)) {
-                block_list = analyze_block(instr->end, block_list);
+                block_list = analyze_block(instr->end, block_list, min_addr, max_addr);
             }
             void *target = get_jump_target(instr);
-            if (target != NULL) {
+            if (target != NULL && target >= min_addr && target < max_addr) {
                 Block *target_block =
                     find_block_for_address(target, block_list);
                 if (target_block == NULL) {
-                    block_list = analyze_block(target, block_list);
+                    block_list = analyze_block(target, block_list, min_addr, max_addr);
                 } else if (target_block->start !=
                            target) { // split up existing block
                     block_list = push_block(target, block_list);

@@ -4,7 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define ENABLE_PRINT
+// #define ENABLE_PRINT
 // #undef ENABLE_PRINT
 
 #ifdef ENABLE_PRINT

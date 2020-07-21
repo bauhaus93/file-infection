@@ -2,7 +2,6 @@
 #include "code_begin.h"
 #include "utility.h"
 
-// TODO: handle 64 bit case
 #pragma GCC push_options
 #pragma GCC optimize("O0")
 size_t __attribute__((noinline)) get_original_entry_point(void) {
@@ -10,7 +9,6 @@ size_t __attribute__((noinline)) get_original_entry_point(void) {
 }
 #pragma GCC pop_options
 
-// TODO: handle 64 bit case
 uint8_t write_original_entry_point(uint32_t oep, void *targetCodeBegin) {
     uint32_t src_oep = get_original_entry_point();
     int32_t start_offset =

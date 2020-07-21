@@ -17,7 +17,7 @@ typedef struct BlockList_ {
     struct BlockList_ *next;
 } BlockList;
 
-BlockList *analyze_block(void *start_address, BlockList *block_list);
+BlockList *analyze_block(void *start_address, BlockList *block_list, void * min_addr, void * max_addr);
 BlockList *push_block(void *block_start, BlockList *block_list);
 Block *top_block(BlockList *block_list);
 void free_block_list(BlockList *block_list);

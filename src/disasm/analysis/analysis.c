@@ -32,7 +32,7 @@ CodeAnalysis *analyze_code(void **entry_points, size_t entrypoint_count,
         analysis->function_count++;
         void *entrypoint = get_next_entrypoint(&pending_calls, &checked_calls);
 
-        analysis->block_list = analyze_block(entrypoint, analysis->block_list);
+        analysis->block_list = analyze_block(entrypoint, analysis->block_list, min_addr, max_addr);
         if (analysis->block_list == NULL) {
             free_code_analysis(analysis);
             analysis = NULL;
