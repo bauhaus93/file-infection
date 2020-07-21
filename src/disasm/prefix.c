@@ -25,7 +25,6 @@ static uint8_t get_prefix_count(void *instruction_begin) {
     return prefix_count;
 }
 
-
 #pragma GCC push_options
 #pragma GCC optimize("O0")
 static bool is_prefix(uint8_t value) {

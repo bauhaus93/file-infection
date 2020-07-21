@@ -1,7 +1,6 @@
 #include "delta.h"
 #include "utility.h"
 
-
 int32_t get_delta_offset(void) {
     int32_t offset = 0;
 #ifdef ENV32

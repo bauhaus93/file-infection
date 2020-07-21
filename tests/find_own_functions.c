@@ -105,7 +105,7 @@ int main(int argc, char **argv) {
         for (int i = 0;
              function_addresses[i] != NULL && function_names[i] != NULL; i++) {
             if (addr == function_addresses[i]) {
-                fprintf(stderr, "Found function: %p -> %-20s\n", addr,
+                fprintf(stderr, "Function found: %p -> %-20s\n", addr,
                         function_names[i]);
                 found_list[i] = true;
                 found++;

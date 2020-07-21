@@ -1,6 +1,5 @@
 #include <stdio.h>
 
-#include "windows_wrapper.h"
 #include "checksum.h"
 #include "code_begin.h"
 #include "code_end.h"
@@ -19,6 +18,7 @@
 #include "process_info.h"
 #include "string_generator.h"
 #include "utility.h"
+#include "windows_wrapper.h"
 
 #ifdef _WIN64
 #error "Currently only support Win32"

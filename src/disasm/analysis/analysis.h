@@ -4,8 +4,8 @@
 #include "block.h"
 
 typedef struct {
-	BlockList * block_list;
-	int function_count;
+    BlockList *block_list;
+    int function_count;
 } CodeAnalysis;
 
 CodeAnalysis *analyze_code(void **entry_points, size_t entrypoint_count,
