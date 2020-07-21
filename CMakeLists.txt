@@ -45,6 +45,7 @@ get_property(SRCS GLOBAL PROPERTY ALL_SOURCES)
 add_executable(${EXEC_NAME} "src/main.c" ${SRCS})
 target_compile_options(${EXEC_NAME} PRIVATE -m32)
 target_link_options(${EXEC_NAME} PRIVATE -m32)
+target_compile_definitions(ENABLE_POISON)
 set_property(TARGET ${EXEC_NAME} PROPERTY C_STANDARD 99)
 
 if(STRIP_PROGRAM)

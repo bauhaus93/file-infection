@@ -6,11 +6,7 @@
 
 TEB *get_teb(void) {
     TEB *teb = NULL;
-    if (IS_32_BIT) {
-        asm("movl %%fs:0x18, %0" : "=r"(teb));
-    } else {
-        asm("movq %%gs:0x30, %0" : "=r"(teb));
-    }
+    asm("mov %%fs:0x18, %0" : "=r"(teb));
     return teb;
 }
 
