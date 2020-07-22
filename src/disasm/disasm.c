@@ -12,7 +12,6 @@
 #include "size.h"
 #include "utility.h"
 
-static bool parse_instruction(void *addr, Instruction *instr);
 static uint8_t calculate_instruction_size(const Instruction *instr);
 static void handle_modrm(Instruction *instr);
 static void handle_sib(Instruction *instr);
@@ -34,7 +33,7 @@ Disassembler *init_disasm(void *start_address) {
 
 void setup_disasm(void *start_address, Disassembler *disasm) {
     if (disasm != NULL) {
-        memzero(disasm, sizeof(Disassembler));
+        memzero_local(disasm, sizeof(Disassembler));
         set_next_address(start_address, disasm);
         disasm->next_addr = start_address;
     }
@@ -93,9 +92,9 @@ static uint8_t calculate_instruction_size(const Instruction *instr) {
     }
 }
 
-static bool parse_instruction(void *addr, Instruction *instr) {
+bool parse_instruction(void *addr, Instruction *instr) {
     if (addr != NULL && instr != NULL) {
-        memzero(instr, sizeof(Instruction));
+        memzero_local(instr, sizeof(Instruction));
         instr->start = addr;
         instr->end = instr->start;
         handle_prefixes(instr);

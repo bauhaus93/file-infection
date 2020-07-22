@@ -2,7 +2,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
 #include "checksum.h"
 #include "code_begin.h"
@@ -33,8 +32,8 @@ int main(int argc, char **argv) {
                                     "infect",
                                     "spawn_infection_thread",
                                     "infection_thread",
-                                    "memzero",
-                                    "memcp",
+                                    "memzero_local",
+                                    "memcpy_local",
                                     "get_original_entry_point",
                                     "write_original_entry_point",
                                     "get_nt_header_by_base",
@@ -43,7 +42,6 @@ int main(int argc, char **argv) {
                                     "get_export_directory_by_base",
                                     "is_section_header_empty",
                                     "create_section_header",
-                                    "get_image_base",
                                     "get_module_base",
                                     "get_kernel32_base",
                                     NULL};
@@ -58,8 +56,8 @@ int main(int argc, char **argv) {
                                         (void *)infect,
                                         (void *)spawn_infection_thread,
                                         (void *)infection_thread,
-                                        (void *)memzero,
-                                        (void *)memcp,
+                                        (void *)memzero_local,
+                                        (void *)memcpy_local,
                                         (void *)get_original_entry_point,
                                         (void *)write_original_entry_point,
                                         (void *)get_nt_header_by_base,
@@ -68,7 +66,6 @@ int main(int argc, char **argv) {
                                         (void *)get_export_directory_by_base,
                                         (void *)is_section_header_empty,
                                         (void *)create_section_header,
-                                        (void *)get_image_base,
                                         (void *)get_module_base,
                                         (void *)get_kernel32_base,
                                         NULL};
@@ -79,13 +76,13 @@ int main(int argc, char **argv) {
         expected++;
     }
     assert(function_addresses[expected] == function_names[expected]);
-    expected--;
     size_t found = 0;
     bool *found_list = malloc(sizeof(bool) * expected);
-    memset(found_list, false, sizeof(bool) * expected);
+    memset_local(found_list, false, sizeof(bool) * expected);
 
     void *entrypoints[] = {(void *)spawn_infection_thread,
-                           (void *)infection_thread, (void*)collect_blocks, NULL};
+                           (void *)infection_thread, (void *)collect_blocks,
+                           NULL};
 
     BlockList *blocks =
         collect_blocks(entrypoints, (void *)code_begin, (void *)code_end);

@@ -32,7 +32,7 @@ endif()
 
 if(${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
   add_compile_options(-fno-asynchronous-unwind-tables -fno-jump-tables
-		      -fmax-errors=1 -Wall -Werror -fno-builtin)
+	  -fmax-errors=1 -Wall -fno-builtin)
   add_link_options(-fmax-errors=1 -Wall -Werror)
 else()
   message(SEND_ERROR "Unknown compiler: ${CMAKE_C_COMPILER_ID}")

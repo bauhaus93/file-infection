@@ -19,6 +19,7 @@ void setup_disasm(void *start_address, Disassembler *disasm);
 void destroy_disasm(Disassembler *disasm);
 void set_next_address(void *next_address, Disassembler *disasm);
 bool next_instruction(Disassembler *disasm);
+bool parse_instruction(void *addr, Instruction *instr);
 Instruction *get_current_instruction(Disassembler *disasm);
 uint8_t get_current_instruction_size(Disassembler *disasm);
 void print_current_instruction(const Disassembler *disasm);

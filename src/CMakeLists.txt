@@ -12,7 +12,6 @@ add_sources(
   delta.c
   checksum.c
   process_info.c
-  copy.c
   memory.c)
 
 add_subdirectory(disasm)

@@ -3,13 +3,17 @@
 
 #include <stddef.h>
 
-#include "reference.h"
 #include "disasm/instruction.h"
+#include "reference.h"
+
+typedef enum { BLOCK_END_RET, BLOCK_END_JMP, BLOCK_END_JCC } BlockEndType;
 
 typedef struct {
     void *start;
     void *end;
-    Instruction *last_instruction;
+
+    BlockEndType end_type;
+    void *dest[2];
 } Block;
 
 typedef struct BlockList_ {
@@ -22,5 +26,10 @@ BlockList *push_block(void *block_start, BlockList *block_list);
 Block *top_block(BlockList *block_list);
 void free_block_list(BlockList *block_list);
 size_t get_block_size(const Block *block);
+size_t get_code_size(const BlockList *block_list);
+size_t get_target_code_size_max(const BlockList *block_list);
+bool copy_blocks(const BlockList *blocks, void *dest, size_t dest_size);
+ReferenceList *collect_references(const BlockList *blocks, void *min_addr,
+                                  void *max_addr);
 
 #endif // DISASM_ANALYSIS_BLOCK_H

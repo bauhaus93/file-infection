@@ -39,18 +39,20 @@ then
 	pushd $MXE_DIR && \
 	make -j8 MXE_TARGETS="$MXE_TARGETS" gcc cmake && \
 	popd && \
-	$CMAKE -B $BUILD_DIR -S $PWD -DCMAKE_BUILD_TYPE="Release"
+	$CMAKE -B $BUILD_DIR -S $PWD -DCMAKE_BUILD_TYPE="Release" -DBUILD_TESTING="ON"
 fi
 
 if [ $MODE = "BUILD" ] || [ $MODE = "TEST" ]
 then
-	$CMAKE --build $BUILD_DIR -j8 --target infect || \
+	$CMAKE --build $BUILD_DIR -j8 --target infect --target test_relocation || \
 	exit 1
 fi
 
 if [ $MODE = "TEST" ]
 then
 	mkdir -pv $SHARED_DIR && \
+	rm -v $SHARED_DIR/* && \
 	cp -v $TEST_TARGET_DIR/*.exe $SHARED_DIR/ && \
 	cp -v "$BUILD_DIR/infect.exe" $SHARED_DIR
+	cp -v "$BUILD_DIR/tests/test_relocation.exe" $SHARED_DIR
 fi

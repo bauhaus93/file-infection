@@ -58,6 +58,8 @@ if(BUILD_TESTING)
 
   add_executable(${CHECK_RELOC_EXEC} test_relocation.c ${SRCS})
   target_compile_options(${CHECK_RELOC_EXEC} PRIVATE -m32)
+  target_link_options(${CHECK_RELOC_EXEC} PRIVATE -m32)
+  target_compile_definitions(${CHECK_RELOC_EXEC} PRIVATE ENABLE_PRINT)
 
   create_instruction_size_test(instructions_op1_basic)
   create_instruction_size_test(instructions_op1_extensions)
@@ -68,7 +70,7 @@ if(BUILD_TESTING)
   create_instruction_size_test(instructions_op2_basic)
   create_instruction_size_test(instructions_op2_extensions)
   create_instruction_size_test(instructions_op3_basic)
-  create_random_instruction_test("random_01" 1000)
+  # create_random_instruction_test("random_01" 1000)
 
   add_test(NAME find_own_functions COMMAND ${FIND_FUNC_EXEC})
 

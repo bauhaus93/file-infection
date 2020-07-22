@@ -11,7 +11,8 @@
 
 #define BYTE_DIFF(hi, lo) ((int32_t)(((uint8_t *)(hi)) - ((uint8_t *)(lo))))
 
-void memzero(void *start, uint32_t size);
-void memcp(void *src, void *dest, uint32_t size);
+void memzero_local(void *start, uint32_t size);
+void memcpy_local(void *src, void *dest, uint32_t size);
+void memset_local(void *start, uint8_t value, uint32_t size);
 
 #endif // MEMORY_H

@@ -37,6 +37,9 @@ bool is_jump(const Instruction *instr);
 bool is_conditional_jump(const Instruction *instr);
 bool is_unconditional_jump(const Instruction *instr);
 void *get_jump_target(const Instruction *instr);
+bool is_jump_direct_offset(const Instruction *instr);
+void write_updated_jump_instruction(const Instruction *old_instr,
+                                    void *new_addr, int32_t new_offset);
 void print_instruction(const Instruction *instr);
 
 #endif // INSTRUCTION_H
