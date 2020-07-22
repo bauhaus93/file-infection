@@ -10,7 +10,7 @@
 
 typedef void(WINAPI *fpExitProcess)(UINT);
 typedef DWORD(WINAPI *fpGetTickCount)(void);
-typedef LPVOID(WINAPI *fpVirualAlloc)(LPVOID, SIZE_T, DWORD, DWORD);
+typedef LPVOID(WINAPI *fpVirtualAlloc)(LPVOID, SIZE_T, DWORD, DWORD);
 typedef BOOL(WINAPI *fpVirtualFree)(LPVOID, SIZE_T, DWORD);
 typedef BOOL(WINAPI *fpVirtualProtect)(LPVOID, SIZE_T, DWORD, PDWORD);
 typedef HANDLE(WINAPI *fpFindFirstFileA)(LPCTSTR, LPWIN32_FIND_DATA);
@@ -38,7 +38,7 @@ typedef VOID(WINAPI *fpSleep)(DWORD);
     (((fp)(get_function_pointer(get_kernel32_base(), cs)))(__VA_ARGS__))
 
 #define VIRTUAL_ALLOC(...)                                                     \
-    (CALL_KERNEL32_FUNCTION(fpVirualAlloc, CS_VIRTUALALLOC, __VA_ARGS__))
+    (CALL_KERNEL32_FUNCTION(fpVirtualAlloc, CS_VIRTUALALLOC, __VA_ARGS__))
 #define VIRTUAL_FREE(...)                                                      \
     (CALL_KERNEL32_FUNCTION(fpVirtualFree, CS_VIRTUALFREE, __VA_ARGS__))
 

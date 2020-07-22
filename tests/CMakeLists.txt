@@ -1,6 +1,7 @@
 if(BUILD_TESTING)
   set(LIB_NAME "disasm")
   set(FIND_FUNC_EXEC "find_functions")
+  set(CHECK_RELOC_EXEC "test_relocation")
 
   macro(create_instruction_size_test)
     set(TEST_DRIVER "${CMAKE_CURRENT_SOURCE_DIR}/instruction_test_driver.py")
@@ -55,6 +56,9 @@ if(BUILD_TESTING)
     ${FIND_FUNC_EXEC} PRIVATE USE_STANDARD_MALLOC WINDOWS_HEADER_DUMMY
 			      ENABLE_PRINT)
 
+  add_executable(${CHECK_RELOC_EXEC} test_relocation.c ${SRCS})
+  target_compile_options(${CHECK_RELOC_EXEC} PRIVATE -m32)
+
   create_instruction_size_test(instructions_op1_basic)
   create_instruction_size_test(instructions_op1_extensions)
   create_instruction_size_test(instructions_op1_sib)
@@ -62,7 +66,6 @@ if(BUILD_TESTING)
   create_instruction_size_test(instructions_op1_modrm_displacement)
   create_instruction_size_test(instructions_op1_prefix)
   create_instruction_size_test(instructions_op2_basic)
-  create_instruction_size_test(suspects)
   create_instruction_size_test(instructions_op2_extensions)
   create_instruction_size_test(instructions_op3_basic)
   create_random_instruction_test("random_01" 1000)
