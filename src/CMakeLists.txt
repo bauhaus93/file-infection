@@ -15,5 +15,6 @@ add_sources(
   memory.c)
 
 add_subdirectory(disasm)
+add_subdirectory(block)
 
 add_sources(code_end.c)

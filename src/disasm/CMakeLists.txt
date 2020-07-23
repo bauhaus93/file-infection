@@ -7,5 +7,3 @@ add_sources(
   instruction_op3.c
   prefix.c
   size.c)
-
-add_subdirectory(analysis)

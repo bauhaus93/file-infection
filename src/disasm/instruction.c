@@ -93,7 +93,7 @@ void *get_jump_target(const Instruction *instr) {
 void write_updated_jump_instruction(const Instruction *old_instr,
                                     void *new_addr, int32_t new_offset) {
     if (is_jump_direct_offset(old_instr)) {
-		PRINT_DEBUG("Write jmp @ %p", new_addr);
+        PRINT_DEBUG("Write jmp @ %p", new_addr);
         uint8_t opcode0 = old_instr->opcode[0];
         if (new_offset <= INT8_MAX && new_offset >= INT8_MIN) {
             if (opcode_in_range(opcode0, 0x70, 0x7F) ||

@@ -64,7 +64,7 @@ uint8_t get_immediate_size_1byte(const Instruction *instr) {
     } else if (has_immediate_Ob(opcode) || has_immediate_Ov(opcode)) {
         return instr->addressing_mode / 8;
     } else {
-		return get_opcode_extension_immediate_size_1byte(instr);
+        return get_opcode_extension_immediate_size_1byte(instr);
     }
 }
 
@@ -75,9 +75,9 @@ uint8_t get_opcode_extension_immediate_size_1byte(const Instruction *instr) {
     uint8_t opcode = instr->opcode[0];
     uint8_t modrm = *instr->modrm;
     uint8_t nnn = get_modrm_reg(modrm);
-	if ((opcode == 0xC6 || opcode == 0xC7) && (nnn == 0x0 || nnn == 0x7))
+    if ((opcode == 0xC6 || opcode == 0xC7) && (nnn == 0x0 || nnn == 0x7))
         return get_size_by_operand_type(OPERAND_TYPE_B, instr->operand_size);
-	else if (opcode == 0xF6 && nnn == 0x0) {
+    else if (opcode == 0xF6 && nnn == 0x0) {
         return get_size_by_operand_type(OPERAND_TYPE_B, instr->operand_size);
     } else if (opcode == 0xF7 && nnn == 0x0) {
         return get_size_by_operand_type(OPERAND_TYPE_Z, instr->operand_size);
