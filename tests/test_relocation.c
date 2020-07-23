@@ -38,10 +38,11 @@ int main(int argc, char **argv) {
     assert(blocks != NULL);
     size_t code_size = get_code_size(blocks);
     assert(code_size > 0);
-    size_t target_max_size = get_target_code_size_max(blocks);
+    size_t target_max_size = estimate_target_code_size(blocks);
     assert(target_max_size > 0);
 
 	PRINT_DEBUG("Code size = %.1fkB", (float)code_size / 1024.);
+	PRINT_DEBUG("Estimated target code size = %.1fkB", (float)target_max_size / 1024.);
 
 	PRINT_DEBUG("Allocating target memory");
     void *target_mem = alloc_executable(target_max_size);
