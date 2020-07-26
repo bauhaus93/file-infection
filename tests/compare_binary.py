@@ -30,13 +30,8 @@ def filter_disassembly(disassembly):
         line = " ".join(line)
         diss_dict[line] = diss_dict.get(line, 0) + 1
 
-    diss_list = sorted(
-        map(lambda kv: (kv[0], kv[1]), diss_dict.items()), key=lambda kv: kv[1]
-    )
-    diss_list = filter(
-        lambda e: not (any(map(lambda w: w in e[0], FILTER_WORDS))), diss_list)
-
-    return list(diss_list)
+    return dict(filter(
+        lambda kv: not (any(map(lambda w: w in kv[0], FILTER_WORDS))), diss_dict.items()))
 
 def disassemble_file(filename):
     result = subprocess.run(
@@ -83,16 +78,27 @@ if __name__ == "__main__":
         logger.error(f"Could not disassemble '{unmodified_file}'")
         exit(1)
 
-    unmod_list = filter_disassembly(unmod_disassembly)
-    mod_list = filter_disassembly(mod_disassembly)
-    if len(unmod_list) != len(mod_list):
-        logger.error(f"Number of relevant instructions changed: Unmodified: {len(unmod_list)}, modified: {len(mod_list)}")
+    unmod_dict = filter_disassembly(unmod_disassembly)
+    mod_dict = filter_disassembly(mod_disassembly)
+    if len(unmod_dict) != len(mod_dict):
+        logger.error(f"Number of relevant instructions changed: Unmodified: {len(unmod_dict)}, modified: {len(mod_dict)}")
         exit(1)
-    for (k_u, v_u), (k_m, v_m) in zip(unmod_list, mod_list):
-        if k_u != k_m:
-            logger.error("Sorted disassembly order changed")
-            exit(1)
-        elif v_u != v_m:
-            logger.error(f"Number of operation occurences changed for '{k_u}': Unmodified is {v_u}, modified is {v_m}")
-            exit(1)
+    only_old = set(unmod_dict.keys()).difference(set(mod_dict.keys()))
+    only_new = set(mod_dict.keys()).difference(set(unmod_dict.keys()))
+
+    for old in only_old:
+        logger.error(f"Instruction missing in modified: {old}")
+    for new in only_new:
+        logger.error(f"New instruction appeared in modified: {new}")
+
+    if len(only_old) > 0 or len(only_new) > 0:
+        exit(1)
+
+    error_found = False
+    for key in unmod_dict.keys():
+        if unmod_dict[key] != mod_dict[key]:
+            logger.error(f"Amount of instruction occurences changed for '{key}': Unmodified: {unmod_dict[key]}, modified: {mod_dict[key]}")
+            error_found = True
+    if error_found:
+        exit(1)
 
