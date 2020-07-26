@@ -1,5 +1,5 @@
-#ifndef DISASM_ANALYSIS_BLOCK_H
-#define DISASM_ANALYSIS_BLOCK_H
+#ifndef BLOCK_H
+#define BLOCK_H
 
 #include <stddef.h>
 
@@ -41,4 +41,4 @@ void *get_min_address(const BlockList *blocks);
 void *get_max_address(const BlockList *blocks);
 size_t count_effective_blocks(const BlockList *blocks);
 
-#endif // DISASM_ANALYSIS_BLOCK_H
+#endif // BLOCK_H

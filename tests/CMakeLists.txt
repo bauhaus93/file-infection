@@ -1,7 +1,7 @@
 if(BUILD_TESTING)
   set(LIB_NAME "disasm")
   set(FIND_FUNC_EXEC "find_functions")
-  set(CHECK_RELOC_EXEC "test_relocation")
+  set(COPY_BLOCKS_EXEC "copy_blocks")
 
   macro(create_instruction_size_test)
     set(TEST_DRIVER "${CMAKE_CURRENT_SOURCE_DIR}/instruction_test_driver.py")
@@ -56,10 +56,12 @@ if(BUILD_TESTING)
     ${FIND_FUNC_EXEC} PRIVATE USE_STANDARD_MALLOC WINDOWS_HEADER_DUMMY
 			      ENABLE_PRINT)
 
-  add_executable(${CHECK_RELOC_EXEC} test_relocation.c ${SRCS})
-  target_compile_options(${CHECK_RELOC_EXEC} PRIVATE -m32)
-  target_link_options(${CHECK_RELOC_EXEC} PRIVATE -m32)
-  target_compile_definitions(${CHECK_RELOC_EXEC} PRIVATE ENABLE_PRINT)
+  add_executable(${COPY_BLOCKS_EXEC} copy_blocks.c ${SRCS})
+  target_compile_options(${COPY_BLOCKS_EXEC} PRIVATE -m32)
+  target_link_options(${COPY_BLOCKS_EXEC} PRIVATE -m32)
+  target_compile_definitions(
+    ${COPY_BLOCKS_EXEC} PRIVATE ENABLE_PRINT USE_STANDARD_MALLOC
+				WINDOWS_HEADER_DUMMY)
 
   create_instruction_size_test(instructions_op1_basic)
   create_instruction_size_test(instructions_op1_extensions)
@@ -73,5 +75,10 @@ if(BUILD_TESTING)
   # create_random_instruction_test("random_01" 1000)
 
   add_test(NAME find_own_functions COMMAND ${FIND_FUNC_EXEC})
+   add_test(NAME copy_blocks COMMAND ${COPY_BLOCKS_EXEC}
+   ${CMAKE_CURRENT_BINARY_DIR}/unmodified.bin
+   ${CMAKE_CURRENT_BINARY_DIR}/modified.bin)
+   add_test(NAME compare_copied_blocks COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/compare_binary.py --unmodified-file ${CMAKE_CURRENT_BINARY_DIR}/unmodified.bin --modified-file ${CMAKE_CURRENT_BINARY_DIR}/modified.bin)
+   set_tests_properties(compare_copied_blocks PROPERTIES DEPENDS copy_blocks)
 
 endif()

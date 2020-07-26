@@ -3,6 +3,7 @@
 #include "disasm/disasm.h"
 #include "disasm/instruction.h"
 #include "reference.h"
+#include "prepare.h"
 #include "utility.h"
 
 static BlockList *check_block(void *start_address, BlockList *block_list,
@@ -24,7 +25,7 @@ static ReferenceList *collect_references_from_block(const Block *block,
                                                     ReferenceList *references);
 
 BlockList *discover_blocks(void **entrypoints, void *min_addr, void *max_addr) {
-    BlockList *block_list = NULL;
+    BlockList *blocks = NULL;
 
     ReferenceList *pending_calls = NULL;
     for (int i = 0; entrypoints[i] != NULL; i++) {
@@ -35,18 +36,21 @@ BlockList *discover_blocks(void **entrypoints, void *min_addr, void *max_addr) {
     while (pending_calls != NULL) {
         void *entrypoint = get_next_entrypoint(&pending_calls, &checked_calls);
 
-        block_list = check_block(entrypoint, block_list, min_addr, max_addr);
-        if (block_list == NULL) {
+        blocks = check_block(entrypoint, blocks, min_addr, max_addr);
+        if (blocks == NULL) {
             break;
         }
         if (pending_calls == NULL) {
             pending_calls = collect_new_calls(pending_calls, checked_calls,
-                                              block_list, min_addr, max_addr);
+                                              blocks, min_addr, max_addr);
         }
     }
     free_reference_list(pending_calls);
     free_reference_list(checked_calls);
-    return block_list;
+
+	blocks = prepare_blocks(blocks);
+
+    return blocks;
 }
 
 static BlockList *check_block(void *start_address, BlockList *block_list,

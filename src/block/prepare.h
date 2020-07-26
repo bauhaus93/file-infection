@@ -3,8 +3,6 @@
 
 #include "block.h"
 
-void order_blocks(BlockList *blocks);
-void merge_order_blocks(BlockList *blocks);
-BlockList *fix_conditional_block_endings(BlockList *blocks);
+BlockList *prepare_blocks(BlockList *blocks);
 
 #endif // BLOCK_PREPARE_H
