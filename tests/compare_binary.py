@@ -81,7 +81,7 @@ if __name__ == "__main__":
     unmod_dict = filter_disassembly(unmod_disassembly)
     mod_dict = filter_disassembly(mod_disassembly)
     if len(unmod_dict) != len(mod_dict):
-        logger.error(f"Number of relevant instructions changed: Unmodified: {len(unmod_dict)}, modified: {len(mod_dict)}")
+        logger.error(f"Number of different instructions changed: Unmodified: {len(unmod_dict)}, modified: {len(mod_dict)}")
         exit(1)
     only_old = set(unmod_dict.keys()).difference(set(mod_dict.keys()))
     only_new = set(mod_dict.keys()).difference(set(unmod_dict.keys()))

@@ -35,6 +35,7 @@ void print_blocks(const BlockList *blocks);
 size_t get_block_size(const Block *block);
 size_t get_code_size(const BlockList *block_list);
 
+void *get_target_address(void *address, const BlockList *blocks);
 Block *find_block_for_address(void *addr, BlockList *block_list);
 
 void *get_min_address(const BlockList *blocks);

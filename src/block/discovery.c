@@ -2,8 +2,8 @@
 #include "block.h"
 #include "disasm/disasm.h"
 #include "disasm/instruction.h"
-#include "reference.h"
 #include "prepare.h"
+#include "reference.h"
 #include "utility.h"
 
 static BlockList *check_block(void *start_address, BlockList *block_list,
@@ -48,7 +48,7 @@ BlockList *discover_blocks(void **entrypoints, void *min_addr, void *max_addr) {
     free_reference_list(pending_calls);
     free_reference_list(checked_calls);
 
-	blocks = prepare_blocks(blocks);
+    blocks = prepare_blocks(blocks);
 
     return blocks;
 }

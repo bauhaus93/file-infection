@@ -18,7 +18,7 @@ if(BUILD_TESTING)
 		 "$<TARGET_FILE:${LIB_NAME}>;${TEST_DRIVER};${TEST_FILE}")
   endmacro()
 
-  macro(create_random_instruction_test)
+macro(create_random_instruction_test)
     set(TEST_DRIVER
 	"${CMAKE_CURRENT_SOURCE_DIR}/generate_random_instructions.py")
     set(TEST_FILE "${CMAKE_CURRENT_BINARY_DIR}/${ARGV0}.s")
@@ -26,8 +26,7 @@ if(BUILD_TESTING)
     execute_process(
       COMMAND
 	python3 ${TEST_DRIVER} --output-file ${TEST_FILE} --seed ${ARGV0}
-	--count ${ARGV1} --input-dir ${CMAKE_CURRENT_SOURCE_DIR} --info-dir
-	${CMAKE_CURRENT_BINARY_DIR}/instruction_info)
+	--count ${ARGV1})
 
     add_test(
       NAME test_${ARGV0}
@@ -40,6 +39,7 @@ if(BUILD_TESTING)
       PROPERTIES REQUIRED_FILES
 		 "$<TARGET_FILE:${LIB_NAME}>;${TEST_DRIVER};${TEST_FILE}")
   endmacro()
+
 
   get_property(SRCS GLOBAL PROPERTY ALL_SOURCES)
 
@@ -72,7 +72,7 @@ if(BUILD_TESTING)
   create_instruction_size_test(instructions_op2_basic)
   create_instruction_size_test(instructions_op2_extensions)
   create_instruction_size_test(instructions_op3_basic)
-  # create_random_instruction_test("random_01" 1000)
+  create_random_instruction_test("random_01" 1000)
 
   add_test(NAME find_own_functions COMMAND ${FIND_FUNC_EXEC})
    add_test(NAME copy_blocks COMMAND ${COPY_BLOCKS_EXEC}

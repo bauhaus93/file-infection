@@ -1,4 +1,3 @@
-#undef NDEBUG
 #include <assert.h>
 #include <stdio.h>
 
@@ -56,13 +55,16 @@ bool write_modified_code_copy(void **entrypoints, const char *filename) {
     assert(target_mem != NULL);
     PRINT_DEBUG("Target base is %p", target_mem);
 
-    void *dest_entrypoint =
-        copy_blocks(blocks, entrypoints[0], target_mem, target_size);
-    if (dest_entrypoint == NULL) {
+    if (!copy_blocks(blocks, target_mem, target_size)) {
         PRINT_DEBUG("Could not copy modified blocks");
         return false;
     }
-    PRINT_DEBUG("Target entry point is %p", dest_entrypoint);
+    void *target_entrypoint = get_target_address(entrypoints[0], blocks);
+    if (target_entrypoint == NULL) {
+        PRINT_DEBUG("Could not find target entry point");
+        return false;
+    }
+    PRINT_DEBUG("Target entry point is %p", target_entrypoint);
 
     memdump(target_mem, target_size, filename);
 

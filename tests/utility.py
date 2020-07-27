@@ -72,7 +72,7 @@ def check_instructions(file_path, bit_width, lib_path):
                         logger.error(
                             f"Mismatch    | {line:40s} | {bin_str:20s} | expected = {len(data):2d} | found = {found_size:2d}"
                         )
-                        #disasm.print_instruction()
+                        # disasm.print_instruction()
                         mismatches += 1
                     else:
                         logger.debug(
@@ -91,6 +91,7 @@ def check_instructions(file_path, bit_width, lib_path):
             total += 1
     logger.info(f"Instruction match finished:  {total - mismatches}/{total} OK")
     return mismatches == 0
+
 
 def compile_instruction(instruction, bit_width, silent_error=False):
     input_file = os.path.join(
@@ -126,6 +127,28 @@ def compile_instruction(instruction, bit_width, silent_error=False):
     os.remove(input_file)
     os.remove(output_file)
     if len(data) == 0:
-        logger.error(f"Assembly successful, but output file is empty for '{instruction}'")
+        logger.error(
+            f"Assembly successful, but output file is empty for '{instruction}'"
+        )
         return None
     return data
+
+
+def try_decompile_instruction(byte_data, bit_width):
+    try:
+        result = subprocess.run(
+            ["ndisasm", f"-b{bit_width}", "-"],
+            input=bytes(byte_data),
+            capture_output=True,
+        )
+        if result.returncode != 0:
+            return None
+        line = " " .join("".join(str(result.stdout).split("\\n")[0]).split(" ")[3:]).strip()
+        if "db" in line or any(map(lambda e: line == e, ["lock", "repne", "rep", "o16", "a16", "cs", "fs", "gs", "ds", "ss", "es"])):
+            return None
+        if not compile_instruction(line, bit_width, silent_error = True):
+            return None
+        return line
+    except Exception as e:
+        logger.error(f"subprocess.run: {e}")
+        return None

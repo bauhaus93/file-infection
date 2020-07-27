@@ -1,7 +1,7 @@
 #ifndef POISON_H
 #define POISON_H
 
-#ifdef ENABLE_POISON
+#ifndef USE_STANDARD_MALLOC
 #pragma GCC poison printf fprintf memset memcpy
 #endif
 

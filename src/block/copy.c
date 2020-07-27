@@ -23,33 +23,8 @@ static void write_ret(void *addr);
 static bool write_jcc(void *addr, int32_t offset, const Instruction *old_instr);
 static void write_jmp(void *addr, int32_t offset);
 
-void *copy_blocks(BlockList *blocks, void *src_entrypoint, void *dest,
-                  size_t dest_size) {
+bool copy_blocks(BlockList *blocks, void *dest, size_t dest_size) {
     void *dest_entrypoint = NULL;
-    void *dest_end = BYTE_OFFSET(dest, dest_size);
-
-    void *ptr = dest;
-    PRINT_DEBUG("Copying blocks");
-    for (const BlockList *ble = blocks; ble != NULL; ble = ble->next) {
-        if (ptr >= dest_end) {
-            return NULL;
-        }
-        ptr = copy_block(ble->block,
-                         ble->next != NULL ? ble->next->block : NULL, ptr);
-        if (ble->block->start == src_entrypoint) {
-            dest_entrypoint = ble->block->new_start;
-        }
-    }
-
-    if (!fix_block_endings(blocks)) {
-        return NULL;
-    }
-
-    return dest_entrypoint;
-}
-
-bool copy_blocks_test(BlockList * blocks, void * dest, size_t dest_size) {
-	void *dest_entrypoint = NULL;
     void *dest_end = BYTE_OFFSET(dest, dest_size);
 
     void *ptr = dest;
@@ -58,11 +33,32 @@ bool copy_blocks_test(BlockList * blocks, void * dest, size_t dest_size) {
         if (ptr >= dest_end) {
             return false;
         }
-		size_t bs = get_block_size(ble->block);
-		memcpy_local(ble->block->start, ptr, bs);
-		ptr = BYTE_OFFSET(ptr, bs);
+        ptr = copy_block(ble->block,
+                         ble->next != NULL ? ble->next->block : NULL, ptr);
     }
-	return true;
+
+    if (!fix_block_endings(blocks)) {
+        return false;
+    }
+
+    return true;
+}
+
+bool copy_blocks_test(BlockList *blocks, void *dest, size_t dest_size) {
+    void *dest_entrypoint = NULL;
+    void *dest_end = BYTE_OFFSET(dest, dest_size);
+
+    void *ptr = dest;
+    PRINT_DEBUG("Copying blocks");
+    for (const BlockList *ble = blocks; ble != NULL; ble = ble->next) {
+        if (ptr >= dest_end) {
+            return false;
+        }
+        size_t bs = get_block_size(ble->block);
+        memcpy_local(ble->block->start, ptr, bs);
+        ptr = BYTE_OFFSET(ptr, bs);
+    }
+    return true;
 }
 
 static void *copy_block(Block *block, Block *next_block, void *dest) {
@@ -117,7 +113,7 @@ static bool fix_block_endings(BlockList *blocks) {
                         if (block->dest != next_start) {
                             int32_t new_offset = calculate_new_offset(
                                 block->dest, instr.end, block, blocks);
-							write_jmp(target_instruction, new_offset);
+                            write_jmp(target_instruction, new_offset);
                         }
                     }
                 } else {

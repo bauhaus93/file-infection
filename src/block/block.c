@@ -29,6 +29,15 @@ void *get_max_address(const BlockList *blocks) {
     return max;
 }
 
+void *get_target_address(void *address, const BlockList *blocks) {
+    for (const BlockList *ble = blocks; ble != NULL; ble = ble->next) {
+        if (ble->block->start == address) {
+            return ble->block->new_start;
+        }
+    }
+    return NULL;
+}
+
 size_t get_code_size(const BlockList *block_list) {
     size_t sum = 0;
     for (const BlockList *ble = block_list; ble != NULL; ble = ble->next) {
