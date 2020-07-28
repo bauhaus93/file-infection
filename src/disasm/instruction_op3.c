@@ -56,7 +56,7 @@ static bool is_valid_opcode_0F38(const Instruction *instr) {
         return opcode_in_range(opcode, 0x00, 0x0B) ||
                opcode_in_range(opcode, 0x1C, 0x1E) ||
                opcode_in_range(opcode, 0xC8, 0xCD) || opcode == 0xF0 ||
-               opcode == 0xF1 || opcode == 0xF6;
+               opcode == 0xF1 || opcode == 0xF6 || opcode == 0xF9;
     }
 }
 

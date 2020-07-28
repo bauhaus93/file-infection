@@ -20,8 +20,7 @@ static bool has_immediate_Ov(uint8_t opcode);
 
 bool is_valid_opcode_1byte(
     const Instruction *instr) { // ignoring invalid opcode extensions
-    uint8_t opcode = instr->opcode[0];
-    return opcode != 0xD6 && (!opcode_in_range(opcode, 0xD8, 0xDF));
+    return true;
 }
 
 bool has_modrm_1byte(const Instruction *instr) {
@@ -33,6 +32,7 @@ bool has_modrm_1byte(const Instruction *instr) {
            opcode_in_range(opcode, 0xC0, 0xD1) ||
            opcode_in_range(opcode, 0xC4, 0xC7) ||
            opcode_in_range(opcode, 0xD2, 0xD3) ||
+           opcode_in_range(opcode, 0xD8, 0xDF) ||
            opcode_in_range(opcode, 0xF6, 0xF7) ||
            opcode_in_range(opcode, 0xFE, 0xFF) || opcode == 0x69 ||
            opcode == 0x6B;

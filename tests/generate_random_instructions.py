@@ -38,7 +38,7 @@ def create_random_instruction_bytes():
         if sib:
             binary.append(random.randint(0x00, 0xFF))
     for i in range(imm):
-        binary.append(random.randint(0x00, 0xFF))
+        binary.append(0xFF)
     return binary
 
 

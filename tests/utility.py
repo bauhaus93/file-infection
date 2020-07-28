@@ -143,10 +143,37 @@ def try_decompile_instruction(byte_data, bit_width):
         )
         if result.returncode != 0:
             return None
-        line = " " .join("".join(str(result.stdout).split("\\n")[0]).split(" ")[3:]).strip()
-        if "db" in line or any(map(lambda e: line == e, ["lock", "repne", "rep", "o16", "a16", "cs", "fs", "gs", "ds", "ss", "es"])):
+        line = " ".join(
+            "".join(str(result.stdout).split("\\n")[0]).split(" ")[3:]
+        ).strip()
+        if any(
+            map(
+                lambda e: e in line,
+                [
+                    "db",
+                    "o16",
+                    "a16",
+                    "ud0",
+                    "dmint",
+                    "femms",
+                    "cpu_write",
+                    "cpu_read",
+                    "sysret",
+                    "hint_nop",
+                    "cldemote",
+                    "gf2p8affineinvqb",
+                    "wait",
+                    "xcryptcfb"
+                ],
+            )
+        ) or any(
+            map(
+                lambda e: e == line,
+                ["lock", "repne", "rep", "cs", "fs", "gs", "ds", "ss", "es"],
+            )
+        ):
             return None
-        if not compile_instruction(line, bit_width, silent_error = True):
+        if not compile_instruction(line, bit_width, silent_error=True):
             return None
         return line
     except Exception as e:
