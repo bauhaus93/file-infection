@@ -163,7 +163,7 @@ def try_decompile_instruction(byte_data, bit_width):
                     "cldemote",
                     "gf2p8affineinvqb",
                     "wait",
-                    "xcryptcfb"
+                    "xcryptcfb",
                 ],
             )
         ) or any(

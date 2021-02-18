@@ -34,5 +34,4 @@ add_custom_target(
 
 get_property(SRCS GLOBAL PROPERTY ALL_SOURCES)
 list(INSERT SRCS 1 ${CMAKE_CURRENT_BINARY_DIR}/string_generator.c)
-
 set_property(GLOBAL PROPERTY ALL_SOURCES ${SRCS})

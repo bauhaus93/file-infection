@@ -23,7 +23,7 @@ fi
 
 if [ $MODE = "BUILD" ] || [ $MODE = "TEST" ]
 then
-	$CMAKE --build $BUILD_DIR -j8 --target disasm find_functions copy_blocks
+	$CMAKE --build $BUILD_DIR -j8 --target disasm function_discovery block_copy
 fi
 
 if [ $MODE = "TEST" ]

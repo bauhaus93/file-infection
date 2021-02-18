@@ -7,13 +7,34 @@ import argparse
 import tempfile
 import subprocess
 
-from utility import setup_logger
+
+def setup_logger():
+    FORMAT = r"[%(asctime)-15s %(levelname)-5s] %(message)s"
+    DATE_FORMAT = r"%Y-%m-%d %H:%M:%S"
+    logging.basicConfig(level=logging.INFO, format=FORMAT, datefmt=DATE_FORMAT)
+
 
 logger = logging.getLogger()
 
 
 def filter_disassembly(disassembly):
-    FILTER_WORDS = ["call", "jg", "jnz", "jmp","jnc", "jnl", "nop", "jz", "jna", "ja", "jae", "jb", "jbe", "jc", "jnae"]
+    FILTER_WORDS = [
+        "call",
+        "jg",
+        "jnz",
+        "jmp",
+        "jnc",
+        "jnl",
+        "nop",
+        "jz",
+        "jna",
+        "ja",
+        "jae",
+        "jb",
+        "jbe",
+        "jc",
+        "jnae",
+    ]
     disassembly = sorted(
         list(
             filter(
@@ -30,19 +51,23 @@ def filter_disassembly(disassembly):
         line = " ".join(line)
         diss_dict[line] = diss_dict.get(line, 0) + 1
 
-    return dict(filter(
-        lambda kv: not (any(map(lambda w: w in kv[0], FILTER_WORDS))), diss_dict.items()))
+    return dict(
+        filter(
+            lambda kv: not (any(map(lambda w: w in kv[0], FILTER_WORDS))),
+            diss_dict.items(),
+        )
+    )
+
 
 def disassemble_file(filename):
-    result = subprocess.run(
-        ["ndisasm", "-b32", filename], capture_output=True
-    )
+    result = subprocess.run(["ndisasm", "-b32", filename], capture_output=True)
     if result.returncode != 0:
         return None
         logger.error(
             f"Could not disassemble file '{unmodified_file}': {result_unmod.stderr.decode('utf-8')}"
         )
     return result.stdout.decode("utf-8")
+
 
 if __name__ == "__main__":
     setup_logger()
@@ -81,7 +106,9 @@ if __name__ == "__main__":
     unmod_dict = filter_disassembly(unmod_disassembly)
     mod_dict = filter_disassembly(mod_disassembly)
     if len(unmod_dict) != len(mod_dict):
-        logger.error(f"Number of different instructions changed: Unmodified: {len(unmod_dict)}, modified: {len(mod_dict)}")
+        logger.error(
+            f"Number of different instructions changed: Unmodified: {len(unmod_dict)}, modified: {len(mod_dict)}"
+        )
         exit(1)
     only_old = set(unmod_dict.keys()).difference(set(mod_dict.keys()))
     only_new = set(mod_dict.keys()).difference(set(unmod_dict.keys()))
@@ -97,8 +124,9 @@ if __name__ == "__main__":
     error_found = False
     for key in unmod_dict.keys():
         if unmod_dict[key] != mod_dict[key]:
-            logger.error(f"Amount of instruction occurences changed for '{key}': Unmodified: {unmod_dict[key]}, modified: {mod_dict[key]}")
+            logger.error(
+                f"Amount of instruction occurences changed for '{key}': Unmodified: {unmod_dict[key]}, modified: {mod_dict[key]}"
+            )
             error_found = True
     if error_found:
         exit(1)
-
