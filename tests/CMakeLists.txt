@@ -6,40 +6,35 @@ if(BUILD_TESTING)
   macro(create_instruction_size_test)
     set(TEST_DRIVER "${CMAKE_CURRENT_SOURCE_DIR}/instruction_test_driver.py")
     set(TEST_FILE "${CMAKE_CURRENT_SOURCE_DIR}/${ARGV0}.s")
-    add_test(
-      NAME ${ARGV0}
-      COMMAND
-	python3 ${TEST_DRIVER} --bit-width 32 --disasm-lib
-	"$<TARGET_FILE:${LIB_NAME}>" ${TEST_FILE})
+    add_test(NAME ${ARGV0}
+             COMMAND python3 ${TEST_DRIVER} --bit-width 32 --disasm-lib
+                     "$<TARGET_FILE:${LIB_NAME}>" ${TEST_FILE})
 
     set_tests_properties(
       ${ARGV0}
       PROPERTIES REQUIRED_FILES
-		 "$<TARGET_FILE:${LIB_NAME}>;${TEST_DRIVER};${TEST_FILE}")
+                 "$<TARGET_FILE:${LIB_NAME}>;${TEST_DRIVER};${TEST_FILE}")
   endmacro()
 
-macro(create_random_instruction_test)
+  macro(create_random_instruction_test)
     set(TEST_DRIVER
-	"${CMAKE_CURRENT_SOURCE_DIR}/generate_random_instructions.py")
+        "${CMAKE_CURRENT_SOURCE_DIR}/generate_random_instructions.py")
     set(TEST_FILE "${CMAKE_CURRENT_BINARY_DIR}/${ARGV0}.s")
 
-    execute_process(
-      COMMAND
-	python3 ${TEST_DRIVER} --output-file ${TEST_FILE} --seed ${ARGV0}
-	--count ${ARGV1})
+    execute_process(COMMAND python3 ${TEST_DRIVER} --output-file ${TEST_FILE}
+                            --seed ${ARGV0} --count ${ARGV1})
 
     add_test(
       NAME test_${ARGV0}
       COMMAND
-	python3 ${CMAKE_CURRENT_SOURCE_DIR}/instruction_test_driver.py
-	--bit-width 32 --disasm-lib "$<TARGET_FILE:${LIB_NAME}>" ${TEST_FILE})
+        python3 ${CMAKE_CURRENT_SOURCE_DIR}/instruction_test_driver.py
+        --bit-width 32 --disasm-lib "$<TARGET_FILE:${LIB_NAME}>" ${TEST_FILE})
 
     set_tests_properties(
       test_${ARGV0}
       PROPERTIES REQUIRED_FILES
-		 "$<TARGET_FILE:${LIB_NAME}>;${TEST_DRIVER};${TEST_FILE}")
+                 "$<TARGET_FILE:${LIB_NAME}>;${TEST_DRIVER};${TEST_FILE}")
   endmacro()
-
 
   get_property(SRCS GLOBAL PROPERTY ALL_SOURCES)
 
@@ -48,20 +43,23 @@ macro(create_random_instruction_test)
   target_link_options(${LIB_NAME} PRIVATE -m64)
   target_compile_definitions(
     ${LIB_NAME} PRIVATE USE_STANDARD_MALLOC WINDOWS_HEADER_DUMMY ENABLE_PRINT)
+  add_dependencies(${LIB_NAME} STRING_GENERATOR CHECKSUM_LIST)
 
   add_executable(${FIND_FUNC_EXEC} "find_own_functions.c" ${SRCS})
   target_compile_options(${FIND_FUNC_EXEC} PRIVATE -m32)
   target_link_options(${FIND_FUNC_EXEC} PRIVATE -m32)
   target_compile_definitions(
     ${FIND_FUNC_EXEC} PRIVATE USE_STANDARD_MALLOC WINDOWS_HEADER_DUMMY
-			      ENABLE_PRINT)
+                              ENABLE_PRINT)
+  add_dependencies(${FIND_FUNC_EXEC} STRING_GENERATOR)
 
   add_executable(${COPY_BLOCKS_EXEC} copy_blocks.c ${SRCS})
   target_compile_options(${COPY_BLOCKS_EXEC} PRIVATE -m32)
   target_link_options(${COPY_BLOCKS_EXEC} PRIVATE -m32)
   target_compile_definitions(
     ${COPY_BLOCKS_EXEC} PRIVATE ENABLE_PRINT USE_STANDARD_MALLOC
-				WINDOWS_HEADER_DUMMY)
+                                WINDOWS_HEADER_DUMMY)
+  add_dependencies(${COPY_BLOCKS_EXEC} STRING_GENERATOR)
 
   create_instruction_size_test(instructions_op1_basic)
   create_instruction_size_test(instructions_op1_extensions)
@@ -75,10 +73,16 @@ macro(create_random_instruction_test)
   create_random_instruction_test("random_01" 1000)
 
   add_test(NAME find_own_functions COMMAND ${FIND_FUNC_EXEC})
-   add_test(NAME copy_blocks COMMAND ${COPY_BLOCKS_EXEC}
-   ${CMAKE_CURRENT_BINARY_DIR}/unmodified.bin
-   ${CMAKE_CURRENT_BINARY_DIR}/modified.bin)
-   add_test(NAME compare_copied_blocks COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/compare_binary.py --unmodified-file ${CMAKE_CURRENT_BINARY_DIR}/unmodified.bin --modified-file ${CMAKE_CURRENT_BINARY_DIR}/modified.bin)
-   set_tests_properties(compare_copied_blocks PROPERTIES DEPENDS copy_blocks)
+  add_test(
+    NAME copy_blocks
+    COMMAND ${COPY_BLOCKS_EXEC} ${CMAKE_CURRENT_BINARY_DIR}/unmodified.bin
+            ${CMAKE_CURRENT_BINARY_DIR}/modified.bin)
+  add_test(
+    NAME compare_copied_blocks
+    COMMAND
+      python3 ${CMAKE_CURRENT_SOURCE_DIR}/compare_binary.py --unmodified-file
+      ${CMAKE_CURRENT_BINARY_DIR}/unmodified.bin --modified-file
+      ${CMAKE_CURRENT_BINARY_DIR}/modified.bin)
+  set_tests_properties(compare_copied_blocks PROPERTIES DEPENDS copy_blocks)
 
 endif()

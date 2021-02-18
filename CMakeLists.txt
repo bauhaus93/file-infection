@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.4)
+cmake_minimum_required(VERSION 3.19)
 project(infect C ASM)
 
 macro(add_sources)
@@ -15,7 +15,6 @@ macro(add_sources)
 endmacro()
 
 set(EXEC_NAME "infect")
-set(DELTA_NAME "delta")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 if(NOT CMAKE_BUILD_TYPE)
@@ -32,14 +31,17 @@ endif()
 
 if(${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
   add_compile_options(-fno-asynchronous-unwind-tables -fno-jump-tables
-	  -fmax-errors=1 -Wall -fno-builtin)
+                      -fmax-errors=1 -Wall -fno-builtin)
   add_link_options(-fmax-errors=1 -Wall -Werror)
 else()
   message(SEND_ERROR "Unknown compiler: ${CMAKE_C_COMPILER_ID}")
 endif()
 
 include_directories(src)
+include_directories(${CMAKE_BINARY_DIR}/filegen/include)
 add_subdirectory(src)
+add_subdirectory(filegen)
+
 get_property(SRCS GLOBAL PROPERTY ALL_SOURCES)
 
 add_executable(${EXEC_NAME} "src/main.c" ${SRCS})
@@ -48,33 +50,7 @@ target_link_options(${EXEC_NAME} PRIVATE -m32)
 target_compile_definitions(${EXEC_NAME} PRIVATE ENABLE_POISON)
 set_property(TARGET ${EXEC_NAME} PROPERTY C_STANDARD 99)
 
-add_custom_command(
-  OUTPUT ${CMAKE_SOURCE_DIR}/src/checksum_list.h
-  COMMAND
-    python3 ${CMAKE_SOURCE_DIR}/scripts/file_generation/generate_checksums.py
-    --input-file ${CMAKE_SOURCE_DIR}/resources/checksums.txt --output-file
-    ${CMAKE_SOURCE_DIR}/src/checksum_list.h && clang-format -i
-    ${CMAKE_SOURCE_DIR}/src/checksum_list.h
-  MAIN_DEPENDENCY ${CMAKE_SOURCE_DIR}/resources/checksums.txt
-  DEPENDS ${CMAKE_SOURCE_DIR}/scripts/file_generation/generate_checksums.py)
-
-target_sources(${EXEC_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/src/checksum_list.h)
-
-add_custom_command(
-  OUTPUT ${CMAKE_SOURCE_DIR}/src/string_generator.c
-	 ${CMAKE_SOURCE_DIR}/src/string_generator.h
-  COMMAND
-    python3 ${CMAKE_SOURCE_DIR}/scripts/file_generation/string_generator.py
-    --string-file ${CMAKE_SOURCE_DIR}/resources/strings.txt --header-path
-    ${CMAKE_SOURCE_DIR}/src/string_generator.h --source-path
-    ${CMAKE_SOURCE_DIR}/src/string_generator.c && clang-format -i
-    ${CMAKE_SOURCE_DIR}/src/string_generator.c
-    ${CMAKE_SOURCE_DIR}/src/string_generator.h
-  MAIN_DEPENDENCY ${CMAKE_SOURCE_DIR}/resources/strings.txt
-  DEPENDS ${CMAKE_SOURCE_DIR}/scripts/file_generation/string_generator.py)
-
-target_sources(${EXEC_NAME} PRIVATE ${CMAKE_SOURCE_DIR}/src/string_generator.h
-				    ${CMAKE_SOURCE_DIR}/src/string_generator.c)
+add_dependencies(${EXEC_NAME} CHECKSUM_LIST STRING_GENERATOR)
 
 include(CTest)
 if(BUILD_TESTING)
