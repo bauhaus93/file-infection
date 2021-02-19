@@ -39,7 +39,7 @@ then
 	pushd $MXE_DIR && \
 	make -j8 MXE_TARGETS="$MXE_TARGETS" gcc cmake && \
 	popd && \
-	$CMAKE -B $BUILD_DIR -S $PWD -DCMAKE_BUILD_TYPE="Release" -DBUILD_TESTING="ON"
+	$CMAKE -B $BUILD_DIR -S $PWD -DCMAKE_BUILD_TYPE="Release" -DBUILD_TESTING="OFF"
 fi
 
 if [ $MODE = "BUILD" ] || [ $MODE = "TEST" ]

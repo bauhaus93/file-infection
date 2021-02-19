@@ -52,7 +52,6 @@ set_property(TARGET ${EXEC_NAME} PROPERTY C_STANDARD 99)
 
 add_dependencies(${EXEC_NAME} CHECKSUM_LIST STRING_GENERATOR)
 
-include(CTest)
 if(BUILD_TESTING)
   add_subdirectory(tests)
 endif()

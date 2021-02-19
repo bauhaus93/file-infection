@@ -11,6 +11,8 @@
 #include "utility.h"
 #include "windows_wrapper.h"
 
+#include "poison.h"
+
 typedef struct {
     HANDLE h_file;
     HANDLE h_map;
