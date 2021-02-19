@@ -44,7 +44,7 @@ fi
 
 if [ $MODE = "BUILD" ] || [ $MODE = "TEST" ]
 then
-	$CMAKE --build $BUILD_DIR -j8 --target infect --target test_relocation || \
+	$CMAKE --build $BUILD_DIR -j8 --target infect || \
 	exit 1
 fi
 
