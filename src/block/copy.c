@@ -45,7 +45,6 @@ bool copy_blocks(BlockList *blocks, void *dest, size_t dest_size) {
 }
 
 bool copy_blocks_test(BlockList *blocks, void *dest, size_t dest_size) {
-    void *dest_entrypoint = NULL;
     void *dest_end = BYTE_OFFSET(dest, dest_size);
 
     void *ptr = dest;
@@ -229,8 +228,8 @@ static int32_t estimate_fixup_overhead(const Block *block,
             }
         } else if (next_block == NULL || block->dest != next_block->start) {
             return JMP_MAX -
-                   existing_size; // May have a JMP or not, if not, add JMP, if
-                                  // is JMP may up/dowgrade it
+                   existing_size; // May have a JMP or not, if not, add JMP,
+                                  // if is JMP may up/dowgrade it
         } else {
             PRINT_DEBUG("Unreachable! dest = %p, dest_alt = %p, last_instr = "
                         "%p, next_start = %p",
