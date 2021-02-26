@@ -154,6 +154,7 @@ def try_decompile_instruction(byte_data, bit_width):
                     "o16",
                     "a16",
                     "ud0",
+                    "ud1",
                     "dmint",
                     "femms",
                     "cpu_write",
