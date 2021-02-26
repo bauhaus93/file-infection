@@ -64,11 +64,17 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--seed", type=str, required=True, help="Seed used in rng",
+        "--seed",
+        type=str,
+        required=True,
+        help="Seed used in rng",
     )
 
     parser.add_argument(
-        "--count", type=int, required=True, help="Number of generated instructions",
+        "--count",
+        type=int,
+        required=True,
+        help="Number of generated instructions",
     )
     args = parser.parse_args()
 

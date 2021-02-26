@@ -10,7 +10,8 @@ import util
 
 
 def wrap_no_optimizations(function_content):
-    return f"#pragma GCC push_options\n#pragma GCC optimize(\"O0\")\n{function_content}\n#pragma GCC pop_options\n"
+    return f'#pragma GCC push_options\n#pragma GCC optimize("O0")\n{function_content}\n#pragma GCC pop_options\n'
+
 
 def read_words(filename):
     words = {}
@@ -18,13 +19,14 @@ def read_words(filename):
         lines = f.readlines()
         word_id = 0
         for line in lines:
-            word_symbol, word_value = line[:-1].split(" ", maxsplit = 1)
+            word_symbol, word_value = line[:-1].split(" ", maxsplit=1)
             if word_symbol.upper() in words:
                 print("Symbol clash: " + word_symbol.upper())
                 return {}
             words[word_symbol.upper()] = (word_id, word_value)
             word_id += 1
     return words
+
 
 def generate_alphabet_map(word_map):
     alphabet = {}
@@ -37,6 +39,7 @@ def generate_alphabet_map(word_map):
                 alphabet[c] = [num]
     return alphabet
 
+
 def generate_function_get_word_length(word_map):
     code = "size_t get_string_length(uint16_t id) {\n"
     code += "switch(id) {\n"
@@ -44,6 +47,7 @@ def generate_function_get_word_length(word_map):
         code += f"case STRING_{word_symbol}: return {len(word_map[word_symbol][1])};\n"
     code += "default: return 0;\n}}"
     return wrap_no_optimizations(code)
+
 
 def generate_function_generate_word(occurence_map):
     code = "size_t get_string(uint16_t id, char * dest, size_t dest_size) {\n"
@@ -53,6 +57,7 @@ def generate_function_generate_word(occurence_map):
     code += generate_switch(occurence_map)
     code += "}\ndest[len] = 0;\n return len + 1;\n}"
     return wrap_no_optimizations(code)
+
 
 def generate_switch(alphabet_map):
     code = ""
@@ -69,6 +74,7 @@ def generate_switch(alphabet_map):
     code += "default: return 0;\n}\n"
     return code
 
+
 def generate_header_code(filename, word_map):
     code = "#include <stdint.h>\n#include <stddef.h>\n\n"
     for word_symbol in word_map:
@@ -77,33 +83,37 @@ def generate_header_code(filename, word_map):
     code += "\nsize_t get_string(uint16_t id, char * dest, size_t destSize);\n"
     return util.safeguard_code(code, filename)
 
+
 def generate_source_code(header_name, word_map):
     alphabet_map = generate_alphabet_map(word_map)
     logging.getLogger().info(f"Alphabet size: {len(alphabet_map)}")
-    code = f"#include \"{header_name}\"\n\n"
+    code = f'#include "{header_name}"\n\n'
     code += generate_function_get_word_length(word_map)
     code += "\n\n"
     code += generate_function_generate_word(alphabet_map)
     return code
 
+
 if __name__ == "__main__":
     util.setup_logger()
     logger = logging.getLogger()
 
-    parser = argparse.ArgumentParser("Generates a word generator in form of a C header and source file.")
+    parser = argparse.ArgumentParser(
+        "Generates a word generator in form of a C header and source file."
+    )
 
-    parser.add_argument("--string-file",
-        metavar = "FILE",
-        help = "Specify the file containing the strings which should be possible to generate.",
-        required = True)
-    parser.add_argument("--header-path",
-        metavar = "DIR",
-        help = "Specify the header path",
-        required = True)
-    parser.add_argument("--source-path",
-        metavar = "DIR",
-        help = "Specify the source path",
-        required = True)
+    parser.add_argument(
+        "--string-file",
+        metavar="FILE",
+        help="Specify the file containing the strings which should be possible to generate.",
+        required=True,
+    )
+    parser.add_argument(
+        "--header-path", metavar="DIR", help="Specify the header path", required=True
+    )
+    parser.add_argument(
+        "--source-path", metavar="DIR", help="Specify the source path", required=True
+    )
     args = parser.parse_args()
 
     HEADER_NAME = os.path.basename(args.header_path)
@@ -116,8 +126,8 @@ if __name__ == "__main__":
 
     with open(args.header_path, "w") as f:
         f.write(header_code)
-        logger.info(f"Generated {args.header_path}")
+        logger.info(f"Generated '{args.header_path}'")
 
     with open(args.source_path, "w") as f:
         f.write(source_code)
-        logger.info(f"Generated {args.source_path}")
+        logger.info(f"Generated '{args.source_path}'")
