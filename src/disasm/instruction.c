@@ -52,6 +52,12 @@ bool is_return(const Instruction *instr) {
            opcode == 0xCB || opcode == 0xCF;
 }
 
+// endbr32
+bool is_endbr(const Instruction *instr) {
+    return instr->opcode[0] == 0x0F && instr->opcode[1] == 0x1E &&
+           has_prefix(instr, 0xF3) && *instr->modrm == 0xFB;
+}
+
 bool is_jump(const Instruction *instr) {
     return is_conditional_jump(instr) || is_unconditional_jump(instr);
 }
@@ -90,66 +96,14 @@ void *get_jump_target(const Instruction *instr) {
     return NULL;
 }
 
-void write_updated_jump_instruction(const Instruction *old_instr,
-                                    void *new_addr, int32_t new_offset) {
-    if (is_jump_direct_offset(old_instr)) {
-        PRINT_DEBUG("Write jmp @ %p", new_addr);
-        uint8_t opcode0 = old_instr->opcode[0];
-        if (new_offset <= INT8_MAX && new_offset >= INT8_MIN) {
-            if (opcode_in_range(opcode0, 0x70, 0x7F) ||
-                opcode0 == 0xEB) { // rel8 jmps, leave them as-is
-                *(uint8_t *)new_addr = opcode0;
-                *(int8_t *)BYTE_INCREMENT(new_addr) = (int8_t)new_offset;
-                PRINT_DEBUG("Write rel8 jmp as-is");
-            } else if (opcode0 ==
-                       0xE9) { // unconditional rel32, downgrade to rel8
-                *(uint8_t *)new_addr = 0xEB;
-                *(int8_t *)BYTE_INCREMENT(new_addr) = (int8_t)new_offset;
-                PRINT_DEBUG("Write downgraded unconditional jmp");
-            } else if (opcode0 == 0x0F) { // is a 2 byte opcode jmp (rel32
-                                          // conditional jmps)
-                uint8_t opcode1 = old_instr->opcode[1];
-                if (opcode_in_range(opcode1, 0x80, 0x8F)) {
-                    *(uint8_t *)new_addr = opcode1 - 0x10;
-                    *(int8_t *)BYTE_INCREMENT(new_addr) = (int8_t)new_offset;
-                    PRINT_DEBUG("Write downgraded conditional jmp");
-                }
-            }
-        } else {
-            if (opcode_in_range(opcode0, 0x70,
-                                0x7F)) { // conditionals, upgrade to rel32
-                PRINT_DEBUG("Write upgraded conditional jmp");
-                *(uint8_t *)new_addr = 0x0F;
-                *(uint8_t *)BYTE_INCREMENT(new_addr) = opcode0 + 0x10;
-                *(int32_t *)BYTE_OFFSET(new_addr, 2) = new_offset;
-            } else if (opcode0 == 0xEB) { // unconditional, upgrade to rel32
-                PRINT_DEBUG("Write upgraded unconditional jmp");
-                *(uint8_t *)new_addr = 0xE9;
-                *(int32_t *)BYTE_INCREMENT(new_addr) = (int32_t)new_offset;
-            } else if (opcode0 == 0xE9) {
-                PRINT_DEBUG("Write rel32 unconditional jmp as-is");
-                *(uint8_t *)new_addr = 0xE9;
-                *(int32_t *)BYTE_INCREMENT(new_addr) = (int32_t)new_offset;
-            } else if (opcode0 == 0x0F) { // is a 2 byte opcode jmp (rel32
-                                          // conditional jmps)
-                uint8_t opcode1 = old_instr->opcode[1];
-                if (opcode_in_range(opcode1, 0x80, 0x8F)) {
-                    PRINT_DEBUG("Write rel32 conditional jmp as-is");
-                    *(uint8_t *)new_addr = opcode0;
-                    *(uint8_t *)BYTE_INCREMENT(new_addr) = opcode1;
-                    *(int8_t *)BYTE_OFFSET(new_addr, 2) = (int32_t)new_offset;
-                }
-            }
-        }
-    }
-}
-
 void print_instruction(const Instruction *instr) {
     PRINT_DEBUG(
-        "Instruction | size: %2d | prefix count: %1d | opcode size: %1d | "
+        "Instruction | opcode: %02X | size: %2d | prefix count: %1d | opcode "
+        "size: %1d | "
         "modrm: %3s | sib: %3s | displacement size: %1d | immediate size: "
         "%1d",
-        get_instruction_size(instr), instr->prefix_count, instr->opcode_size,
-        instr->modrm == NULL ? "no" : "yes", instr->sib == NULL ? "no" : "yes",
-        instr->displacement_size, instr->immediate_size);
+        *instr->opcode, get_instruction_size(instr), instr->prefix_count,
+        instr->opcode_size, instr->modrm == NULL ? "no" : "yes",
+        instr->sib == NULL ? "no" : "yes", instr->displacement_size,
+        instr->immediate_size);
 }

@@ -7,8 +7,7 @@
 uint8_t is_pe(void *base) {
     return *(uint16_t *)base == 0x5A4D &&
            get_nt_header_by_base(base)->OptionalHeader.Magic ==
-               (IS_32_BIT ? IMAGE_NT_OPTIONAL_HDR32_MAGIC
-                          : IMAGE_NT_OPTIONAL_HDR64_MAGIC);
+               IMAGE_NT_OPTIONAL_HDR_MAGIC;
 }
 
 uint32_t align_value(uint32_t value, uint32_t alignment) {
@@ -23,10 +22,6 @@ IMAGE_NT_HEADERS *get_nt_header_by_base(void *base) {
     return (IMAGE_NT_HEADERS *)((uint8_t *)base + dosHdr->e_lfanew);
 }
 
-IMAGE_NT_HEADERS *get_nt_header(void) {
-    return get_nt_header_by_base(get_image_base());
-}
-
 IMAGE_EXPORT_DIRECTORY *get_export_directory_by_base(void *base) {
     if (base == NULL) {
         return NULL;
@@ -35,14 +30,6 @@ IMAGE_EXPORT_DIRECTORY *get_export_directory_by_base(void *base) {
     return (IMAGE_EXPORT_DIRECTORY *)((uint8_t *)base +
                                       nt_header->OptionalHeader.DataDirectory[0]
                                           .VirtualAddress);
-}
-
-IMAGE_EXPORT_DIRECTORY *get_export_directory(void) {
-    return get_export_directory_by_base(get_image_base());
-}
-
-IMAGE_EXPORT_DIRECTORY *get_kernel32_export_directory(void) {
-    return get_export_directory_by_base(get_kernel32_base());
 }
 
 IMAGE_SECTION_HEADER *get_section_header(IMAGE_NT_HEADERS *nt_headers,

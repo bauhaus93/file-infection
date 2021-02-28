@@ -24,7 +24,6 @@ static bool write_jcc(void *addr, int32_t offset, const Instruction *old_instr);
 static void write_jmp(void *addr, int32_t offset);
 
 bool copy_blocks(BlockList *blocks, void *dest, size_t dest_size) {
-    void *dest_entrypoint = NULL;
     void *dest_end = BYTE_OFFSET(dest, dest_size);
 
     void *ptr = dest;
@@ -190,6 +189,7 @@ static int32_t get_block_delta(const Block *block) {
     return 0;
 }
 
+// only used for testing
 size_t estimate_target_code_size(const BlockList *block_list) {
     size_t sum = 0;
     for (const BlockList *ble = block_list; ble != NULL; ble = ble->next) {

@@ -61,6 +61,7 @@ bndmk bnd0, [eax]
 ;prefix=0xF3
 bndcu bnd0, eax
 bndcn bnd0, eax
+endbr32
 
 ;0x20-0x27
 mov eax, cr0

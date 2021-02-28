@@ -3,6 +3,6 @@
 
 #include "block.h"
 
-BlockList *discover_blocks(void **entry_points, void *min_addr, void *max_addr);
+BlockList *discover_blocks(void **entry_points);
 
 #endif // BLOCK_DISCOVERY_H

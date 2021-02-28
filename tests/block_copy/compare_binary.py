@@ -25,6 +25,7 @@ def filter_disassembly(disassembly):
         "jmp",
         "jnc",
         "jnl",
+        "jng",
         "nop",
         "jz",
         "jna",
@@ -62,10 +63,10 @@ def filter_disassembly(disassembly):
 def disassemble_file(filename):
     result = subprocess.run(["ndisasm", "-b32", filename], capture_output=True)
     if result.returncode != 0:
-        return None
         logger.error(
-            f"Could not disassemble file '{unmodified_file}': {result_unmod.stderr.decode('utf-8')}"
+            f"Could not disassemble file '{filename}': {result.stderr.decode('utf-8')}"
         )
+        return None
     return result.stdout.decode("utf-8")
 
 
@@ -100,7 +101,7 @@ if __name__ == "__main__":
 
     mod_disassembly = disassemble_file(modified_file)
     if mod_disassembly is None:
-        logger.error(f"Could not disassemble '{unmodified_file}'")
+        logger.error(f"Could not disassemble '{modified_file}'")
         exit(1)
 
     unmod_dict = filter_disassembly(unmod_disassembly)

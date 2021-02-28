@@ -6,8 +6,7 @@
 #include "reference.h"
 #include "utility.h"
 
-static BlockList *check_block(void *start_address, BlockList *block_list,
-                              void *min_addr, void *max_addr);
+static BlockList *check_block(void *start_address, BlockList *block_list);
 
 static void *get_next_entrypoint(ReferenceList **pending_calls,
                                  ReferenceList **checked_calls);
@@ -15,16 +14,8 @@ static ReferenceList *find_calls_in_block(const Block *block);
 static ReferenceList *collect_calls_from_blocks(BlockList *block_list);
 static ReferenceList *collect_new_calls(ReferenceList *pending_calls,
                                         ReferenceList *checked_calls,
-                                        BlockList *block_list, void *min_addr,
-                                        void *max_addr);
-static ReferenceList *collect_references(const BlockList *blocks,
-                                         void *min_addr, void *max_addr);
-static ReferenceList *collect_references_from_block(const Block *block,
-                                                    void *min_addr,
-                                                    void *max_addr,
-                                                    ReferenceList *references);
-
-BlockList *discover_blocks(void **entrypoints, void *min_addr, void *max_addr) {
+                                        BlockList *block_list);
+BlockList *discover_blocks(void **entrypoints) {
     BlockList *blocks = NULL;
 
     ReferenceList *pending_calls = NULL;
@@ -36,13 +27,13 @@ BlockList *discover_blocks(void **entrypoints, void *min_addr, void *max_addr) {
     while (pending_calls != NULL) {
         void *entrypoint = get_next_entrypoint(&pending_calls, &checked_calls);
 
-        blocks = check_block(entrypoint, blocks, min_addr, max_addr);
+        blocks = check_block(entrypoint, blocks);
         if (blocks == NULL) {
             break;
         }
         if (pending_calls == NULL) {
-            pending_calls = collect_new_calls(pending_calls, checked_calls,
-                                              blocks, min_addr, max_addr);
+            pending_calls =
+                collect_new_calls(pending_calls, checked_calls, blocks);
         }
     }
     free_reference_list(pending_calls);
@@ -53,9 +44,7 @@ BlockList *discover_blocks(void **entrypoints, void *min_addr, void *max_addr) {
     return blocks;
 }
 
-static BlockList *check_block(void *start_address, BlockList *block_list,
-                              void *min_addr, void *max_addr) {
-    // PRINT_DEBUG("Analysing block: start = 0x%p", start_address);
+static BlockList *check_block(void *start_address, BlockList *block_list) {
     Disassembler disasm;
     setup_disasm(start_address, &disasm);
 
@@ -67,7 +56,7 @@ static BlockList *check_block(void *start_address, BlockList *block_list,
         const Instruction *instr = get_current_instruction(&disasm);
         block->end = instr->end;
         block->last_instruction = instr->start;
-        if (is_return(instr)) {
+        if (is_return(instr) || is_endbr(instr)) {
             block->dest = NULL;
             block->dest_alternative = NULL;
             found_end = true;
@@ -77,19 +66,16 @@ static BlockList *check_block(void *start_address, BlockList *block_list,
             if (is_conditional_jump(instr)) {
                 block->dest = block->end;
                 block->dest_alternative = target;
-                block_list =
-                    check_block(instr->end, block_list, min_addr, max_addr);
+                block_list = check_block(instr->end, block_list);
             } else if (is_unconditional_jump(instr)) {
                 block->dest = target;
                 block->dest_alternative = NULL;
             }
-            if (target != NULL && target >= min_addr && target < max_addr) {
-
+            if (target != NULL) {
                 Block *target_block =
                     find_block_for_address(target, block_list);
                 if (target_block == NULL) {
-                    block_list =
-                        check_block(target, block_list, min_addr, max_addr);
+                    block_list = check_block(target, block_list);
                 } else if (target_block->start !=
                            target) { // split up existing block
                     block_list = push_block(target, block_list);
@@ -153,16 +139,13 @@ static ReferenceList *find_calls_in_block(const Block *block) {
 
 static ReferenceList *collect_new_calls(ReferenceList *pending_calls,
                                         ReferenceList *checked_calls,
-                                        BlockList *block_list, void *min_addr,
-                                        void *max_addr) {
+                                        BlockList *block_list) {
     ReferenceList *new_calls = collect_calls_from_blocks(block_list);
     while (new_calls != NULL) {
         void *new_target = top_reference_dest(new_calls);
-        if (new_target >= min_addr && new_target <= max_addr) {
-            if (!reference_in_list(new_target, pending_calls) &&
-                !reference_in_list(new_target, checked_calls)) {
-                pending_calls = push_reference(new_target, NULL, pending_calls);
-            }
+        if (!reference_in_list(new_target, pending_calls) &&
+            !reference_in_list(new_target, checked_calls)) {
+            pending_calls = push_reference(new_target, NULL, pending_calls);
         }
         new_calls = pop_reference(new_calls);
     }
@@ -181,40 +164,4 @@ static ReferenceList *collect_calls_from_blocks(BlockList *block_list) {
         }
     }
     return calls;
-}
-
-static ReferenceList *collect_references_from_block(const Block *block,
-                                                    void *min_addr,
-                                                    void *max_addr,
-                                                    ReferenceList *references) {
-    Disassembler disasm;
-    setup_disasm(block->start, &disasm);
-    while (next_instruction(&disasm)) {
-        const Instruction *instr = get_current_instruction(&disasm);
-        if (instr->start >= block->end) {
-            break;
-        }
-        if (is_call(instr)) {
-            void *target = get_call_target(instr);
-            if (target != NULL && target >= min_addr && target < max_addr) {
-                references = push_reference(target, instr->start, references);
-            }
-        } else if (is_jump(instr)) {
-            void *target = get_jump_target(instr);
-            if (target != NULL && target >= min_addr && target < max_addr) {
-                references = push_reference(target, instr->start, references);
-            }
-        }
-    }
-    return references;
-}
-
-static ReferenceList *collect_references(const BlockList *blocks,
-                                         void *min_addr, void *max_addr) {
-    ReferenceList *references = NULL;
-    for (const BlockList *ble = blocks; ble != NULL; ble = ble->next) {
-        references = collect_references_from_block(ble->block, min_addr,
-                                                   max_addr, references);
-    }
-    return references;
 }

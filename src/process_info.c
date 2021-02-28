@@ -12,8 +12,6 @@ TEB *get_teb(void) {
 
 PEB *get_peb(void) { return get_teb()->peb; }
 
-void *get_image_base(void) { return get_peb()->image_base; }
-
 void *get_module_base(uint16_t module_string_id) {
     char module_path[100];
     size_t str_len = get_string_length(module_string_id) + 1;

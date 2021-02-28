@@ -33,6 +33,7 @@ bool is_call(const Instruction *instr);
 bool is_call_direct_offset(const Instruction *instr);
 void *get_call_target(const Instruction *instr);
 bool is_return(const Instruction *instr);
+bool is_endbr(const Instruction *instr);
 bool is_jump(const Instruction *instr);
 bool is_conditional_jump(const Instruction *instr);
 bool is_unconditional_jump(const Instruction *instr);

@@ -1,7 +1,10 @@
 set(LIB_NAME "disasm")
 
+set(TEST_DRIVER "${CMAKE_CURRENT_SOURCE_DIR}/instruction_test_driver.py")
+set(TEST_GENERATOR
+    "${CMAKE_CURRENT_SOURCE_DIR}/generate_random_instructions.py")
+
 macro(create_instruction_size_test)
-  set(TEST_DRIVER "${CMAKE_CURRENT_SOURCE_DIR}/instruction_test_driver.py")
   set(TEST_FILE "${CMAKE_CURRENT_SOURCE_DIR}/${ARGV0}.s")
   add_test(NAME ${ARGV0}
            COMMAND python3 ${TEST_DRIVER} --bit-width 32 --disasm-lib
@@ -14,31 +17,30 @@ macro(create_instruction_size_test)
 endmacro()
 
 macro(create_random_instruction_test)
-  set(TEST_DRIVER "${CMAKE_CURRENT_SOURCE_DIR}/generate_random_instructions.py")
   set(TEST_FILE "${CMAKE_CURRENT_BINARY_DIR}/${ARGV0}.s")
 
-  execute_process(COMMAND python3 ${TEST_DRIVER} --output-file ${TEST_FILE}
-                          --seed ${ARGV0} --count ${ARGV1})
+  if(NOT EXISTS ${TEST_FILE})
+    execute_process(COMMAND python3 ${TEST_GENERATOR} --output-file
+                            ${TEST_FILE} --seed ${ARGV0} --count ${ARGV1})
+  endif()
 
-  add_test(
-    NAME test_${ARGV0}
-    COMMAND
-      python3 ${CMAKE_CURRENT_SOURCE_DIR}/instruction_test_driver.py
-      --bit-width 32 --disasm-lib "$<TARGET_FILE:${LIB_NAME}>" ${TEST_FILE})
+  add_test(NAME test_${ARGV0}
+           COMMAND python3 ${TEST_DRIVER} --bit-width 32 --disasm-lib
+                   "$<TARGET_FILE:${LIB_NAME}>" ${TEST_FILE})
 
   set_tests_properties(
     test_${ARGV0}
     PROPERTIES REQUIRED_FILES
-               "$<TARGET_FILE:${LIB_NAME}>;${TEST_DRIVER};${TEST_FILE}")
+               "$<TARGET_FILE:${LIB_NAME}>;${TEST_GENERATOR};${TEST_FILE}")
 endmacro()
 
 get_property(SRCS GLOBAL PROPERTY ALL_SOURCES)
 
-add_library(${LIB_NAME} SHARED ${SRCS})
+add_library(${LIB_NAME} SHARED)
 target_compile_options(${LIB_NAME} PRIVATE -m64)
 target_link_options(${LIB_NAME} PRIVATE -m64)
-target_compile_definitions(
-  ${LIB_NAME} PRIVATE USE_STANDARD_MALLOC WINDOWS_HEADER_DUMMY ENABLE_PRINT)
+target_compile_definitions(${LIB_NAME} PUBLIC USE_STANDARD_MALLOC ENABLE_PRINT)
+target_link_libraries(${LIB_NAME} ${TEST_INFECT_LIB64})
 add_dependencies(${LIB_NAME} STRING_GENERATOR CHECKSUM_LIST)
 
 create_instruction_size_test(instructions_op1_basic)

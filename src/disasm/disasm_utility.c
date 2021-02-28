@@ -8,10 +8,6 @@ bool opcode_in_range(uint8_t opcode, uint8_t low, uint8_t high) {
            col <= (high & 0xF);
 }
 
-uint8_t get_col(uint8_t opcode) { return opcode & 0xF; }
-
-uint8_t get_row(uint8_t opcode) { return (opcode >> 4); }
-
 uint8_t get_modrm_mod(uint8_t modrm) { return modrm >> 6; }
 
 uint8_t get_modrm_rm(uint8_t modrm) { return modrm & 0x7; }
@@ -24,9 +20,5 @@ bool has_sib_byte(uint8_t modrm) {
     uint8_t rm = get_modrm_rm(modrm);
     return mod <= 0x2 && rm == 0x4;
 }
-
-uint8_t get_sib_scale(uint8_t sib) { return sib >> 6; }
-
-uint8_t get_sib_index(uint8_t sib) { return (sib >> 3) & 0x7; }
 
 uint8_t get_sib_base(uint8_t sib) { return sib & 0x7; }

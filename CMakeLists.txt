@@ -15,12 +15,19 @@ macro(add_sources)
 endmacro()
 
 set(EXEC_NAME "infect")
+set(INFECT_LIB "infect_lib")
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE
       Debug
       CACHE STRING "Choose build type" FORCE)
+endif()
+
+if(NOT WINDOWS_INCLUDE_DIR)
+  set(WINDOWS_INCLUDE_DIR
+      ${CMAKE_SOURCE_DIR}/windows/include
+      CACHE STRING "Select include dir, where windows header files are located"
+            FORCE)
 endif()
 
 if(NOT BUILD_TESTING)
@@ -30,8 +37,7 @@ if(NOT BUILD_TESTING)
 endif()
 
 if(${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
-  add_compile_options(-fno-asynchronous-unwind-tables -fno-jump-tables
-                      -fmax-errors=1 -Wall -fno-builtin)
+  add_compile_options(-fmax-errors=1 -Wall)
   add_link_options(-fmax-errors=1 -Wall -Werror)
 else()
   message(SEND_ERROR "Unknown compiler: ${CMAKE_C_COMPILER_ID}")
@@ -44,15 +50,22 @@ add_subdirectory(filegen)
 
 get_property(SRCS GLOBAL PROPERTY ALL_SOURCES)
 
-add_executable(${EXEC_NAME} "src/main.c" ${SRCS})
-target_compile_options(${EXEC_NAME} PRIVATE -m32)
-target_link_options(${EXEC_NAME} PRIVATE -m32)
-target_compile_definitions(${EXEC_NAME} PRIVATE ENABLE_POISON)
-set_property(TARGET ${EXEC_NAME} PROPERTY C_STANDARD 99)
+add_library(${INFECT_LIB} OBJECT ${SRCS})
+target_compile_options(
+  ${INFECT_LIB} PUBLIC -fno-asynchronous-unwind-tables -fno-jump-tables
+                       -fno-builtin -nostdlib -m32)
+target_compile_definitions(${INFECT_LIB} PRIVATE ENABLE_POISON)
+target_link_options(${INFECT_LIB} PUBLIC -m32)
 
-add_dependencies(${EXEC_NAME} CHECKSUM_LIST STRING_GENERATOR)
+add_dependencies(${INFECT_LIB} CHECKSUM_LIST STRING_GENERATOR)
+
+add_executable(${EXEC_NAME} "src/main.c")
+target_compile_options(${EXEC_NAME} PRIVATE -m32 -nostdlib)
+target_link_options(${EXEC_NAME} PRIVATE -m32 -nostdlib)
+target_link_libraries(${EXEC_NAME} ${INFECT_LIB})
+target_compile_definitions(${EXEC_NAME} PRIVATE ENABLE_POISON)
 
 if(BUILD_TESTING)
-  enable_testing()
+  include(CTest)
   add_subdirectory(tests)
 endif()

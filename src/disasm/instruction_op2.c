@@ -11,7 +11,7 @@ static bool has_immediate_Jz(uint8_t opcode);
 
 bool is_valid_opcode_2byte(const Instruction *instr) {
     uint8_t opcode = instr->opcode[1];
-    return !(opcode_in_range(opcode, 0x1C, 0x1E) ||
+    return !(opcode_in_range(opcode, 0x1C, 0x1D) ||
              opcode_in_range(opcode, 0x24, 0x27) ||
              opcode_in_range(opcode, 0x38, 0x3F) || opcode == 0x07 ||
              opcode == 0x0A || opcode == 0x0C || opcode == 0x0E ||

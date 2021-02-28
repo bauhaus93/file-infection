@@ -7,28 +7,7 @@
 #include "reference.h"
 #include "utility.h"
 
-void *get_min_address(const BlockList *blocks) {
-    void *min = blocks->block->start;
-    while (blocks != NULL) {
-        if (blocks->block->start < min) {
-            min = blocks->block->start;
-        }
-        blocks = blocks->next;
-    }
-    return min;
-}
-
-void *get_max_address(const BlockList *blocks) {
-    void *max = blocks->block->end;
-    while (blocks != NULL) {
-        if (blocks->block->end > max) {
-            max = blocks->block->end;
-        }
-        blocks = blocks->next;
-    }
-    return max;
-}
-
+// only used for testing
 void *get_target_address(void *address, const BlockList *blocks) {
     for (const BlockList *ble = blocks; ble != NULL; ble = ble->next) {
         if (ble->block->start == address) {
@@ -38,6 +17,7 @@ void *get_target_address(void *address, const BlockList *blocks) {
     return NULL;
 }
 
+// only used for testing
 size_t get_code_size(const BlockList *block_list) {
     size_t sum = 0;
     for (const BlockList *ble = block_list; ble != NULL; ble = ble->next) {
@@ -84,34 +64,6 @@ BlockList *push_block(void *block_start, BlockList *block_list) {
         free_block_list(block_list);
     }
     return new_list;
-}
-
-BlockList *append_block(void *block_start, BlockList *block_list) {
-    BlockList *new_list = (BlockList *)MALLOC(sizeof(BlockList));
-    if (new_list != NULL) {
-        new_list->block = create_block(block_start);
-        if (new_list->block != NULL) {
-            if (block_list == NULL) {
-                return new_list;
-            } else {
-                for (BlockList *ptr = block_list; ptr != NULL;
-                     ptr = ptr->next) {
-                    if (ptr->next == NULL) {
-                        ptr->next = new_list;
-                        return block_list;
-                    }
-                }
-            }
-        } else {
-            free_block_list(block_list);
-            free_block_list(new_list);
-            return NULL;
-        }
-    } else {
-        free_block_list(block_list);
-        return NULL;
-    }
-    return block_list;
 }
 
 BlockList *insert_block(void *block_start, BlockList *block_list) {
@@ -190,6 +142,7 @@ void print_block(const Block *block) {
     }
 }
 
+// only used for printing function which may be used for testing
 size_t count_effective_blocks(const BlockList *blocks) {
     size_t c = 0;
     for (const BlockList *ble = blocks; ble != NULL; ble = ble->next) {

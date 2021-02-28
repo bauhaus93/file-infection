@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #define PRINT_DEBUG(...)                                                       \
     {                                                                          \
-        fprintf(stderr, "[%s] ", __func__);                                    \
+        fprintf(stderr, "[%-20s] ", __func__);                                 \
         fprintf(stderr, __VA_ARGS__);                                          \
         fprintf(stderr, "\n");                                                 \
     }
@@ -34,11 +34,5 @@
 #define BYTE_DIFF(hi, lo) ((int32_t)(((uint8_t *)(hi)) - ((uint8_t *)(lo))))
 
 uint8_t same_case_insensitive(char a, char b);
-
-uint8_t write_value32(uint32_t value, void *memory);
-void *find_value32(uint32_t value, void *start, void *end);
-uint8_t find_replace_value32(uint32_t search_value, uint32_t new_value,
-                             void *symbol_start_addr, void *symbol_end_addr,
-                             void *code_begin, void *target_code_begin);
 
 #endif // UTILITY_H

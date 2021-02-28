@@ -11,7 +11,7 @@ CMAKE_MXE=$(MXE_TARGET)-cmake
 
 BUILD_DIR_NATIVE=$(PWD)/build-native
 CMAKE_NATIVE=cmake
-BUILD_TYPE_NATIVE=Release
+BUILD_TYPE_NATIVE=Debug
 
 BUILD_JOBS=8
 
@@ -30,7 +30,7 @@ clean:
 reformat:
 	$(SRC_DIR)/scripts/reformat.sh
 
-target-native-setup:
+target-native-setup: $(MXE_INCLUDE)
 	rm -rf $(BUILD_DIR_NATIVE) && \
 	mkdir -p $(BUILD_DIR_NATIVE) && \
 	$(CMAKE_NATIVE) \
@@ -44,12 +44,12 @@ target-native-build:
 	$(CMAKE_NATIVE) \
 		--build $(BUILD_DIR_NATIVE) \
 		-j$(BUILD_JOBS) \
-		--target disasm function_discovery block_copy
+		--target infect infect_lib disasm function_discovery block_copy copy_execution
 
 target-native-test: target-native-build
 	cd $(BUILD_DIR_NATIVE) && \
 	ctest --output-on-failure \
-		-j$(BUILD_JOBS)
+		-j$(BUILD_JOBS) -R "discover_own_functions"
 
 mxe-toolchain $(MXE_BIN)/$(MXE_TARGET) $(MXE_BIN)/$(CMAKE_MXE):
 	[ ! -d "$(MXE_DIR)" ] && git clone https://github.com/mxe/mxe.git $(MXE_DIR);\
@@ -72,5 +72,5 @@ target-windows-build: $(MXE_BIN)/$(MXE_TARGET) $(MXE_BIN)/$(CMAKE_MXE)
 	[ ! -d "$(BUILD_DIR_MXE)" ] && make target-windows-setup;\
 	PATH="$(MXE_BIN):$$PATH" $(CMAKE_MXE) --build $(BUILD_DIR_MXE) \
 		-j$(BUILD_JOBS) \
-		--target infect
+		--target infect infect_lib
 

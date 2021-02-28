@@ -17,7 +17,7 @@ void memdump(void *addr, size_t size, const char *filename) {
 }
 
 bool write_raw_code_copy(void **entrypoints, const char *filename) {
-    BlockList *blocks = discover_blocks(entrypoints, code_begin, code_end);
+    BlockList *blocks = discover_blocks(entrypoints);
     if (blocks == NULL) {
         PRINT_DEBUG("Could not discover blocks");
         return false;
@@ -39,7 +39,7 @@ bool write_raw_code_copy(void **entrypoints, const char *filename) {
 }
 
 bool write_modified_code_copy(void **entrypoints, const char *filename) {
-    BlockList *blocks = discover_blocks(entrypoints, code_begin, code_end);
+    BlockList *blocks = discover_blocks(entrypoints);
     if (blocks == NULL) {
         PRINT_DEBUG("Could not discover blocks");
         return false;
