@@ -49,7 +49,7 @@ target-native-build:
 target-native-test: target-native-build
 	cd $(BUILD_DIR_NATIVE) && \
 	ctest --output-on-failure \
-		-j$(BUILD_JOBS) -R "discover_own_functions"
+		-j$(BUILD_JOBS) -E "copy_execution"
 
 mxe-toolchain $(MXE_BIN)/$(MXE_TARGET) $(MXE_BIN)/$(CMAKE_MXE):
 	[ ! -d "$(MXE_DIR)" ] && git clone https://github.com/mxe/mxe.git $(MXE_DIR);\

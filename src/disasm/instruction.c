@@ -97,12 +97,19 @@ void *get_jump_target(const Instruction *instr) {
 }
 
 void print_instruction(const Instruction *instr) {
+#ifdef ENABLE_PRINT
+    char dump[64];
+    for (size_t i = 0; i < get_instruction_size(instr); i++) {
+        snprintf(dump + 3 * i, 64 - 3 * i, "%02X ",
+                 *(uint8_t *)BYTE_OFFSET(instr->start, i));
+    }
+#endif
     PRINT_DEBUG(
-        "Instruction | opcode: %02X | size: %2d | prefix count: %1d | opcode "
+        "Instruction | %20s | size: %2d | prefix count: %1d | opcode "
         "size: %1d | "
         "modrm: %3s | sib: %3s | displacement size: %1d | immediate size: "
         "%1d",
-        *instr->opcode, get_instruction_size(instr), instr->prefix_count,
+        dump, get_instruction_size(instr), instr->prefix_count,
         instr->opcode_size, instr->modrm == NULL ? "no" : "yes",
         instr->sib == NULL ? "no" : "yes", instr->displacement_size,
         instr->immediate_size);

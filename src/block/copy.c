@@ -20,6 +20,7 @@ static int32_t estimate_fixup_overhead(const Block *block,
 
 static bool fix_block_endings(BlockList *blocks);
 static void write_ret(void *addr);
+static void write_endbr32(void *addr);
 static bool write_jcc(void *addr, int32_t offset, const Instruction *old_instr);
 static void write_jmp(void *addr, int32_t offset);
 
@@ -96,6 +97,8 @@ static bool fix_block_endings(BlockList *blocks) {
                     BYTE_DIFF(block->last_instruction, block->start));
                 if (is_return(&instr)) {
                     write_ret(target_instruction);
+                } else if (is_endbr(&instr)) {
+                    write_endbr32(target_instruction);
                 } else if (is_jump_direct_offset(&instr)) {
                     if (is_conditional_jump(&instr)) {
                         int32_t new_offset = calculate_new_offset(
@@ -127,6 +130,14 @@ static bool fix_block_endings(BlockList *blocks) {
 }
 
 static void write_ret(void *addr) { *(uint8_t *)addr = 0xC3; }
+
+static void write_endbr32(void *addr) {
+    uint8_t *x = (uint8_t *)addr;
+    x[0] = 0xF3;
+    x[1] = 0x0F;
+    x[2] = 0x1E;
+    x[3] = 0xFB;
+}
 
 static bool write_jcc(void *addr, int32_t offset,
                       const Instruction *old_instr) {

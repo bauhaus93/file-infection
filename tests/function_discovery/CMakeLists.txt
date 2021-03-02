@@ -15,7 +15,8 @@ add_custom_target(FUNCTION_INFO DEPENDS ${FUNCTION_INFO_FILE})
 add_executable(${DISCOVERY_EXEC} "function_discovery.c")
 target_compile_options(${DISCOVERY_EXEC} PRIVATE -m32)
 target_link_options(${DISCOVERY_EXEC} PRIVATE -m32)
-target_link_libraries(${DISCOVERY_EXEC} ${TEST_INFECT_LIB32})
+target_link_libraries(${DISCOVERY_EXEC} ${TEST_INFECT_LIB32}
+                      ${TEST_UTILITY_LIB})
 target_compile_definitions(${DISCOVERY_EXEC} PUBLIC USE_STANDARD_MALLOC
                                                     ENABLE_PRINT)
 add_dependencies(${DISCOVERY_EXEC} INFECT_BINARY INFECT_BINARY_DISASSEMBLY

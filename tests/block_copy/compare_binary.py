@@ -2,6 +2,7 @@
 
 from functools import reduce
 import os
+import re
 import logging
 import argparse
 import tempfile
@@ -25,6 +26,9 @@ def filter_disassembly(disassembly):
         "jmp",
         "jnc",
         "jnl",
+        "jl",
+        "jns",
+        "js",
         "jng",
         "nop",
         "jz",
@@ -70,6 +74,33 @@ def disassemble_file(filename):
     return result.stdout.decode("utf-8")
 
 
+def collect_call_targets(disassembly):
+    pat = re.compile("call (0x[0-9a-fA-F]+)")
+    targets = {}
+    for m in pat.finditer(disassembly):
+        targets[int(m.group(1), 16)] = targets.get(int(m.group(1), 16), 0) + 1
+    return targets
+
+
+def check_call_targets(original_disassembly, modified_disassembly):
+    orig_targets = collect_call_targets(original_disassembly)
+    mod_targets = collect_call_targets(modified_disassembly)
+
+    targets = set([*orig_targets.keys(), *mod_targets.keys()])
+    diff_count = 0
+    total = 0
+    for t in targets:
+        c_orig = orig_targets.get(t, 0)
+        c_mod = mod_targets.get(t, 0)
+        if c_orig == 0:
+            logger.error(f"New call\t\t| amount: {c_mod:3d} | target:  0x{t:08X}")
+        if c_mod == 0:
+            logger.error(f"Missing call\t| amount: {c_orig:3d} | target:  0x{t:08X}")
+        diff_count += abs(c_orig - c_mod)
+        total += c_orig + c_mod
+    return 1.0 - diff_count / total
+
+
 if __name__ == "__main__":
     setup_logger()
     parser = argparse.ArgumentParser(
@@ -104,30 +135,32 @@ if __name__ == "__main__":
         logger.error(f"Could not disassemble '{modified_file}'")
         exit(1)
 
+    similarity = check_call_targets(unmod_disassembly, mod_disassembly)
+    if similarity < 1.0:
+        logger.error(f"Call targets similarity: {similarity * 100:.1f}%")
+        exit(1)
+
     unmod_dict = filter_disassembly(unmod_disassembly)
     mod_dict = filter_disassembly(mod_disassembly)
-    if len(unmod_dict) != len(mod_dict):
-        logger.error(
-            f"Number of different instructions changed: Unmodified: {len(unmod_dict)}, modified: {len(mod_dict)}"
-        )
-        exit(1)
     only_old = set(unmod_dict.keys()).difference(set(mod_dict.keys()))
     only_new = set(mod_dict.keys()).difference(set(unmod_dict.keys()))
 
-    for old in only_old:
-        logger.error(f"Instruction missing in modified: {old}")
-    for new in only_new:
-        logger.error(f"New instruction appeared in modified: {new}")
-
-    if len(only_old) > 0 or len(only_new) > 0:
-        exit(1)
-
-    error_found = False
-    for key in unmod_dict.keys():
-        if unmod_dict[key] != mod_dict[key]:
+    total = 0
+    diff_count = 0
+    new_appeared = 0
+    for key in set([*unmod_dict.keys(), *mod_dict.keys()]):
+        unmod_count = unmod_dict.get(key, 0)
+        mod_count = mod_dict.get(key, 0)
+        if unmod_count != mod_count:
             logger.error(
-                f"Amount of instruction occurences changed for '{key}': Unmodified: {unmod_dict[key]}, modified: {mod_dict[key]}"
+                f"Amount of instruction occurences changed for '{key}': original: {unmod_count}, copied: {mod_count}"
             )
-            error_found = True
-    if error_found:
+            if mod_count > unmod_count:
+                # print(key, mod_count, unmod_count)
+                new_appeared += mod_count - unmod_count
+            diff_count += abs(unmod_count - mod_count)
+            total += unmod_count
+    logger.error(f"Difference: {100. * diff_count / total:.2f}%")
+    logger.error(f"Newly appread: {100. * new_appeared / total:.2f}%")
+    if diff_count > 0:
         exit(1)

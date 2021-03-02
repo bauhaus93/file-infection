@@ -2,9 +2,11 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "block/block.h"
 #include "block/discovery.h"
+#include "test_utility.h"
 #include "utility.h"
 
 // Mainly function which are used for testing purposes
@@ -38,41 +40,19 @@ static bool is_blacklisted(const char *name) {
 int main(int argc, char **argv) {
 
     if (argc != 3) {
-        fprintf(stderr, "Needing 2 args: Path of code binary dump followed by "
-                        "path of file containing the function map");
+        fprintf(stderr, "Needing 2 args: Path of code binary dump, followed by "
+                        "path of file containing the function map\n");
         return 1;
     }
 
-    PRINT_DEBUG("Code file: %s", argv[1]);
-
-    FILE *f = fopen(argv[1], "rb");
-    if (f == NULL) {
-        fprintf(stderr, "Could not open file '%s'", argv[1]);
-        return 1;
-    }
-    fseek(f, 0, SEEK_END);
-    size_t size = ftell(f);
-    fseek(f, 0, SEEK_SET);
-    PRINT_DEBUG("Size:\t\t%.1f kiB", ((float)size) / 1024.0);
-
-    uint8_t *code = (uint8_t *)malloc(sizeof(uint8_t) * size);
+    PRINT_DEBUG("Binary file: '%s'", argv[1]);
+    size_t size = 0;
+    uint8_t *code = read_binary(argv[1], &size);
     if (code == NULL) {
-        fprintf(stderr, "Could not allocate %d bytes for code",
-                sizeof(uint8_t) * size);
-        fclose(f);
+        fprintf(stderr, "Could not read binary\n");
         return 1;
     }
-
-    size_t bytes_read = fread((void *)code, sizeof(uint8_t), size, f);
-    fclose(f);
-    if (bytes_read != size) {
-        fprintf(
-            stderr,
-            "Code could not be read fully: size = %d bytes, read = %d bytes",
-            size, bytes_read);
-        free(code);
-        return 1;
-    }
+    PRINT_DEBUG("Size:\t\t%.1f kiB", ((float)size) / 1024.0);
 
     void *entrypoints[] = {(void *)code, NULL};
 
@@ -81,7 +61,7 @@ int main(int argc, char **argv) {
     free(code);
 
     if (blocks == NULL) {
-        fprintf(stderr, "collect_blocks() returned NULL");
+        fprintf(stderr, "collect_blocks() returned NULL\n");
         return 1;
     }
 
@@ -91,9 +71,9 @@ int main(int argc, char **argv) {
     }
     PRINT_DEBUG("Blocks found:\t%d", block_count);
 
-    f = fopen(argv[2], "r");
+    FILE *f = fopen(argv[2], "r");
     if (f == NULL) {
-        fprintf(stderr, "Could not open function map file '%s'", argv[2]);
+        fprintf(stderr, "Could not open function map file '%s'\n", argv[2]);
         free_block_list(blocks);
         return 1;
     }
@@ -121,7 +101,7 @@ int main(int argc, char **argv) {
             if (is_blacklisted(&name)) {
                 functions_expected--;
             } else {
-                PRINT_DEBUG("Function not found: %s", name);
+                fprintf(stderr, "Function not found: %s\n", name);
             }
         }
     }
