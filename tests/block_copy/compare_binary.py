@@ -125,6 +125,9 @@ if __name__ == "__main__":
     unmodified_file = os.path.abspath(args.unmodified_file)
     modified_file = os.path.abspath(args.modified_file)
 
+    logger.info(f"Original file: '{unmodified_file}'")
+    logger.info(f"Modified file: '{modified_file}'")
+
     unmod_disassembly = disassemble_file(unmodified_file)
     if unmod_disassembly is None:
         logger.error(f"Could not disassemble '{unmodified_file}'")

@@ -41,22 +41,8 @@ bool copy_blocks(BlockList *blocks, void *dest, size_t dest_size) {
         return false;
     }
 
-    return true;
-}
+    // TODO: Fix calls, somehow this isn't done yet, lel
 
-bool copy_blocks_test(BlockList *blocks, void *dest, size_t dest_size) {
-    void *dest_end = BYTE_OFFSET(dest, dest_size);
-
-    void *ptr = dest;
-    PRINT_DEBUG("Copying blocks");
-    for (const BlockList *ble = blocks; ble != NULL; ble = ble->next) {
-        if (ptr >= dest_end) {
-            return false;
-        }
-        size_t bs = get_block_size(ble->block);
-        memcpy_local(ble->block->start, ptr, bs);
-        ptr = BYTE_OFFSET(ptr, bs);
-    }
     return true;
 }
 
