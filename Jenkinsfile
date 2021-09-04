@@ -3,13 +3,13 @@ pipeline {
 	stages {
 		stage("Build") {
 			steps {
-				make target-native-setup
-				make target-native-build
+				sh 'make target-native-setup'
+				sh 'make target-native-build'
 			}
 		}
 		stage("Test") {
 			steps {
-				make target-native-test
+				sh 'make target-native-test'
 			}
 		}
 	}
