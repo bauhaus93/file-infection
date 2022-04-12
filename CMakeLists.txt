@@ -52,7 +52,7 @@ get_property(SRCS GLOBAL PROPERTY ALL_SOURCES)
 
 add_library(${INFECT_LIB} OBJECT ${SRCS})
 target_compile_options(
-  ${INFECT_LIB} PUBLIC -fno-asynchronous-unwind-tables -fno-jump-tables
+  ${INFECT_LIB} PUBLIC -fno-asynchronous-unwind-tables -fno-jump-tables -fno-stack-protector
                        -fno-builtin -nostdlib -m32)
 target_compile_definitions(${INFECT_LIB} PRIVATE ENABLE_POISON)
 target_link_options(${INFECT_LIB} PUBLIC -m32)
