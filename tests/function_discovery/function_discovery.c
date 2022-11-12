@@ -4,10 +4,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "block/block.h"
-#include "block/discovery.h"
-#include "test_utility.h"
-#include "utility.h"
+#include "../../src/block/block.h"
+#include "../../src/block/discovery.h"
+#include "../../src/utility.h"
+#include "../test_utility.h"
 
 // Mainly function which are used for testing purposes
 static const char *BLACKLIST[] = {"code_begin",
@@ -25,6 +25,8 @@ static const char *BLACKLIST[] = {"code_begin",
                                   "estimate_target_code_size",
                                   "count_effective_blocks",
                                   "__x86.get_pc_thunk.dx",
+                                  "__x86.get_pc_thunk.cx",
+                                  "__x86.get_pc_thunk.si",
                                   NULL};
 
 static bool is_blacklisted(const char *name) {
