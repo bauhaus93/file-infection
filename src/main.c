@@ -4,9 +4,9 @@
 #include "infection_thread.h"
 
 void _start() {
-    infection_thread(NULL);
-    EXIT_PROCESS(0);
-    spawn_infection_thread();
-    discover_blocks(NULL);
-    copy_blocks(NULL, NULL, 0);
+  infection_thread(NULL);
+  EXIT_PROCESS(0);
+  spawn_infection_thread();
+  discover_blocks(NULL);
+  copy_blocks(NULL, NULL, 0);
 }

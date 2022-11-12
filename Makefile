@@ -13,7 +13,7 @@ BUILD_DIR_NATIVE=$(PWD)/build-native
 CMAKE_NATIVE=cmake
 BUILD_TYPE_NATIVE=Debug
 
-BUILD_JOBS=8
+BUILD_JOBS=24
 
 .PHONY: target-native-setup target-native-build target-native-test \
 		mxe-toolchain \

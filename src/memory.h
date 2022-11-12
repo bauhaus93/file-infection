@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 #define BYTE_OFFSET(start, byte_offset)                                        \
-    ((void *)(((uint8_t *)(start)) + (byte_offset)))
+  ((void *)(((uint8_t *)(start)) + (byte_offset)))
 
 #define BYTE_INCREMENT(addr) BYTE_OFFSET(addr, 1)
 #define BYTE_DECREMENT(addr) BYTE_OFFSET(addr, -1)

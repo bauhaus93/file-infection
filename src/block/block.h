@@ -4,19 +4,19 @@
 #include <stddef.h>
 
 typedef struct {
-    void *start;
-    void *end;
-    void *new_start;
+  void *start;
+  void *end;
+  void *new_start;
 
-    void *last_instruction;
+  void *last_instruction;
 
-    void *dest;
-    void *dest_alternative;
+  void *dest;
+  void *dest_alternative;
 } Block;
 
 typedef struct BlockList_ {
-    Block *block;
-    struct BlockList_ *next;
+  Block *block;
+  struct BlockList_ *next;
 } BlockList;
 
 Block *create_block(void *start);

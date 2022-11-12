@@ -3,12 +3,12 @@
 
 #include <stdbool.h>
 
-#include "disasm/instruction.h"
+#include "../disasm/instruction.h"
 
 typedef struct ReferenceList_ {
-    void *dest;
-    void *src;
-    struct ReferenceList_ *next;
+  void *dest;
+  void *src;
+  struct ReferenceList_ *next;
 } ReferenceList;
 
 ReferenceList *push_reference(void *dest, void *src, ReferenceList *references);

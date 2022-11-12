@@ -6,7 +6,7 @@
 #include "windows_wrapper.h"
 
 #define MALLOC(size)                                                           \
-    VIRTUAL_ALLOC(NULL, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE)
+  VIRTUAL_ALLOC(NULL, size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE)
 #define FREE(addr) VIRTUAL_FREE(addr, 0, MEM_RELEASE)
 
 #else

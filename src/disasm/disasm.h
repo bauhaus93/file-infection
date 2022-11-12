@@ -9,9 +9,9 @@
 #define INSTRUCTION_HISTORY_SIZE (2)
 
 typedef struct {
-    Instruction instr[INSTRUCTION_HISTORY_SIZE];
-    unsigned int index;
-    void *next_addr;
+  Instruction instr[INSTRUCTION_HISTORY_SIZE];
+  unsigned int index;
+  void *next_addr;
 } Disassembler;
 
 Disassembler *init_disasm(void *start_address);

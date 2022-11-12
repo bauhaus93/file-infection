@@ -16,7 +16,7 @@ def create_random_instruction_bytes():
     PREFIX_2BYTE = 0x0F
     PREFIX_3BYTE = [0x38, 0x3A]
     num_prefixes = random.choices(
-        range(5), weights=list(map(lambda e: e ** 2, reversed(range(5))))
+        range(5), weights=list(map(lambda e: e**2, reversed(range(5))))
     )[0]
     prefixes = random.choices(PREFIXES, k=num_prefixes)
     instr_len = random.choices([1, 2, 3], weights=[3, 2, 1])[0]
