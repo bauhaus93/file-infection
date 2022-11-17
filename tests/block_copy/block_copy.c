@@ -1,13 +1,14 @@
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-#include "block/copy.h"
-#include "block/discovery.h"
-#include "code_begin.h"
-#include "code_end.h"
-#include "infection_thread.h"
-#include "test_utility.h"
-#include "utility.h"
+#include "../../src/block/copy.h"
+#include "../../src/block/discovery.h"
+#include "../../src/code_begin.h"
+#include "../../src/code_end.h"
+#include "../../src/infection_thread.h"
+#include "../../src/utility.h"
+#include "../test_utility.h"
 
 void memdump(void *addr, size_t size, const char *filename) {
   FILE *f = fopen(filename, "wb");
