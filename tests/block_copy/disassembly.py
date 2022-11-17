@@ -5,7 +5,9 @@ _logger = logging.getLogger(__name__)
 
 
 def disassemble_file(filename):
-    result = subprocess.run(["ndisasm", "-b32", filename], capture_output=True)
+    result = subprocess.run(
+        ["ndisasm", "-b32", filename], capture_output=True, check=True
+    )
     if result.returncode != 0:
         _logger.error(
             "Could not disassemble file '%s': %s",

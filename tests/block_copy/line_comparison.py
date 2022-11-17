@@ -3,12 +3,9 @@
 import argparse
 import logging
 import os
-import sys
 
-from call import verify_call_targets
 from disassembly import disassemble_file
 from line import create_linewise_comparison
-from similarity import verify_instruction_similarity
 
 _FORMAT = r"[%(asctime)-15s %(levelname)-5s] %(message)s"
 _DATE_FORMAT = r"%Y-%m-%d %H:%M:%S"
@@ -24,8 +21,7 @@ _logger = logging.getLogger(__name__)
 def main():
     setup_logger()
     parser = argparse.ArgumentParser(
-        description="Compares two binary files by checking if they have"
-        "relevant differences in their disassembly."
+        description="Creates a line by line comparison of two disassemblies"
     )
     parser.add_argument(
         "--unmodified-file",
@@ -41,11 +37,18 @@ def main():
         required=True,
         help="Name of the modified file",
     )
-
+    parser.add_argument(
+        "--output",
+        metavar="File",
+        type=str,
+        required=True,
+        help="Output file of the comparison",
+    )
     args = parser.parse_args()
 
     unmodified_file = os.path.abspath(args.unmodified_file)
     modified_file = os.path.abspath(args.modified_file)
+    output_file = os.path.abspath(args.output)
 
     _logger.info("Original file: '%s'", unmodified_file)
     _logger.info("Modified file: '%s'", modified_file)
@@ -60,22 +63,10 @@ def main():
         _logger.error("Could not disassemble '%s'", modified_file)
         return False
 
-    success = True
-
-    differences = verify_instruction_similarity(unmod_disassembly, mod_disassembly)
-    if differences:
-        _logger.error("Instruction difference not zero: %d", differences)
-        success = False
-
-    differences = verify_call_targets(unmod_disassembly, mod_disassembly)
-    if differences > 0:
-        _logger.error("Call targets difference not zero: %d", differences)
-        success = False
-
-    return success
+    with open(output_file, "w", encoding="utf-8") as f:
+        f.write(create_linewise_comparison(unmod_disassembly, mod_disassembly))
+    _logger.info("Created linewise comparison in '%s'", output_file)
 
 
 if __name__ == "__main__":
-    SUCCESS = main()
-    if not SUCCESS:
-        sys.exit(1)
+    main()
