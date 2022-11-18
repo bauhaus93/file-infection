@@ -5,8 +5,8 @@ _logger = logging.getLogger(__name__)
 
 
 def verify_call_targets(disassembly_original, disassembly_modified):
-    orig_targets = _collect_call_targets(disassembly_original)
-    mod_targets = _collect_call_targets(disassembly_modified)
+    orig_targets = collect_call_targets(disassembly_original)
+    mod_targets = collect_call_targets(disassembly_modified)
 
     targets = set([*orig_targets.keys(), *mod_targets.keys()])
     diff_count = 0
@@ -22,13 +22,17 @@ def verify_call_targets(disassembly_original, disassembly_modified):
             )
         diff_count += abs(c_orig - c_mod)
         total += c_orig + c_mod
-
     return diff_count
 
 
-def _collect_call_targets(disassembly):
+def collect_call_targets(disassembly):
     pat = re.compile("call (0x[0-9a-fA-F]+)")
+    pat = re.compile(
+        r"(?P<src>[0-9A-F]+)\s+call (?P<target_address>0x[0-9A-F]+)",
+        re.IGNORECASE,
+    )
     targets = {}
     for match in pat.finditer(disassembly):
-        targets[int(match.group(1), 16)] = targets.get(int(match.group(1), 16), 0) + 1
+        dest = int(match.group("target_address"), 16)
+        targets[dest] = targets.get(dest, 0) + 1
     return targets
