@@ -22,47 +22,18 @@ bool write_modified_code_copy(const char *src_binary,
                               const char *target_binary) {
   PRINT_DEBUG("Binary file: '%s'", src_binary);
   size_t size = 0;
-  uint8_t *code = read_binary(src_binary, &size);
+  void *code = read_binary(src_binary, &size);
   if (code == NULL) {
     fprintf(stderr, "Could not read binary\n");
     return false;
   }
   PRINT_DEBUG("Size:\t\t%.1f kiB", ((float)size) / 1024.0);
 
-  void *entrypoints[] = {(void *)code, NULL};
+  size_t target_size = 0;
+  void *target_code = copy_code(code, &target_size);
+  memdump(target_code, target_size, target_binary);
 
-  BlockList *blocks = discover_blocks(entrypoints);
-
-  if (blocks == NULL) {
-    fprintf(stderr, "Could not discover blocks\n");
-    return false;
-  }
-
-  size_t target_size = estimate_target_code_size(blocks);
-  assert(target_size > 0);
-  fprintf(stderr, "Target code size estimate = %.1fkB\n",
-          (float)target_size / 1024.);
-
-  PRINT_DEBUG("Allocating target memory");
-  void *target_mem = malloc(target_size);
-  assert(target_mem != NULL);
-  PRINT_DEBUG("Target base is %p", target_mem);
-
-  if (!copy_blocks(blocks, target_mem, target_size)) {
-    fprintf(stderr, "Could not copy modified blocks\n");
-    return false;
-  }
-  void *target_entrypoint = get_target_address(entrypoints[0], blocks);
-  if (target_entrypoint == NULL) {
-    fprintf(stderr, "Could not find target entry point\n");
-    return false;
-  }
-  PRINT_DEBUG("Target entry point is %p", target_entrypoint);
-
-  memdump(target_mem, target_size, target_binary);
-
-  free(target_mem);
-  free_block_list(blocks);
+  free(target_code);
   return true;
 }
 

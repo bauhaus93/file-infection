@@ -47,10 +47,9 @@ bool copy_blocks(BlockList *blocks, void *dest, size_t dest_size) {
 }
 
 static void *copy_block(Block *block, Block *next_block, void *dest) {
-  // PRINT_DEBUG("Copying block %p -> %p, size = 0x%X", block->start,
-  // dest,
-  //            size);
   size_t size = get_block_size(block);
+  // PRINT_DEBUG("Copying block %p -> %p, size = 0x%X", block->start, dest,
+  // size);
   size_t fixed_size = size;
   block->new_start = dest;
   if (block->last_instruction != NULL) {

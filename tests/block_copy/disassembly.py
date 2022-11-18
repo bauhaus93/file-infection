@@ -45,7 +45,8 @@ _FILTER_WORDS = [
 
 
 def annonate_disassembly(disassembly):
-    output_lines = []
+    function_header = f"{'#'*24} Function {'#'*24}"
+    output_lines = [function_header]
     pat = re.compile(r"(?P<addr>[0-9A-F]+)", re.IGNORECASE)
     call_targets = set(collect_call_targets(disassembly).keys())
     for line in disassembly.split("\n"):
@@ -53,7 +54,7 @@ def annonate_disassembly(disassembly):
         if match:
             addr = int(match.group("addr"), 16)
             if addr in call_targets:
-                output_lines.append(f"{'#'*24} Function {'#'*24}")
+                output_lines.append(function_header)
             output_lines.append(line)
     return "\n".join(output_lines)
 
