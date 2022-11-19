@@ -37,29 +37,6 @@ def parse_file(filename: str, file_type: str) -> list[Instruction]:
     raise NotImplementedError(f"File parsing for type '{file_type}' is not supported!")
 
 
-_FILTER_WORDS = [
-    "call",
-    "jg",
-    "jnz",
-    "jmp",
-    "jnc",
-    "jnl",
-    "jl",
-    "jns",
-    "js",
-    "jng",
-    "nop",
-    "jz",
-    "jna",
-    "ja",
-    "jae",
-    "jb",
-    "jbe",
-    "jc",
-    "jnae",
-]
-
-
 _DISASM_PATTERNS = {
     "ndisasm": re.compile(
         r"(?P<address>[0-9A-F]+)\s+(?P<bytecode>[0-9A-F]+)\s+(?P<instruction>\w+)(\s+(?P<args>.*))?",
@@ -69,6 +46,7 @@ _DISASM_PATTERNS = {
         r"\s*(?P<address>[0-9A-F]+):\s+(?P<bytecode>[0-9A-F ]+)\s*(?P<instruction>\w+)(\s+(?P<args>.*))?",
         re.IGNORECASE,
     ),
+    "label": re.compile(r"(?P<address>[0-9A-F]+)\s+<(?P<label>\w+)>:"),
 }
 
 
@@ -79,9 +57,13 @@ def parse_disassembly(disassembly: str) -> list[dict[str, str]]:
         for name, pat in _DISASM_PATTERNS.items():
             match = pat.match(line)
             if match:
-                instr = Instruction.from_match(match)
+                if name != "label":
+                    instr = Instruction.from_instruction_match(match)
+                    matched_parsers.add(name)
+                else:
+                    instr = Instruction.from_label_match(match)
+
                 instructions.append(instr)
-                matched_parsers.add(name)
                 break
     if len(matched_parsers) > 1:
         _logger.warning(

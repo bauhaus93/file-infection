@@ -47,7 +47,7 @@ class Instruction(object):
     )
 
     @classmethod
-    def from_match(cls, match):
+    def from_instruction_match(cls, match):
         instr = cls()
         instr.address = int(match.group("address").strip(), 16)
         instr.bytecode = match.group("bytecode").strip()
@@ -61,6 +61,12 @@ class Instruction(object):
                 instr.args = dest_match.group("target_offset").strip()
                 instr.destination_name = dest_match.group("target_name").strip()
 
+        return instr
+
+    @classmethod
+    def from_label_match(cls, match):
+        instr = cls()
+        instr.label = match.group("label")
         return instr
 
     @property
@@ -79,6 +85,7 @@ class Instruction(object):
             filter(
                 lambda e: e is not None,
                 [
+                    f"{self.label}:" if self.label else None,
                     self.address,
                     self.bytecode,
                     self.instruction,
@@ -92,7 +99,7 @@ class Instruction(object):
 def count_different_instructions(instructions: list[Instruction]) -> dict[str, int]:
     instruction_count = {}
     for instr in instructions:
-        if not instr.is_nop:
+        if not (instr.is_nop or instr.label):
             instruction_count[instr.instruction] = (
                 instruction_count.get(instr.instruction, 0) + 1
             )
