@@ -1,17 +1,26 @@
 import logging
 
-from disassembly import get_instruction_count
+from instruction import Instruction, count_different_instructions
 
 _logger = logging.getLogger(__name__)
 
 
-def verify_instruction_similarity(disassembly_original, disassembly_modified):
-    unmod_dict = get_instruction_count(disassembly_original)
-    mod_dict = get_instruction_count(disassembly_modified)
+def verify_instruction_similarity(
+    instructions_original: list[Instruction], instructions_modified: list[Instruction]
+) -> int:
+    unmod_dict = count_different_instructions(instructions_original)
+    mod_dict = count_different_instructions(instructions_modified)
 
     new_appeared = 0
     new_missing = 0
-    for key in set([*unmod_dict.keys(), *mod_dict.keys()]):
+    instructions = set([*unmod_dict.keys(), *mod_dict.keys()])
+
+    # jmps  get discarded when they would jump to the next block (-> 2 blocks get merged)
+    # so don't ignore them for this test
+    if "jmp" in instructions:
+        instructions.remove("jmp")
+    for key in instructions:
+
         unmod_count = unmod_dict.get(key, 0)
         mod_count = mod_dict.get(key, 0)
         if unmod_count != mod_count:

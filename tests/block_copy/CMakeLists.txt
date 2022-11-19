@@ -16,13 +16,14 @@ add_test(NAME copy_blocks_infect COMMAND ${BLOCK_COPY_EXEC} ${INFECT_BIN_PATH}
 
 add_test(
   NAME check_copied_blocks_instruction_count
-  COMMAND python3 ${TEST_DRIVER} --unmodified-file ${INFECT_BIN_PATH}
-          --modified-file ${INFECT_MOD_BIN_PATH} --check-type instruction_count)
+  COMMAND
+    python3 ${TEST_DRIVER} --unmodified-binary ${INFECT_BIN_PATH}
+    --modified-binary ${INFECT_MOD_BIN_PATH} --check-type instruction_count)
 
 add_test(
   NAME check_copied_blocks_call_targets
-  COMMAND python3 ${TEST_DRIVER} --unmodified-file ${INFECT_BIN_PATH}
-          --modified-file ${INFECT_MOD_BIN_PATH} --check-type call_targets)
+  COMMAND python3 ${TEST_DRIVER} --unmodified-binary ${INFECT_BIN_PATH}
+          --modified-binary ${INFECT_MOD_BIN_PATH} --check-type call_targets)
 
 set_tests_properties(copy_blocks_infect PROPERTIES LABELS "copy_code")
 set_tests_properties(check_copied_blocks_instruction_count

@@ -198,7 +198,7 @@ size_t estimate_target_code_size(const BlockList *block_list) {
 static int32_t estimate_fixup_overhead(const Block *block,
                                        const Block *next_block) {
   const int32_t JMP_MAX = 2 + 4; // 2 byte opcode + rel32 offset
-  const int32_t JCC_MAX = 1 + 4; // 1 byte opcode + rel32 offset
+  const int32_t JCC_MAX = 1 + 4; // 1 op + rel8 OR 2 op + rel16 OR 1 op + rel32
 
   if (block != NULL) {
     int32_t existing_size = BYTE_DIFF(
@@ -209,8 +209,18 @@ static int32_t estimate_fixup_overhead(const Block *block,
       return 0;
     } else if (block->dest_alternative != NULL) {
       return JCC_MAX - existing_size;
-    } else if (block->dest != NULL) {
+    } else if (block->dest != NULL &&
+               (next_block == NULL ||
+                block->dest != next_block->start)) { // Unconditional jmp when
+                                                     // next block isn't
+                                                     // the jump target
       return JMP_MAX - existing_size;
+    } else if (block->dest != NULL && next_block != NULL &&
+               block->dest ==
+                   next_block->start) { // Uncoditional jmp, when next block is
+      // already the jmp target -> we can trash this
+      // jump and just let the pc flow
+      return -existing_size;
     } else {
       PRINT_DEBUG("Unreachable! dest = %p, dest_alt = %p, last_instr = "
                   "%p, next_start = %p",

@@ -1,14 +1,16 @@
 import logging
 import re
 
-from disassembly import get_call_targets
+from instruction import Instruction, get_call_targets
 
 _logger = logging.getLogger(__name__)
 
 
-def verify_call_targets(disassembly_original, disassembly_modified):
-    orig_targets = get_call_targets(disassembly_original)
-    mod_targets = get_call_targets(disassembly_modified)
+def verify_call_targets(
+    instructions_original: list[Instruction], instructions_modified: list[Instruction]
+) -> int:
+    orig_targets = get_call_targets(instructions_original)
+    mod_targets = get_call_targets(instructions_modified)
 
     targets = set([*orig_targets.keys(), *mod_targets.keys()])
     diff_count = 0
