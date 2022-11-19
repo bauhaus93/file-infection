@@ -24,4 +24,5 @@ add_dependencies(${DISCOVERY_EXEC} INFECT_BINARY INFECT_BINARY_DISASSEMBLY
 add_test(NAME discover_own_functions COMMAND ${DISCOVERY_EXEC} ${INFECT_BIN}
                                              ${FUNCTION_INFO_FILE})
 
-set_tests_properties(discover_own_functions PROPERTIES LABELS "function_discovery")
+set_tests_properties(discover_own_functions PROPERTIES LABELS
+                                                       "function_discovery")

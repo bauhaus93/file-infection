@@ -18,24 +18,15 @@ void *read_binary(const char *path, size_t *size) {
   *size = ftell(f);
   fseek(f, 0, SEEK_SET);
 
-  uint8_t *code = (uint8_t *)malloc(sizeof(uint8_t) * (*size));
+  void *code = malloc(*size);
   if (code == NULL) {
-    fprintf(stderr, "Could not allocate %lu bytes for code\n",
-            sizeof(uint8_t) * (*size));
+    fprintf(stderr, "Could not allocate %lu bytes for code\n", *size);
     fclose(f);
     return NULL;
   }
 
-  size_t bytes_read = fread((void *)code, sizeof(uint8_t), *size, f);
+  fread((void *)code, *size, 1, f);
   fclose(f);
-  if (bytes_read != *size) {
-    fprintf(
-        stderr,
-        "Code could not be read fully: size = %lu bytes, read = %lu bytes\n",
-        *size, bytes_read);
-    free(code);
-    return NULL;
-  }
   return code;
 }
 

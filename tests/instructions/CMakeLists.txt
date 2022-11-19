@@ -12,8 +12,8 @@ macro(create_instruction_size_test)
   set_tests_properties(
     ${ARGV0}
     PROPERTIES REQUIRED_FILES
-               "$<TARGET_FILE:${LIB_NAME}>;${TEST_DRIVER};${TEST_FILE}"
-              LABELS "disassembler")
+               "$<TARGET_FILE:${LIB_NAME}>;${TEST_DRIVER};${TEST_FILE}" LABELS
+               "disassembler")
 endmacro()
 
 macro(create_random_instruction_test)
@@ -32,7 +32,7 @@ macro(create_random_instruction_test)
     test_${ARGV0}
     PROPERTIES REQUIRED_FILES
                "$<TARGET_FILE:${LIB_NAME}>;${TEST_GENERATOR};${TEST_FILE}"
-              LABELS "disassembler")
+               LABELS "disassembler")
 endmacro()
 
 get_property(SRCS GLOBAL PROPERTY ALL_SOURCES)

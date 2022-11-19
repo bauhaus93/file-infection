@@ -9,7 +9,8 @@ set(INFECT_BIN_DISASM "${CMAKE_CURRENT_BINARY_DIR}/infect.s")
 
 add_custom_command(
   OUTPUT ${INFECT_BIN}
-  COMMAND objcopy -O binary -j .text ${CMAKE_BINARY_DIR}/infect ${INFECT_BIN}
+  COMMAND objcopy -RS -O binary -j .text ${CMAKE_BINARY_DIR}/infect
+          ${INFECT_BIN}
   DEPENDS infect)
 
 add_custom_command(
@@ -39,7 +40,7 @@ add_library(${TEST_UTILITY_LIB} OBJECT
             ${CMAKE_CURRENT_SOURCE_DIR}/test_utility.c)
 target_compile_options(${TEST_UTILITY_LIB} PUBLIC -m32)
 target_compile_definitions(${TEST_UTILITY_LIB} PUBLIC USE_STANDARD_MALLOC
-                                                       ENABLE_PRINT)
+                                                      ENABLE_PRINT)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 add_subdirectory(instructions)

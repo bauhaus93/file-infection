@@ -1,9 +1,11 @@
+#include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
 #include "../disasm/disasm.h"
 #include "../disasm/instruction.h"
+#include "../memory.h"
 #include "../utility.h"
 #include "block.h"
 #include "copy.h"
@@ -202,23 +204,13 @@ static int32_t estimate_fixup_overhead(const Block *block,
     int32_t existing_size = BYTE_DIFF(
         block->end,
         block->last_instruction != NULL ? block->last_instruction : block->end);
-    if (block->dest == NULL) {
-      if (block->dest_alternative == NULL) {
-        return 0; // ret instruction
-      } else if (block->dest_alternative != NULL) {
-        return JCC_MAX - existing_size; // JCC with yet-to-determine next instr
-                                        // pos, may up/downgrade JCC
-      }
-    } else if (next_block != NULL && block->dest == next_block->start) {
-      if (block->dest_alternative != NULL) {
-        return JCC_MAX - existing_size; // Normal JCC, may up/downgrade it
-      } else {
-        return -existing_size; // May have a JMP or not, if a JMP can
-                               // trash it
-      }
-    } else if (next_block == NULL || block->dest != next_block->start) {
-      return JMP_MAX - existing_size; // May have a JMP or not, if not, add JMP,
-                                      // if is JMP may up/dowgrade it
+
+    if (block->dest == NULL && block->dest_alternative == NULL) {
+      return 0;
+    } else if (block->dest_alternative != NULL) {
+      return JCC_MAX - existing_size;
+    } else if (block->dest != NULL) {
+      return JMP_MAX - existing_size;
     } else {
       PRINT_DEBUG("Unreachable! dest = %p, dest_alt = %p, last_instr = "
                   "%p, next_start = %p",
