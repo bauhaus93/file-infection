@@ -1,4 +1,9 @@
 set(BLOCK_COPY_EXEC "block_copy")
+set(INFECT_BIN_PATH "${CMAKE_BINARY_DIR}/tests/infect.bin")
+set(INFECT_MOD_BIN_PATH "${CMAKE_CURRENT_BINARY_DIR}/infect_modified.bin")
+set(TEST_DRIVER "${CMAKE_CURRENT_SOURCE_DIR}/compare_binary.py")
+
+
 
 add_executable(${BLOCK_COPY_EXEC} block_copy.c)
 target_compile_options(${BLOCK_COPY_EXEC} PRIVATE -m32)
@@ -9,13 +14,23 @@ target_compile_definitions(${BLOCK_COPY_EXEC} PRIVATE ENABLE_PRINT
                                                       USE_STANDARD_MALLOC)
 
 add_test(NAME copy_blocks
-         COMMAND ${BLOCK_COPY_EXEC} ${CMAKE_BINARY_DIR}/tests/infect.bin
-                 ${CMAKE_CURRENT_BINARY_DIR}/infect_modified.bin)
+        COMMAND ${BLOCK_COPY_EXEC} ${INFECT_BIN_PATH} ${INFECT_MOD_BIN_PATH})
+set_tests_properties(copy_blocks PROPERTIES LABELS "copy_code")
+
 add_test(
-  NAME compare_copied_blocks
-  COMMAND
-    python3 ${CMAKE_CURRENT_SOURCE_DIR}/compare_binary.py --unmodified-file
-    ${CMAKE_BINARY_DIR}/tests/infect.bin --modified-file
-    ${CMAKE_CURRENT_BINARY_DIR}/infect_modified.bin
+  NAME check_copied_blocks_instruction_count
+  COMMAND python3 ${TEST_DRIVER}
+    --unmodified-file ${INFECT_BIN_PATH}
+    --modified-file ${INFECT_MOD_BIN_PATH}
+    --check-type instruction_count
   )
-set_tests_properties(compare_copied_blocks PROPERTIES DEPENDS "copy_blocks")
+  set_tests_properties(check_copied_blocks_instruction_count PROPERTIES DEPENDS "copy_blocks" LABELS "copy_code")
+
+add_test(
+  NAME check_copied_blocks_call_targets
+  COMMAND python3 ${TEST_DRIVER}
+    --unmodified-file ${INFECT_BIN_PATH}
+    --modified-file ${INFECT_MOD_BIN_PATH}
+    --check-type call_targets
+  )
+  set_tests_properties(check_copied_blocks_call_targets PROPERTIES DEPENDS "copy_blocks" LABELS "copy_code" DEPENDS check_copied_blocks_instruction_count)

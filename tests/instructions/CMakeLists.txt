@@ -9,11 +9,11 @@ macro(create_instruction_size_test)
   add_test(NAME ${ARGV0}
            COMMAND python3 ${TEST_DRIVER} --bit-width 32 --disasm-lib
                    "$<TARGET_FILE:${LIB_NAME}>" ${TEST_FILE})
-
   set_tests_properties(
     ${ARGV0}
     PROPERTIES REQUIRED_FILES
-               "$<TARGET_FILE:${LIB_NAME}>;${TEST_DRIVER};${TEST_FILE}")
+               "$<TARGET_FILE:${LIB_NAME}>;${TEST_DRIVER};${TEST_FILE}"
+              LABELS "disassembler")
 endmacro()
 
 macro(create_random_instruction_test)
@@ -31,7 +31,8 @@ macro(create_random_instruction_test)
   set_tests_properties(
     test_${ARGV0}
     PROPERTIES REQUIRED_FILES
-               "$<TARGET_FILE:${LIB_NAME}>;${TEST_GENERATOR};${TEST_FILE}")
+               "$<TARGET_FILE:${LIB_NAME}>;${TEST_GENERATOR};${TEST_FILE}"
+              LABELS "disassembler")
 endmacro()
 
 get_property(SRCS GLOBAL PROPERTY ALL_SOURCES)

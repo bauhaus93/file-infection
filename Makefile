@@ -1,6 +1,7 @@
 
 SRC_DIR=$(PWD)
 
+BUILD_JOBS=24
 BUILD_DIR_MXE=$(PWD)/build-mxe
 BUILD_TYPE_MXE=Release
 
@@ -13,7 +14,9 @@ BUILD_DIR_NATIVE=$(PWD)/build-native
 CMAKE_NATIVE=cmake
 BUILD_TYPE_NATIVE=Debug
 
-BUILD_JOBS=24
+CTEST_BASE_ARGS= --output-on-failure \
+		--stop-on-failure \
+		-j$(BUILD_JOBS)
 
 .PHONY: target-native-setup target-native-build target-native-test \
 		mxe-toolchain \
@@ -48,8 +51,9 @@ target-native-build:
 
 target-native-test: target-native-build
 	cd $(BUILD_DIR_NATIVE) && \
-	ctest --output-on-failure \
-		-j$(BUILD_JOBS) -E "copy_execution"
+		ctest $(CTEST_BASE_ARGS) -L disassembler && \
+		ctest $(CTEST_BASE_ARGS) -L function_discovery && \
+		ctest $(CTEST_BASE_ARGS) -L copy_code
 
 mxe-toolchain $(MXE_BIN)/$(MXE_TARGET) $(MXE_BIN)/$(CMAKE_MXE):
 	[ ! -d "$(MXE_DIR)" ] && git clone https://github.com/mxe/mxe.git $(MXE_DIR);\

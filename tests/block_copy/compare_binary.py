@@ -41,6 +41,14 @@ def main():
         help="Name of the modified file",
     )
 
+    parser.add_argument(
+        "--check-type",
+        type=str,
+        choices=["instruction_count", "call_targets"],
+        required=True,
+        help="Determines, which kind of check should be run",
+    )
+
     args = parser.parse_args()
 
     unmodified_file = os.path.abspath(args.unmodified_file)
@@ -59,19 +67,20 @@ def main():
         _logger.error("Could not disassemble '%s'", modified_file)
         return False
 
-    success = True
-
-    differences = verify_instruction_similarity(unmod_disassembly, mod_disassembly)
-    if differences:
-        _logger.error("Instruction difference not zero: %d", differences)
-        success = False
-
-    differences = verify_call_targets(unmod_disassembly, mod_disassembly)
-    if differences > 0:
-        _logger.error("Call targets difference not zero: %d", differences)
-        success = False
-
-    return success
+    if args.check_type == "instruction_count":
+        differences = verify_instruction_similarity(unmod_disassembly, mod_disassembly)
+        if differences:
+            _logger.error("Instruction difference not zero: %d", differences)
+            return False
+    elif args.check_type == "call_targets":
+        differences = verify_call_targets(unmod_disassembly, mod_disassembly)
+        if differences > 0:
+            _logger.error("Call targets difference not zero: %d", differences)
+            return False
+    else:
+        _logger.error("No check type was given!")
+        return False
+    return True
 
 
 if __name__ == "__main__":
