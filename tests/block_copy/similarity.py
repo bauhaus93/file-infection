@@ -19,23 +19,27 @@ def verify_instruction_similarity(
     # so don't ignore them for this test
     if "jmp" in instructions:
         instructions.remove("jmp")
+    differences = []
     for key in instructions:
 
         unmod_count = unmod_dict.get(key, 0)
         mod_count = mod_dict.get(key, 0)
         if unmod_count != mod_count:
-            _logger.error(
-                "Amount of instruction occurences changed "
-                "| %10s | original: %4d | copied: %4d | delta: %4d",
-                key,
-                unmod_count,
-                mod_count,
-                mod_count - unmod_count,
-            )
+            differences.append((key, unmod_count, mod_count))
             if mod_count > unmod_count:
                 new_appeared += mod_count - unmod_count
             elif mod_count < unmod_count:
                 new_missing += unmod_count - mod_count
+
+    for key, unmod_count, mod_count in sorted(differences, key=lambda e: e[2] - e[1]):
+        _logger.error(
+            "Amount of instruction occurences changed "
+            "| %10s | original: %4d | copied: %4d | delta: %4d",
+            key,
+            unmod_count,
+            mod_count,
+            mod_count - unmod_count,
+        )
 
     _logger.error("Instruction delta: +%d/-%d", new_appeared, new_missing)
     return new_appeared + new_missing
