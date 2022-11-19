@@ -50,7 +50,7 @@ class Instruction(object):
     def from_instruction_match(cls, match):
         instr = cls()
         instr.address = int(match.group("address").strip(), 16)
-        instr.bytecode = match.group("bytecode").strip()
+        instr.bytecode = match.group("bytecode").replace(" ", "")
         instr.instruction = _normalize_instruction_name(
             match.group("instruction").strip()
         )
@@ -98,12 +98,15 @@ class Instruction(object):
 
 def count_different_instructions(instructions: list[Instruction]) -> dict[str, int]:
     instruction_count = {}
-    for instr in instructions:
-        if not (instr.is_nop or instr.label):
-            instruction_count[instr.instruction] = (
-                instruction_count.get(instr.instruction, 0) + 1
-            )
+    for instr in filter(lambda e: not (e.is_nop or e.label), instructions):
+        instruction_count[instr.instruction] = (
+            instruction_count.get(instr.instruction, 0) + 1
+        )
     return instruction_count
+
+
+def get_labels(instructions: list[Instruction]) -> list[str]:
+    return list(map(lambda e: e.label, filter(lambda e: e.label, instructions)))
 
 
 def get_call_targets(instructions: list[Instruction]) -> dict[int, int]:
@@ -112,3 +115,18 @@ def get_call_targets(instructions: list[Instruction]) -> dict[int, int]:
         dest = int(instr.args, 16)
         targets[dest] = targets.get(dest, 0) + 1
     return targets
+
+
+def get_labeled_bytecode(instructions: list[Instruction]) -> dict[str, list[str]]:
+    labels = {}
+    active_label = "__entrypoint"
+    for instr in instructions:
+        if instr.label:
+            active_label = instr.label
+            if active_label in labels:
+                labels[active_label].append("")
+            else:
+                labels[active_label] = [""]
+        else:
+            labels[active_label][-1] += instr.bytecode
+    return labels

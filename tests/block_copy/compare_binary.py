@@ -8,7 +8,7 @@ import sys
 from call import verify_call_targets
 from disassembly import parse_file
 from instruction import Instruction
-from similarity import verify_instruction_similarity
+from similarity import check_function_sanity, verify_instruction_similarity
 
 _FORMAT = r"[%(asctime)-15s %(levelname)-5s] %(message)s"
 _DATE_FORMAT = r"%Y-%m-%d %H:%M:%S"
@@ -58,7 +58,7 @@ def create_argument_parser():
     parser.add_argument(
         "--check-type",
         type=str,
-        choices=["instruction_count", "call_targets"],
+        choices=["instruction_count", "function_sanity", "call_targets"],
         required=True,
         help="Determines, which kind of check should be run",
     )
@@ -100,6 +100,20 @@ def main():
         differences = verify_call_targets(unmod_instructions, mod_instructions)
         if differences > 0:
             _logger.error("Call targets difference not zero: %d", differences)
+            return False
+    elif args.check_type == "function_sanity":
+        try:
+            destroyed_functions = check_function_sanity(
+                unmod_instructions, mod_instructions
+            )
+        except Exception as e:
+            _logger.error("Could not check function sanity: %s", e)
+            return False
+
+        if len(destroyed_functions) > 0:
+            _logger.error(
+                "Got some destroyed functions: %s", ", ".join(destroyed_functions)
+            )
             return False
     else:
         _logger.error("No check type was given!")

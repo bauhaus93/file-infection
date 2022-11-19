@@ -46,7 +46,9 @@ _DISASM_PATTERNS = {
         r"\s*(?P<address>[0-9A-F]+):\s+(?P<bytecode>[0-9A-F ]+)\s*(?P<instruction>\w+)(\s+(?P<args>.*))?",
         re.IGNORECASE,
     ),
-    "label": re.compile(r"(?P<address>[0-9A-F]+)\s+<(?P<label>\w+)>:"),
+    "label": re.compile(
+        r"(?P<address>[0-9A-F]+)\s+<(?P<label>[\w\.]+)>:", re.IGNORECASE
+    ),
 }
 
 

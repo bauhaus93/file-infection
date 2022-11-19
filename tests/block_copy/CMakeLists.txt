@@ -22,6 +22,11 @@ add_test(NAME copy_blocks_infect COMMAND ${BLOCK_COPY_EXEC} ${INFECT_BIN_PATH}
                                          ${INFECT_MOD_BIN_PATH})
 
 add_test(
+  NAME check_copied_blocks_function_sanity
+  COMMAND python3 ${TEST_DRIVER} --unmodified-disassembly ${INFECT_DISASM_PATH}
+          --modified-binary ${INFECT_MOD_BIN_PATH} --check-type function_sanity)
+
+add_test(
   NAME check_copied_blocks_instruction_count
   COMMAND
     python3 ${TEST_DRIVER} --unmodified-binary ${INFECT_BIN_PATH}
@@ -34,8 +39,11 @@ add_test(
 
 set_tests_properties(check_generated_bin_disasm PROPERTIES LABELS "copy_code")
 set_tests_properties(copy_blocks_infect PROPERTIES LABELS "copy_code")
+set_tests_properties(check_copied_blocks_function_sanity
+                     PROPERTIES DEPENDS "copy_blocks_infect" LABELS "copy_code")
 set_tests_properties(check_copied_blocks_instruction_count
                      PROPERTIES DEPENDS "copy_blocks_infect" LABELS "copy_code")
+
 set_tests_properties(
   check_copied_blocks_call_targets
   PROPERTIES DEPENDS "copy_blocks_infect" LABELS "copy_code" DEPENDS

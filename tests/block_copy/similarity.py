@@ -1,6 +1,7 @@
 import logging
 
-from instruction import Instruction, count_different_instructions
+from instruction import (Instruction, count_different_instructions,
+                         get_labeled_bytecode, get_labels)
 
 _logger = logging.getLogger(__name__)
 
@@ -15,8 +16,8 @@ def verify_instruction_similarity(
     new_missing = 0
     instructions = set([*unmod_dict.keys(), *mod_dict.keys()])
 
-    # jmps  get discarded when they would jump to the next block (-> 2 blocks get merged)
-    # so don't ignore them for this test
+    # jmps  get discarded when they would jump to their subsequent block (-> 2 blocks get merged)
+    # so ignore them for this test
     if "jmp" in instructions:
         instructions.remove("jmp")
     differences = []
@@ -43,3 +44,17 @@ def verify_instruction_similarity(
 
     _logger.error("Instruction delta: +%d/-%d", new_appeared, new_missing)
     return new_appeared + new_missing
+
+
+def check_function_sanity(
+    instructions_original: list[Instruction], instructions_modified: list[Instruction]
+) -> int:
+    labels = get_labels(instructions_original)
+    if not get_labels(instructions_original):
+        raise Exception("Original dissassembly contains no labels to check against!")
+
+    labeled_bytecode = get_labeled_bytecode(instructions_original)
+    for label, bytecode in labeled_bytecode.items():
+        _logger.info("label = %s, bytecode = %s", label, bytecode)
+
+    raise NotImplementedError("TODO: Find matching functions in modified code")
