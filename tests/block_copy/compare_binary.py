@@ -74,8 +74,8 @@ def parse_files(args: argparse.ArgumentParser) -> (Instruction, Instruction):
         unmod_instructions = parse_file(unmod_binary_path, "binary")
 
     if args.modified_disassembly:
-        mod_disassembly_path = os.path.abspath(args.unmodified_disassembly)
-        mod_instructions = parse_file(unmod_disassembly_path, "disasm")
+        mod_disassembly_path = os.path.abspath(args.modified_disassembly)
+        mod_instructions = parse_file(mod_disassembly_path, "disasm")
     elif args.modified_binary:
         mod_binary_path = os.path.abspath(args.modified_binary)
         mod_instructions = parse_file(mod_binary_path, "binary")

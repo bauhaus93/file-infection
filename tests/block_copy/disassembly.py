@@ -31,13 +31,10 @@ def disassemble_file(filename: str) -> str:
 def parse_file(filename: str, file_type: str) -> list[Instruction]:
     if file_type == "binary":
         return parse_disassembly(disassemble_file(filename))
-    elif file_type == "disasm":
-        with open(filename, "r") as f:
+    if file_type == "disasm":
+        with open(filename, "r", encoding="utf-8") as f:
             return parse_disassembly(f.read())
-    else:
-        raise NotImplementedError(
-            f"File parsing for type '{file_type}' is not supported!"
-        )
+    raise NotImplementedError(f"File parsing for type '{file_type}' is not supported!")
 
 
 _FILTER_WORDS = [
