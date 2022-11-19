@@ -38,6 +38,8 @@ add_dependencies(${TEST_INFECT_LIB64} CHECKSUM_LIST STRING_GENERATOR)
 add_library(${TEST_UTILITY_LIB} OBJECT
             ${CMAKE_CURRENT_SOURCE_DIR}/test_utility.c)
 target_compile_options(${TEST_UTILITY_LIB} PUBLIC -m32)
+target_compile_definitions(${TEST_UTILITY_LIB} PUBLIC USE_STANDARD_MALLOC
+                                                       ENABLE_PRINT)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 add_subdirectory(instructions)

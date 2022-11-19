@@ -4,9 +4,6 @@
 
 #include "../../src/block/copy.h"
 #include "../../src/block/discovery.h"
-#include "../../src/code_begin.h"
-#include "../../src/code_end.h"
-#include "../../src/infection_thread.h"
 #include "../../src/utility.h"
 #include "../test_utility.h"
 

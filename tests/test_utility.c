@@ -51,8 +51,8 @@ void *copy_code(void *entry_point, size_t *target_size) {
 
   *target_size = estimate_target_code_size(blocks);
   assert(*target_size > 0);
-  fprintf(stderr, "Target code size estimate = %.1fkB\n",
-          (float)*target_size / 1024.);
+  PRINT_DEBUG("Target code size estimate = %.1fkB",
+              (float)*target_size / 1024.);
 
   PRINT_DEBUG("Allocating target memory");
   void *target_mem = malloc(*target_size);
@@ -65,7 +65,6 @@ void *copy_code(void *entry_point, size_t *target_size) {
   }
   void *target_entrypoint = get_target_address(entrypoints[0], blocks);
   free_block_list(blocks);
-  assert(target_entrypoint == target_mem);
   PRINT_DEBUG("Target entry point is %p", target_entrypoint);
-  return target_entrypoint;
+  return target_mem;
 }

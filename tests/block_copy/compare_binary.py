@@ -7,7 +7,6 @@ import sys
 
 from call import verify_call_targets
 from disassembly import disassemble_file
-from line import create_linewise_comparison
 from similarity import verify_instruction_similarity
 
 _FORMAT = r"[%(asctime)-15s %(levelname)-5s] %(message)s"
