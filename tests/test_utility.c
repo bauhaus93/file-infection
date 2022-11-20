@@ -20,7 +20,7 @@ void *read_binary(const char *path, size_t *size) {
 
   void *code = malloc(*size);
   if (code == NULL) {
-    fprintf(stderr, "Could not allocate %lu bytes for code\n", *size);
+    fprintf(stderr, "Could not allocate %zu bytes for code\n", *size);
     fclose(f);
     return NULL;
   }

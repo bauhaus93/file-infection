@@ -8,6 +8,9 @@
 #include "process_info.h"
 #include "windows_wrapper.h"
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wattributes"
+
 typedef void(WINAPI *fpExitProcess)(UINT);
 typedef DWORD(WINAPI *fpGetTickCount)(void);
 typedef LPVOID(WINAPI *fpVirtualAlloc)(LPVOID, SIZE_T, DWORD, DWORD);
@@ -33,6 +36,8 @@ typedef HANDLE(WINAPI *fpCreateThread)(LPSECURITY_ATTRIBUTES, SIZE_T,
                                        LPDWORD);
 typedef DWORD(WINAPI *fpGetLogicalDrives)(void);
 typedef VOID(WINAPI *fpSleep)(DWORD);
+
+#pragma GCC diagnostic pop
 
 #define CALL_KERNEL32_FUNCTION(fp, cs, ...)                                    \
   (((fp)(get_function_pointer(get_kernel32_base(), cs)))(__VA_ARGS__))

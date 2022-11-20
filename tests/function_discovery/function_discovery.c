@@ -59,7 +59,6 @@ int main(int argc, char **argv) {
 
   BlockList *blocks = discover_blocks(entrypoints);
   void *code_base = code;
-  free(code);
 
   if (blocks == NULL) {
     fprintf(stderr, "collect_blocks() returned NULL\n");
@@ -76,6 +75,7 @@ int main(int argc, char **argv) {
   if (f == NULL) {
     fprintf(stderr, "Could not open function map file '%s'\n", argv[2]);
     free_block_list(blocks);
+    free(code);
     return 1;
   }
 
@@ -85,7 +85,7 @@ int main(int argc, char **argv) {
   while (fgets(line, 256, f) != NULL) {
     uint32_t addr;
     char name[64];
-    sscanf(line, "%X %64s", &addr, name);
+    sscanf(line, "%X %63s", &addr, name);
     bool function_found = false;
     for (BlockList *curr = blocks; curr != NULL; curr = curr->next) {
       Block *ble = curr->block;
@@ -99,13 +99,14 @@ int main(int argc, char **argv) {
       // PRINT_DEBUG("Found function: %s", name);
       functions_found++;
     } else {
-      if (is_blacklisted(&name)) {
+      if (is_blacklisted((const char *)&name)) {
         functions_expected--;
       } else {
         fprintf(stderr, "Function not found: %s\n", name);
       }
     }
   }
+  free(code);
   fclose(f);
 
   PRINT_DEBUG("Found %d/%d functions", functions_found, functions_expected);

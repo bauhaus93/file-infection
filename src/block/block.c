@@ -116,7 +116,7 @@ void print_blocks(const BlockList *blocks) {
     i++;
     print_block(ble->block);
   }
-  PRINT_DEBUG("%d blocks (%d effective)", i, count_effective_blocks(blocks));
+  PRINT_DEBUG("%d blocks (%zu effective)", i, count_effective_blocks(blocks));
 }
 
 void print_block(const Block *block) {

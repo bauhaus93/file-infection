@@ -37,7 +37,7 @@ if(NOT BUILD_TESTING)
 endif()
 
 if(${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
-  add_compile_options(-fmax-errors=1 -Wall)
+  add_compile_options(-fmax-errors=1 -Wall -Werror)
   add_link_options(-fmax-errors=1 -Wall -Werror)
 else()
   message(SEND_ERROR "Unknown compiler: ${CMAKE_C_COMPILER_ID}")
